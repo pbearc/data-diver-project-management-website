@@ -13,13 +13,10 @@
   <body class="bg-lightblue">
     <div class="container">
       <div class="row">
-        <div class="col-md-6">
-          <div class="logo-container">
-            <img src="assets/logo.png" alt="Data Diver Logo" class="logo" />
-            <h1 class="brand">Data Diver</h1>
-          </div>
-        </div>
-        <div class="col-md-6">
+        <div
+          class="col-md-12 d-flex justify-content-between align-items-center"
+        >
+          <a href="index.html" class="btn btn-primary">Back</a>
           <ul class="nav nav-tabs justify-content-end">
             <li class="nav-item">
               <a class="nav-link" href="#">Change Password</a>
@@ -33,11 +30,100 @@
           </ul>
         </div>
       </div>
-      <button id="addTaskButton">+</button>
-      <div id="taskList">
-        <!-- Tasks will be displayed here -->
+      <div class="row">
+        <div class="col-md-12 button-container">
+          <button id="addTaskButton" class="button">Add Task</button>
+        </div>
       </div>
     </div>
+    <div id="taskList">
+      <!-- Tasks will be displayed here -->
+    </div>
+    <!-- Floating window for input -->
+    <div id="floatingWindow" class="floating-window">
+      <div class="container">
+        <!-- Row 1: Task Name and Category -->
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label for="taskName">Task Name:</label>
+            <input type="text" class="form-control" id="taskName" />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="category">Category:</label>
+            <select class="form-control" id="category">
+              <option value="category1">Category 1</option>
+              <option value="category2">Category 2</option>
+              <!-- Add more categories as needed -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 2: Tag and Priority -->
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label for="tag">Tag:</label>
+            <select class="form-control" id="tag">
+              <option value="tag1">Tag 1</option>
+              <option value="tag2">Tag 2</option>
+              <!-- Add more tags as needed -->
+            </select>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="priority">Priority:</label>
+            <select class="form-control" id="priority">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 3: Assignee and Story Point -->
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label for="assignee">Assignee:</label>
+            <select class="form-control" id="assignee">
+              <option value="user1">User 1</option>
+              <option value="user2">User 2</option>
+              <!-- Add more assignees as needed -->
+            </select>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="storyPoint">Story Point:</label>
+            <input type="text" class="form-control" id="storyPoint" />
+          </div>
+        </div>
+
+        <!-- Row 4: Task Description -->
+        <div class="row">
+          <div class="form-group col-md-12">
+            <label for="taskDescription">Task Description:</label>
+            <textarea class="form-control" id="taskDescription"></textarea>
+          </div>
+        </div>
+
+        <!-- Row 5: Task Status -->
+        <div class="row">
+          <div class="form-group col-md-12">
+            <label for="taskStatus">Task Status:</label>
+            <select class="form-control" id="taskStatus">
+              <option value="todo">To Do</option>
+              <option value="inprogress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 6: Save and Close Buttons -->
+        <div class="form-group col-md-12 text-right">
+          <button id="saveTaskButton" class="btn btn-primary">Save</button>
+          <button id="closeFloatingWindow" class="btn btn-secondary">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
