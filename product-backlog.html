@@ -41,6 +41,15 @@
         <!-- Tasks will be displayed here -->
       </div>
     </div>
+    </div>
+    </div>
+    <!-- Floating window for task details -->
+    <div id="taskDetailsWindow" class="floating-window task-details">
+      <div id="taskDetailsContent">
+        <!-- Task details will be displayed here -->
+      </div>
+      <button id="closeTaskDetails" class="btn btn-secondary">Close</button>
+    </div>
     <!-- Floating window for input -->
     <div id="floatingWindow" class="floating-window">
       <div class="container">
@@ -53,8 +62,8 @@
           <div class="form-group col-md-6">
             <label for="category">Category:</label>
             <select class="form-control" id="category">
-              <option value="category1">Category 1</option>
-              <option value="category2">Category 2</option>
+              <option value="Story">Story</option>
+              <option value="Bug">Bug</option>
               <!-- Add more categories as needed -->
             </select>
           </div>
@@ -65,17 +74,24 @@
           <div class="form-group col-md-6">
             <label for="tag">Tag:</label>
             <select class="form-control" id="tag">
-              <option value="tag1">Tag 1</option>
-              <option value="tag2">Tag 2</option>
+              <option value="API">API</option>
+              <option value="Backend">Backend</option>
+              <option value="Database">Database</option>
+              <option value="Frontend">Frontend</option>
+              <option value="Framework">Framework</option>
+              <option value="Testing">Testing</option>
+              <option value="UI">UI</option>
+              <option value="UX">UX</option>
               <!-- Add more tags as needed -->
             </select>
           </div>
           <div class="form-group col-md-6">
             <label for="priority">Priority:</label>
             <select class="form-control" id="priority">
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+              <option value="Low" class="priority-low">Low</option>
+              <option value="Medium" class="priority-medium">Medium</option>
+              <option value="Important" class="priority-important">Important</option>
+              <option value="Urgent" class="priority-urgent">Urgent</option>
             </select>
           </div>
         </div>
@@ -85,8 +101,8 @@
           <div class="form-group col-md-6">
             <label for="assignee">Assignee:</label>
             <select class="form-control" id="assignee">
-              <option value="user1">User 1</option>
-              <option value="user2">User 2</option>
+              <option value="User 1">User 1</option>
+              <option value="User 2">User 2</option>
               <!-- Add more assignees as needed -->
             </select>
           </div>
@@ -109,9 +125,9 @@
           <div class="form-group col-md-12">
             <label for="taskStatus">Task Status:</label>
             <select class="form-control" id="taskStatus">
-              <option value="todo">To Do</option>
-              <option value="inprogress">In Progress</option>
-              <option value="done">Done</option>
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
         </div>
