@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const taskItem = document.createElement("div");
     
     // Style your task item
-    taskItem.style.cssText = 'background-color: white; padding: 10px; margin: 10px; border-radius: 5px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); position: relative;';
+    taskItem.className = 'task-item';
     
     const deleteButton = createButton("X", { x: "right", y: "top" }, () => {
       const confirmDelete = confirm("Do you want to delete this task?");
