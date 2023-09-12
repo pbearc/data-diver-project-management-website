@@ -137,7 +137,7 @@ body {
 }
 
 .task-item {
-  width: 170px; /* Fixed width */
+  width: 200px; /* Fixed width */
   height: 330px; /* Fixed height */
   overflow-y: auto; /* Make it scrollable */
   background-color: white;
