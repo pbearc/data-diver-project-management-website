@@ -71,14 +71,31 @@ document.addEventListener("DOMContentLoaded", function () {
       editingTaskId = taskId;
       floatingWindow.style.display = "block";
     });
-    
+
+    // Determine class based on priority
+    let priorityClass = "priority-text-";
+    switch (taskData.priority.toLowerCase()) {
+      case 'low':
+        priorityClass += 'low';
+        break;
+      case 'medium':
+        priorityClass += 'medium';
+        break;
+      case 'important':
+        priorityClass += 'important';
+        break;
+      case 'urgent':
+        priorityClass += 'urgent';
+        break;
+      default:
+        priorityClass += 'default';
+    }
+
     taskItem.innerHTML = `
       <h3>${taskData.taskName}</h4>
-      <p>Category: ${taskData.category}</p>
+      <p>Tag: ${taskData.tag}</p>
       <p>Story Point: ${taskData.storyPoint}</p>
-      <p>Assignee: ${taskData.assignee}</p>
-      <p>Description: ${taskData.taskDescription}</p>
-      <p>Status: ${taskData.taskStatus}</p>
+      <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
     `;
 
     [deleteButton, editButton].forEach(button => taskItem.appendChild(button));
