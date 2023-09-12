@@ -97,11 +97,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function displayTasksRealtime() {
     const tasksCollection = collection(db, "tasks");
-  
+
+    // Sort tasks by timestamp
     onSnapshot(tasksCollection, (querySnapshot) => {
       const taskList = document.getElementById("taskList");
       taskList.innerHTML = "";
-      querySnapshot.forEach((doc) => displayTask(doc.data(), doc.id));
+
+      const sortedDocs = querySnapshot.docs.sort((a, b) => {
+        return a.data().timestamp - b.data().timestamp;
+      });
+
+      sortedDocs.forEach((doc) => displayTask(doc.data(), doc.id));
     });
   }
 
@@ -126,6 +132,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const taskData = Object.fromEntries(
       Array.from(formFields).map(field => [field.id, field.value])
     );
+    
+    taskData.timestamp = Date.now();
 
     if (editingTaskId) {
       updateTask(editingTaskId, taskData);
