@@ -141,28 +141,12 @@ body {
   background-color: #f44336; /* Red for Urgent */
 }
 
-.task-box {
-  /* Add ellipsis (...) at the end of the text when it overflows */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 18px;
-}
-
-.task-container {
-  width: 200px; /* Set the desired width */
-  height: 200px; /* Set the desired height */
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  margin: 20px;
-  padding: 15px;
-  cursor: pointer; /* Add a pointer cursor to indicate interactivity */
-}
-
 .task-item {
   width: 205px; /* Fixed width */
   height: 205px; /* Fixed height */
-  overflow-y: auto; /* Make it scrollable */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 18px;
   background-color: white;
   padding: 10px;
   margin-left: 15px;
@@ -170,6 +154,7 @@ body {
   margin-bottom: 40px;
   border-radius: 5px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer; /* Add a pointer cursor to indicate interactivity */
   position: relative;
 }
 
@@ -180,10 +165,10 @@ body {
 }
 
 .priority-text-low {
-  color: green;
+  color: rgb(3, 130, 3);
 }
 .priority-text-medium {
-  color: yellow;
+  color: rgb(235, 235, 72);
 }
 .priority-text-important {
   color: orange;
