@@ -116,6 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <h3>${taskData.taskName}</h3>
       <p>Tag: ${taskData.tag}</p>
       <p>Story Point: ${taskData.storyPoint}</p>
+      <p>Category: ${taskData.category}</p>
       <p>Priority: ${taskData.priority}</p>
       <p>Assignee: ${taskData.assignee}</p>
       <p>Task Description: ${taskData.taskDescription}</p>
