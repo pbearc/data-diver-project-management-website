@@ -137,14 +137,16 @@ body {
 }
 
 .task-item {
-  width: 200px; /* Fixed width */
-  height: 230px; /* Fixed height */
+  width: 205px; /* Fixed width */
+  height: 205px; /* Fixed height */
   overflow-y: auto; /* Make it scrollable */
   background-color: white;
   padding: 10px;
-  margin: 10px;
+  margin-left: 15px;
+  margin-right: 25px;
+  margin-bottom: 40px;
   border-radius: 5px;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   position: relative;
 }
 
