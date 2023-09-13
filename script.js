@@ -50,18 +50,24 @@ document.addEventListener("DOMContentLoaded", function () {
   function displayTask(taskData, taskId) {
     const taskList = document.getElementById("taskList");
     const taskItem = document.createElement("div");
+
+    taskItem.addEventListener("click", () => {
+      displayTaskDetails(taskData); // Call a function to display task details
+    });
     
     // Style your task item
     taskItem.className = 'task-item';
     
-    const deleteButton = createButton("X", { x: "right", y: "top" }, () => {
+    const deleteButton = createButton("X", { x: "right", y: "top" }, (event) => {
+      event.stopPropagation();
       const confirmDelete = confirm("Do you want to delete this task?");
       if (confirmDelete) {
         deleteTask(taskId);
       }
     });
     
-    const editButton = createButton("Edit", { x: "right", y: "bottom" }, () => {
+    const editButton = createButton("Edit", { x: "right", y: "bottom" }, (event) => {
+      event.stopPropagation();
       Object.keys(taskData).forEach((key) => {
         const field = document.getElementById(key);
         if (field) {
@@ -100,6 +106,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     [deleteButton, editButton].forEach(button => taskItem.appendChild(button));
     taskList.appendChild(taskItem);
+  }
+
+  function displayTaskDetails(taskData) {
+    const taskDetailsContent = document.getElementById("taskDetailsContent");
+  
+    // Populate the task details in the pop-up window
+    taskDetailsContent.innerHTML = `
+      <h3>${taskData.taskName}</h3>
+      <p>Tag: ${taskData.tag}</p>
+      <p>Story Point: ${taskData.storyPoint}</p>
+      <p>Priority: ${taskData.priority}</p>
+      <p>Assignee: ${taskData.assignee}</p>
+      <p>Task Description: ${taskData.taskDescription}</p>
+      <p>Task Status: ${taskData.taskStatus}</p>
+    `;
+  
+    const taskDetailsWindow = document.getElementById("taskDetailsWindow");
+    taskDetailsWindow.style.display = "block";
+  
+    // Add an event listener to close the pop-up window
+    const closeTaskDetailsButton = document.getElementById("closeTaskDetails");
+    closeTaskDetailsButton.addEventListener("click", () => {
+      taskDetailsWindow.style.display = "none";
+    });
   }
 
   async function deleteTask(taskId) {

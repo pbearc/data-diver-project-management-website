@@ -102,6 +102,29 @@ body {
   margin: 10px 0;
 }
 
+.task-view-window {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #FFFFFF; /* Light blue color */
+  padding: 20px;
+  font-size: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+  width: 60%;
+  max-height: 80%; /* Set a maximum height as a percentage of the viewport height */
+  overflow-y: auto; /* Enable vertical scrolling if content overflows */
+}
+
+.task-view-window label,
+.task-view-window input,
+.task-view-window select,
+.task-view-window button {
+  display: block;
+  margin: 10px 0;
+}
+
 .priority-low {
   background-color: #26da26; /* Green for Low */
 }
