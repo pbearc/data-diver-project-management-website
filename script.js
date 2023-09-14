@@ -132,13 +132,31 @@ document.addEventListener("DOMContentLoaded", function () {
   function displayTaskDetails(taskData) {
     const taskDetailsContent = document.getElementById("taskDetailsContent");
 
+    let priorityClass = "priority-text-";
+    switch (taskData.priority.toLowerCase()) {
+      case "low":
+        priorityClass += "low";
+        break;
+      case "medium":
+        priorityClass += "medium";
+        break;
+      case "important":
+        priorityClass += "important";
+        break;
+      case "urgent":
+        priorityClass += "urgent";
+        break;
+      default:
+        priorityClass += "default";
+    }
+
     // Populate the task details in the pop-up window
     taskDetailsContent.innerHTML = `
       <p>Name: ${taskData.taskName}</p>
       <p>Tag: ${taskData.tag}</p>
       <p>Story Point: ${taskData.storyPoint}</p>
       <p>Category: ${taskData.category}</p>
-      <p>Priority: ${taskData.priority}</p>
+      <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
       <p>Assignee: ${taskData.assignee}</p>
       <p>Task Description: ${taskData.taskDescription}</p>
       <p>Task Status: ${taskData.taskStatus}</p>
