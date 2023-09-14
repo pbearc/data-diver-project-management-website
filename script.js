@@ -201,10 +201,17 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     // Validate required form fields
-    if (!taskData.taskName || !taskData.tag || !taskData.storyPoint) {
-      alert(
-        "Please fill out all required fields: Task Name, Tag, and Story Point."
-      );
+    if (
+      !taskData.taskName ||
+      !taskData.tag ||
+      !taskData.storyPoint ||
+      !taskData.priority ||
+      !taskData.assignee ||
+      !taskData.taskDescription ||
+      !taskData.taskStatus ||
+      !taskData.category
+    ) {
+      alert("Please fill out all fields.");
       return; // Don't proceed with saving if validation fails
     }
 
