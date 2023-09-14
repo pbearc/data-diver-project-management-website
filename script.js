@@ -8,6 +8,7 @@ import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot }
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
+<<<<<<< Updated upstream
   apiKey: "AIzaSyBbyuRShsNdaTzIcuKKzlvTDl8bCDr8pJY",
   authDomain: "fit2101-project-database.firebaseapp.com",
   databaseURL: "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -16,6 +17,16 @@ const firebaseConfig = {
   messagingSenderId: "841276992676",
   appId: "1:841276992676:web:c7761b64a8d7d43d230a31",
   measurementId: "G-9936B4VLCD"
+=======
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID",
+>>>>>>> Stashed changes
 };
 
 // Initialize Firebase
@@ -35,10 +46,22 @@ document.addEventListener("DOMContentLoaded", function () {
     initialFormValues[field.id] = field.value;
   });
 
+<<<<<<< Updated upstream
 // Add these lines at the beginning of your DOMContentLoaded event listener
 let tags = [];
 const tagInput = document.getElementById("tagInput");
 const tagContainer = document.getElementById("tagContainer");
+=======
+  // Initialize taskData with an empty array for tags
+  const taskData = {
+    tags: [],
+  };
+
+
+  function displayTask(taskData, taskId) {
+    const taskList = document.getElementById("taskList");
+    const taskItem = document.createElement("div");
+>>>>>>> Stashed changes
 
 tagInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && tagInput.value) {
@@ -177,6 +200,7 @@ function displayTaskDetails(taskData) {
     floatingWindow.style.display = "none"; // Hide the floating window
   });
 
+<<<<<<< Updated upstream
   saveTaskButton.addEventListener("click", function () {
     // Get data from form fields
     const taskName = document.getElementById("taskName").value;
@@ -199,6 +223,24 @@ function displayTaskDetails(taskData) {
       taskDescription,
       taskStatus,
     };
+=======
+  // Save Task Button Event Listener
+  saveTaskButton.addEventListener("click", () => {
+    // Validate required form fields including tags
+    if (
+      !taskData.taskName ||
+      taskData.tags.length === 0 || // Ensure at least one tag is provided
+      !taskData.storyPoint ||
+      !taskData.priority ||
+      !taskData.assignee ||
+      !taskData.taskDescription ||
+      !taskData.taskStatus ||
+      !taskData.category
+    ) {
+      alert("Please fill out all fields and provide at least one tag.");
+      return; // Don't proceed with saving if validation fails
+    }
+>>>>>>> Stashed changes
 
 <<<<<<< Updated upstream
     // Add the data to Firestore
@@ -224,6 +266,7 @@ function displayTaskDetails(taskData) {
       const tasksCollection = collection(db, "tasks");
       addDoc(tasksCollection, taskData).then(() => {
         floatingWindow.style.display = "none";
+<<<<<<< Updated upstream
         resetFormFields(formFields, initialFormValues);
         tags.length = 0;
         tagContainer.innerHTML = "";
@@ -234,3 +277,70 @@ function displayTaskDetails(taskData) {
 >>>>>>> Stashed changes
 });
 
+=======
+      });
+    }
+  });
+
+  // Helper function to initialize tags input field
+  const initializeTagsInput = () => {
+    const tagsInput = document.getElementById("tags");
+    const tagsList = document.getElementById("tagsList");
+
+    tagsInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        const tag = tagsInput.value.trim();
+        if (tag !== "") {
+          addTag(tag);
+          tagsInput.value = ""; // Clear the input field after adding the tag
+        }
+      }
+    });
+
+    // Event listener for deleting tags
+    tagsList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target.classList.contains("delete-tag")) {
+        const tag = target.dataset.tag;
+        deleteTag(tag);
+        tagsList.removeChild(target.parentElement);
+      }
+    });
+  };
+
+  // Helper function to add a tag to the task data
+  const addTag = (tag) => {
+    const tagsList = document.getElementById("tagsList");
+    const tagItem = document.createElement("div");
+    tagItem.className = "tag-item";
+
+    const deleteTagButton = createButton(
+      "X",
+      { x: "right", y: "top" },
+      () => {
+        deleteTag(tag);
+        tagsList.removeChild(tagItem);
+      }
+    );
+
+    tagItem.innerHTML = `${tag}`;
+    tagItem.appendChild(deleteTagButton);
+    tagsList.appendChild(tagItem);
+
+    // Add the tag to the task data
+    taskData.tags.push(tag);
+  };
+
+  // Helper function to delete a tag from the task data
+  const deleteTag = (tag) => {
+    const index = taskData.tags.indexOf(tag);
+    if (index !== -1) {
+      taskData.tags.splice(index, 1);
+    }
+  };
+
+  // Initialize tags input field
+  initializeTagsInput();
+});
+>>>>>>> Stashed changes
