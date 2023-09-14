@@ -31,8 +31,19 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-12 button-container">
-          <button id="addTaskButton" class="button">Add Task</button>
+        <div class="col-md-12 button-container d-flex justify-content-start align-items-center">
+          <button id="addTaskButton" class="button mr-auto">Add Task</button>
+          <div class="row">
+            <div class="nav-link new-button custom-filter-button">
+              <label for="sorting">Filter:</label>
+              <select class="form-control" id="sorting">
+                <option value="Lowest to Urgent">Lowest to Urgent</option>
+                <option value="Urgent to Lowest">Urgent to Lowest</option>
+                <option value="Recent to Oldest">Recent to Oldest</option>
+                <option value="Oldest to Recent">Oldest to Recent</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </div>

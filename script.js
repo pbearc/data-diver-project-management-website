@@ -162,24 +162,71 @@ document.addEventListener("DOMContentLoaded", function () {
     await updateDoc(taskRef, newData);
   }
 
-  function displayTasksRealtime() {
+  function displayTasksRealtime(sortOrder = "OldestToRecent") {
     const tasksCollection = collection(db, "tasks");
-
-    // Sort tasks by timestamp
+  
     onSnapshot(tasksCollection, (querySnapshot) => {
       const taskList = document.getElementById("taskList");
       taskList.innerHTML = "";
-
-      const sortedDocs = querySnapshot.docs.sort((a, b) => {
-        return a.data().timestamp - b.data().timestamp;
-      });
-
+  
+      let sortedDocs;
+  
+      switch (sortOrder) {
+        case "RecentToOldest":
+          sortedDocs = querySnapshot.docs.sort(
+            (a, b) => b.data().timestamp - a.data().timestamp
+          );
+          break;
+        case "LowestToUrgent":
+          sortedDocs = querySnapshot.docs.sort((a, b) => {
+            const priorityOrder = ["Low", "Medium", "Important", "Urgent"];
+            return (
+              priorityOrder.indexOf(a.data().priority) -
+              priorityOrder.indexOf(b.data().priority)
+            );
+          });
+          break;
+        case "UrgentToLowest":
+          sortedDocs = querySnapshot.docs.sort((a, b) => {
+            const priorityOrder = ["Urgent", "Important", "Medium", "Low"];
+            return (
+              priorityOrder.indexOf(a.data().priority) -
+              priorityOrder.indexOf(b.data().priority)
+            );
+          });
+          break;
+        default:
+          sortedDocs = querySnapshot.docs.sort(
+            (a, b) => a.data().timestamp - b.data().timestamp
+          );
+      }
       sortedDocs.forEach((doc) => displayTask(doc.data(), doc.id));
     });
   }
 
   displayTasksRealtime();
 
+  const sortingDropdown = document.getElementById("sorting");
+  sortingDropdown.addEventListener("change", () => {
+    const selectedValue = sortingDropdown.value;
+    switch (selectedValue) {
+      case "Recent to Oldest":
+        displayTasksRealtime("RecentToOldest");
+        break;
+      case "Oldest to Recent":
+        displayTasksRealtime("OldestToRecent");
+        break;
+      case "Lowest to Urgent":
+        displayTasksRealtime("LowestToUrgent");
+        break;
+      case "Urgent to Lowest":
+        displayTasksRealtime("UrgentToLowest");
+        break;
+      default:
+        displayTasksRealtime();
+    }
+  });
+  
   // Event listeners for buttons and windows
   const addTaskButton = document.getElementById("addTaskButton");
   const floatingWindow = document.getElementById("floatingWindow");

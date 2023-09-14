@@ -176,3 +176,17 @@ body {
 .priority-text-urgent {
   color: red;
 }
+
+.new-button {
+  background-color: #3b96ff;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.custom-filter-button {
+  margin-right: 20px; 
+  margin-bottom: 100px; 
+  font-size: large;
+}
