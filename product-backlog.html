@@ -98,7 +98,7 @@
         <div class="row">
           <div class="form-group col-md-6">
             <label for="tag">Tag:</label>
-            <select class="form-control" id="tag" multiple>
+            <select class="form-control" id=" multiple">
               <option value="API">API</option>
               <option value="Backend">Backend</option>
               <option value="Database">Database</option>
@@ -138,7 +138,20 @@
           </div>
         </div>
 
-        <!-- Row 4: Task Description -->
+        <!-- Row 4: Task Stages -->
+        <div class="row">
+          <div class="form-group col-md-12">
+            <label for="taskStatus">Task Stages:</label>
+            <select class="form-control" id="taskStatus">
+              <option value="Not Started">Planning</option>
+              <option value="In Progress">Development</option>
+              <option value="Completed">Testing</option>
+              <option value="Completed">Integration</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Row 5: Task Description -->
         <div class="row">
           <div class="form-group col-md-12">
             <label for="taskDescription">Task Description:</label>
@@ -146,7 +159,7 @@
           </div>
         </div>
 
-        <!-- Row 5: Task Status -->
+        <!-- Row 6: Task Status -->
         <div class="row">
           <div class="form-group col-md-12">
             <label for="taskStatus">Task Status:</label>
@@ -158,7 +171,7 @@
           </div>
         </div>
 
-        <!-- Row 6: Save and Close Buttons -->
+        <!-- Row 7: Save and Close Buttons -->
         <div class="form-group col-md-12 text-right">
           <button id="saveTaskButton" class="btn btn-primary">Save</button>
           <button id="closeFloatingWindow" class="btn btn-secondary">
