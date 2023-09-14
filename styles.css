@@ -145,8 +145,8 @@ body {
   width: 205px; /* Fixed width */
   height: 205px; /* Fixed height */
   overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 18px;
+  white-space: nowrap;
+  font-size: 17px;
   background-color: white;
   padding: 10px;
   margin-left: 15px;

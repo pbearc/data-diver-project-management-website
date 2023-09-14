@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const deleteButton = createButton(
       "X",
-      { x: "right", y: "top" },
+      { x: "left", y: "bottom" },
       (event) => {
         event.stopPropagation();
         const confirmDelete = confirm("Do you want to delete this task?");
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     taskItem.innerHTML = `
-      <h3>${taskData.taskName}</h4>
+      <p>Name: ${taskData.taskName}</p>
       <p>Tag: ${taskData.tag}</p>
       <p>Story Point: ${taskData.storyPoint}</p>
       <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Populate the task details in the pop-up window
     taskDetailsContent.innerHTML = `
-      <h3>${taskData.taskName}</h3>
+      <p>Name: ${taskData.taskName}</p>
       <p>Tag: ${taskData.tag}</p>
       <p>Story Point: ${taskData.storyPoint}</p>
       <p>Category: ${taskData.category}</p>
