@@ -44,7 +44,7 @@
     </div>
     </div>
     <!-- Floating window for task details -->
-    <div id="taskDetailsWindow" class="task-view-window task-details">
+    <div id="taskDetailsWindow" class="floating-window task-details">
       <div id="taskDetailsContent">
         <!-- Task details will be displayed here -->
       </div>
@@ -108,6 +108,7 @@
           </div>
           <div class="form-group col-md-6">
             <label for="storyPoint">Story Point:</label>
+            <div id="storyPointSlider"></div>
             <input type="text" class="form-control" id="storyPoint" />
           </div>
         </div>
@@ -146,5 +147,29 @@
   </body>
 </html>
 
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<!-- jQuery UI -->
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+/>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+  $(function () {
+    $("#storyPointSlider").slider({
+      range: "min", // Use "min" for a single handle slider
+      min: 0,       // Minimum value
+      max: 10,      // Maximum value
+      value: 5,     // Default value
+      slide: function (event, ui) {
+        // Update the input field with the slider's value
+        $("#storyPoint").val(ui.value);
+      },
+    });
 
+    // Set the initial value in the input field
+    $("#storyPoint").val($("#storyPointSlider").slider("value"));
+  });
+</script>
