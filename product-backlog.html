@@ -147,6 +147,7 @@
   </body>
 </html>
 
+<!-- slider for story points -->
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -160,8 +161,8 @@
   $(function () {
     $("#storyPointSlider").slider({
       range: "min", // Use "min" for a single handle slider
-      min: 0,       // Minimum value
-      max: 10,      // Maximum value
+      min: 0,  
+      max: 10, 
       value: 5,     // Default value
       slide: function (event, ui) {
         // Update the input field with the slider's value
