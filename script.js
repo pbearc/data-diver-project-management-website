@@ -1,23 +1,32 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  getDocs,
+  onSnapshot,
+} from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 import { deleteDoc } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBbyuRShsNdaTzIcuKKzlvTDl8bCDr8pJY",
   authDomain: "fit2101-project-database.firebaseapp.com",
-  databaseURL: "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL:
+    "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "fit2101-project-database",
   storageBucket: "fit2101-project-database.appspot.com",
   messagingSenderId: "841276992676",
   appId: "1:841276992676:web:c7761b64a8d7d43d230a31",
-  measurementId: "G-9936B4VLCD"
+  measurementId: "G-9936B4VLCD",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig, "Data Diver");
-const db = getFirestore(app)
+const db = getFirestore(app);
 
 // Helper function to reset form fields
 const resetFormFields = (fields, initialValues) => {
@@ -41,7 +50,7 @@ const createButton = (text, position, eventHandler) => {
 document.addEventListener("DOMContentLoaded", function () {
   let editingTaskId = null;
   const formFields = document.querySelectorAll(".form-control");
-  
+
   const initialFormValues = {};
   formFields.forEach((field) => {
     initialFormValues[field.id] = field.value;
@@ -54,47 +63,55 @@ document.addEventListener("DOMContentLoaded", function () {
     taskItem.addEventListener("click", () => {
       displayTaskDetails(taskData); // Call a function to display task details
     });
-    
+
     // Style your task item
-    taskItem.className = 'task-item';
-    
-    const deleteButton = createButton("X", { x: "right", y: "top" }, (event) => {
-      event.stopPropagation();
-      const confirmDelete = confirm("Do you want to delete this task?");
-      if (confirmDelete) {
-        deleteTask(taskId);
-      }
-    });
-    
-    const editButton = createButton("Edit", { x: "right", y: "bottom" }, (event) => {
-      event.stopPropagation();
-      Object.keys(taskData).forEach((key) => {
-        const field = document.getElementById(key);
-        if (field) {
-          field.value = taskData[key];
+    taskItem.className = "task-item";
+
+    const deleteButton = createButton(
+      "X",
+      { x: "right", y: "top" },
+      (event) => {
+        event.stopPropagation();
+        const confirmDelete = confirm("Do you want to delete this task?");
+        if (confirmDelete) {
+          deleteTask(taskId);
         }
-      });
-      editingTaskId = taskId;
-      floatingWindow.style.display = "block";
-    });
+      }
+    );
+
+    const editButton = createButton(
+      "Edit",
+      { x: "right", y: "bottom" },
+      (event) => {
+        event.stopPropagation();
+        Object.keys(taskData).forEach((key) => {
+          const field = document.getElementById(key);
+          if (field) {
+            field.value = taskData[key];
+          }
+        });
+        editingTaskId = taskId;
+        floatingWindow.style.display = "block";
+      }
+    );
 
     // Determine class based on priority
     let priorityClass = "priority-text-";
     switch (taskData.priority.toLowerCase()) {
-      case 'low':
-        priorityClass += 'low';
+      case "low":
+        priorityClass += "low";
         break;
-      case 'medium':
-        priorityClass += 'medium';
+      case "medium":
+        priorityClass += "medium";
         break;
-      case 'important':
-        priorityClass += 'important';
+      case "important":
+        priorityClass += "important";
         break;
-      case 'urgent':
-        priorityClass += 'urgent';
+      case "urgent":
+        priorityClass += "urgent";
         break;
       default:
-        priorityClass += 'default';
+        priorityClass += "default";
     }
 
     taskItem.innerHTML = `
@@ -104,13 +121,15 @@ document.addEventListener("DOMContentLoaded", function () {
       <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
     `;
 
-    [deleteButton, editButton].forEach(button => taskItem.appendChild(button));
+    [deleteButton, editButton].forEach((button) =>
+      taskItem.appendChild(button)
+    );
     taskList.appendChild(taskItem);
   }
 
   function displayTaskDetails(taskData) {
     const taskDetailsContent = document.getElementById("taskDetailsContent");
-  
+
     // Populate the task details in the pop-up window
     taskDetailsContent.innerHTML = `
       <h3>${taskData.taskName}</h3>
@@ -122,10 +141,10 @@ document.addEventListener("DOMContentLoaded", function () {
       <p>Task Description: ${taskData.taskDescription}</p>
       <p>Task Status: ${taskData.taskStatus}</p>
     `;
-  
+
     const taskDetailsWindow = document.getElementById("taskDetailsWindow");
     taskDetailsWindow.style.display = "block";
-  
+
     // Add an event listener to close the pop-up window
     const closeTaskDetailsButton = document.getElementById("closeTaskDetails");
     closeTaskDetailsButton.addEventListener("click", () => {
@@ -178,9 +197,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   saveTaskButton.addEventListener("click", () => {
     const taskData = Object.fromEntries(
-      Array.from(formFields).map(field => [field.id, field.value])
+      Array.from(formFields).map((field) => [field.id, field.value])
     );
-    
+
+    // Validate required form fields
+    if (!taskData.taskName || !taskData.tag || !taskData.storyPoint) {
+      alert(
+        "Please fill out all required fields: Task Name, Tag, and Story Point."
+      );
+      return; // Don't proceed with saving if validation fails
+    }
+
     taskData.timestamp = Date.now();
 
     if (editingTaskId) {
