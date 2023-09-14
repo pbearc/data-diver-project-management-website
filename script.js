@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
       default:
         priorityClass += "default";
     }
-
+    
     // Populate the task details in the pop-up window
     taskDetailsContent.innerHTML = `
       <p>Name: ${taskData.taskName}</p>
