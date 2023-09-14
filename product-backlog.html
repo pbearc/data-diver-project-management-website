@@ -35,7 +35,20 @@
           <button id="addTaskButton" class="button mr-auto">Add Task</button>
           <div class="row">
             <div class="nav-link new-button custom-filter-button">
-              <label for="sorting">Filter:</label>
+              <label for="filter">Filter:</label>
+              <select class="form-control" id="filter">
+                <option value="API-filter">API</option>
+                <option value="Backend-filter">Backend</option>
+                <option value="Database-filter">Database</option>
+                <option value="Frontend-filter">Frontend</option>
+                <option value="Framework-filter">Framework</option>
+                <option value="Testing-filter">Testing</option>
+                <option value="UI-filter">UI</option>
+                <option value="UX-filter">UX</option>
+              </select>
+            </div>
+            <div class="nav-link new-button custom-filter-button">
+              <label for="sorting">Sorting:</label>
               <select class="form-control" id="sorting">
                 <option value="Lowest to Urgent">Lowest to Urgent</option>
                 <option value="Urgent to Lowest">Urgent to Lowest</option>

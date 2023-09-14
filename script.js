@@ -51,6 +51,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let editingTaskId = null;
   const formFields = document.querySelectorAll(".form-control");
 
+  const tagSelect = document.getElementById("tag");
+
   const initialFormValues = {};
   formFields.forEach((field) => {
     initialFormValues[field.id] = field.value;
@@ -115,11 +117,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     taskItem.innerHTML = `
-      <p>Name: ${taskData.taskName}</p>
-      <p>Tag: ${taskData.tag}</p>
-      <p>Story Point: ${taskData.storyPoint}</p>
-      <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
-    `;
+    <p class="task-name">Name: ${taskData.taskName}</p>
+    <p class="task-name">Tag: ${taskData.tag}</p>
+    <p>Story Point: ${taskData.storyPoint}</p>
+    <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
+  `;
 
     [deleteButton, editButton].forEach((button) =>
       taskItem.appendChild(button)
@@ -164,6 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function displayTasksRealtime(sortOrder = "OldestToRecent") {
     const tasksCollection = collection(db, "tasks");
+    const filterValue = document.getElementById("filter").value.replace("-filter", "");
   
     onSnapshot(tasksCollection, (querySnapshot) => {
       const taskList = document.getElementById("taskList");
@@ -200,11 +203,22 @@ document.addEventListener("DOMContentLoaded", function () {
             (a, b) => a.data().timestamp - b.data().timestamp
           );
       }
-      sortedDocs.forEach((doc) => displayTask(doc.data(), doc.id));
+      sortedDocs.forEach((doc) => {
+        const taskData = doc.data();
+  
+        if (filterValue === "" || taskData.tag.includes(filterValue)) {
+          displayTask(taskData, doc.id);
+        }
+      });
     });
   }
 
   displayTasksRealtime();
+
+  const filterDropdown = document.getElementById("filter");
+  filterDropdown.addEventListener("change", () => {
+    displayTasksRealtime();
+  });
 
   const sortingDropdown = document.getElementById("sorting");
   sortingDropdown.addEventListener("change", () => {
@@ -247,6 +261,15 @@ document.addEventListener("DOMContentLoaded", function () {
       Array.from(formFields).map((field) => [field.id, field.value])
     );
 
+    const selectedTags = Array.from(tagSelect.selectedOptions).map(
+      (option) => option.value
+    );
+
+    // Ensure unique selections
+    const uniqueTags = Array.from(new Set(selectedTags));
+    
+    taskData.tag = uniqueTags.join(", ")
+    
     // Validate required form fields
     if (
       !taskData.taskName ||
