@@ -23,8 +23,44 @@ const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app)
 
 document.addEventListener("DOMContentLoaded", function () {
+<<<<<<< Updated upstream
   
   function displayTask(taskData) {
+=======
+  let editingTaskId = null;
+  const formFields = document.querySelectorAll(".form-control");
+
+  const initialFormValues = {};
+  formFields.forEach((field) => {
+    initialFormValues[field.id] = field.value;
+  });
+
+// Add these lines at the beginning of your DOMContentLoaded event listener
+let tags = [];
+const tagInput = document.getElementById("tagInput");
+const tagContainer = document.getElementById("tagContainer");
+
+tagInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && tagInput.value) {
+    event.preventDefault();
+    tags.push(tagInput.value);
+    const newTag = document.createElement("span");
+    newTag.textContent = tagInput.value;
+    const deleteButton = createButton("X", { x: "right", y: "top" }, () => {
+      const index = tags.indexOf(tagInput.value);
+      if (index > -1) {
+        tags.splice(index, 1);
+      }
+      tagContainer.removeChild(newTag);
+    });
+    newTag.appendChild(deleteButton);
+    tagContainer.appendChild(newTag);
+    tagInput.value = "";
+  }
+});
+
+function displayTask(taskData, taskId) {
+>>>>>>> Stashed changes
     const taskList = document.getElementById("taskList");
 
     // Create HTML elements to display the task data
@@ -42,7 +78,40 @@ document.addEventListener("DOMContentLoaded", function () {
     taskList.appendChild(taskItem);
   }
 
+<<<<<<< Updated upstream
   // Update Task Function
+=======
+function displayTaskDetails(taskData) {
+    const taskDetailsContent = document.getElementById("taskDetailsContent");
+
+    // Populate the task details in the pop-up window
+    taskDetailsContent.innerHTML = `
+      <p>Name: ${taskData.taskName}</p>
+      <p>Tag: ${taskData.tag}</p>
+      <p>Story Point: ${taskData.storyPoint}</p>
+      <p>Category: ${taskData.category}</p>
+      <p>Priority: ${taskData.priority}</p>
+      <p>Assignee: ${taskData.assignee}</p>
+      <p>Task Description: ${taskData.taskDescription}</p>
+      <p>Task Status: ${taskData.taskStatus}</p>
+    `;
+
+    const taskDetailsWindow = document.getElementById("taskDetailsWindow");
+    taskDetailsWindow.style.display = "block";
+
+    // Add an event listener to close the pop-up window
+    const closeTaskDetailsButton = document.getElementById("closeTaskDetails");
+    closeTaskDetailsButton.addEventListener("click", () => {
+      taskDetailsWindow.style.display = "none";
+    });
+  }
+
+  async function deleteTask(taskId) {
+    const taskRef = doc(db, "tasks", taskId);
+    await deleteDoc(taskRef);
+  }
+
+>>>>>>> Stashed changes
   async function updateTask(taskId, newData) {
     const taskRef = doc(db, "tasks", taskId);
 
@@ -131,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
       taskStatus,
     };
 
+<<<<<<< Updated upstream
     // Add the data to Firestore
     const tasksCollection = collection(db, "tasks"); // Replace "tasks" with your Firestore collection name
     addDoc(tasksCollection, taskData)
@@ -143,5 +213,24 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     floatingWindow.style.display = "none"; // Hide the floating window
   });
+=======
+    taskData.timestamp = Date.now();
+
+    if (editingTaskId) {
+      updateTask(editingTaskId, taskData);
+      floatingWindow.style.display = "none";
+      editingTaskId = null;
+    } else {
+      const tasksCollection = collection(db, "tasks");
+      addDoc(tasksCollection, taskData).then(() => {
+        floatingWindow.style.display = "none";
+        resetFormFields(formFields, initialFormValues);
+        tags.length = 0;
+        tagContainer.innerHTML = "";
+        editingTaskId = null;
+        });
+     }
+   });
+>>>>>>> Stashed changes
 });
 
