@@ -1,22 +1,12 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  doc,
-  updateDoc,
-  getDocs,
-  onSnapshot,
-} from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
-import { deleteDoc } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot, deleteDoc } 
+from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBbyuRShsNdaTzIcuKKzlvTDl8bCDr8pJY",
   authDomain: "fit2101-project-database.firebaseapp.com",
   databaseURL:
-    "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
+  "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "fit2101-project-database",
   storageBucket: "fit2101-project-database.appspot.com",
   messagingSenderId: "841276992676",
@@ -28,14 +18,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app);
 
-// Helper function to reset form fields
+// Helper functions
 const resetFormFields = (fields, initialValues) => {
   fields.forEach((field) => {
     field.value = initialValues[field.id] || "";
   });
 };
 
-// Helper function to create buttons
 const createButton = (text, position, eventHandler) => {
   const button = document.createElement("button");
   button.innerHTML = text;
@@ -46,22 +35,108 @@ const createButton = (text, position, eventHandler) => {
   return button;
 };
 
-// Main execution starts when DOM is fully loaded
+const getPriorityClass = (priority) => {
+  let priorityClass = "priority-text-";
+  switch (priority.toLowerCase()) {
+    case "low": return priorityClass += "low";
+    case "medium": return priorityClass += "medium";
+    case "important": return priorityClass += "important";
+    case "urgent": return priorityClass += "urgent";
+    default: return priorityClass += "default";
+  }
+};
+
+const isValidTaskData = (data) => {
+  const requiredFields = [
+    "taskName",
+    "tag",
+    "storyPoint",
+    "priority",
+    "assignee",
+    "taskDescription",
+    "taskStatus",
+    "category",
+  ];
+  return requiredFields.every((field) => Boolean(data[field]));
+};
+
+const getUniqueTags = (tagSelect) => {
+  const selectedTags = Array.from(tagSelect.selectedOptions).map(
+    (option) => option.value
+  );
+  return Array.from(new Set(selectedTags)).join(", ");
+};
+
+const sortTasks = (querySnapshot, sortOrder) => {
+  let sortedDocs;
+
+  switch (sortOrder) {
+    case "RecentToOldest":
+      sortedDocs = querySnapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+      break;
+    case "LowestToUrgent":
+    case "UrgentToLowest":
+      const priorityOrder = sortOrder === "LowestToUrgent" ? ["Low", "Medium", "Important", "Urgent"] : ["Urgent", "Important", "Medium", "Low"];
+      sortedDocs = querySnapshot.docs.sort((a, b) => priorityOrder.indexOf(a.data().priority) - priorityOrder.indexOf(b.data().priority));
+      break;
+    default:
+      sortedDocs = querySnapshot.docs.sort((a, b) => a.data().timestamp - b.data().timestamp);
+  }
+
+  return sortedDocs;
+}
+
+// Main code
 document.addEventListener("DOMContentLoaded", function () {
   let editingTaskId = null;
   const formFields = document.querySelectorAll(".form-control");
-
   const tagSelect = document.getElementById("tag");
-
   const initialFormValues = {};
   formFields.forEach((field) => {
     initialFormValues[field.id] = field.value;
   });
 
+  displayTasksRealtime();
+
+  async function deleteTask(taskId) {
+    const taskRef = doc(db, "tasks", taskId);
+    await deleteDoc(taskRef);
+  }
+
+  async function updateTask(taskId, newData) {
+    const taskRef = doc(db, "tasks", taskId);
+    await updateDoc(taskRef, newData);
+  }
+
+  const filterDropdown = document.getElementById("filter");
+  filterDropdown.addEventListener("change", () => {
+    displayTasksRealtime();
+  });
+
+  const sortingDropdown = document.getElementById("sorting");
+  sortingDropdown.addEventListener("change", () => {
+    const selectedValue = sortingDropdown.value;
+    switch (selectedValue) {
+      case "Recent to Oldest":
+        displayTasksRealtime("RecentToOldest");
+        break;
+      case "Oldest to Recent":
+        displayTasksRealtime("OldestToRecent");
+        break;
+      case "Lowest to Urgent":
+        displayTasksRealtime("LowestToUrgent");
+        break;
+      case "Urgent to Lowest":
+        displayTasksRealtime("UrgentToLowest");
+        break;
+      default:
+        displayTasksRealtime();
+    }
+  });
+
   function displayTask(taskData, taskId) {
     const taskList = document.getElementById("taskList");
     const taskItem = document.createElement("div");
-
     taskItem.addEventListener("click", () => {
       displayTaskDetails(taskData); // Call a function to display task details
     });
@@ -97,25 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     );
 
-    // Determine class based on priority
-    let priorityClass = "priority-text-";
-    switch (taskData.priority.toLowerCase()) {
-      case "low":
-        priorityClass += "low";
-        break;
-      case "medium":
-        priorityClass += "medium";
-        break;
-      case "important":
-        priorityClass += "important";
-        break;
-      case "urgent":
-        priorityClass += "urgent";
-        break;
-      default:
-        priorityClass += "default";
-    }
-
+    const priorityClass = getPriorityClass(taskData.priority);
     taskItem.innerHTML = `
     <p class="task-name">Name: ${taskData.taskName}</p>
     <p class="task-name">Tag: ${taskData.tag}</p>
@@ -131,24 +188,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function displayTaskDetails(taskData) {
     const taskDetailsContent = document.getElementById("taskDetailsContent");
-
-    let priorityClass = "priority-text-";
-    switch (taskData.priority.toLowerCase()) {
-      case "low":
-        priorityClass += "low";
-        break;
-      case "medium":
-        priorityClass += "medium";
-        break;
-      case "important":
-        priorityClass += "important";
-        break;
-      case "urgent":
-        priorityClass += "urgent";
-        break;
-      default:
-        priorityClass += "default";
-    }
+    const priorityClass = getPriorityClass(taskData.priority);
     
     // Populate the task details in the pop-up window
     taskDetailsContent.innerHTML = `
@@ -173,16 +213,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  async function deleteTask(taskId) {
-    const taskRef = doc(db, "tasks", taskId);
-    await deleteDoc(taskRef);
-  }
-
-  async function updateTask(taskId, newData) {
-    const taskRef = doc(db, "tasks", taskId);
-    await updateDoc(taskRef, newData);
-  }
-
   function displayTasksRealtime(sortOrder = "OldestToRecent") {
     const tasksCollection = collection(db, "tasks");
     const filterValue = document.getElementById("filter").value.replace("-filter", "");
@@ -191,74 +221,16 @@ document.addEventListener("DOMContentLoaded", function () {
       const taskList = document.getElementById("taskList");
       taskList.innerHTML = "";
   
-      let sortedDocs;
+      const sortedDocs = sortTasks(querySnapshot, sortOrder);
   
-      switch (sortOrder) {
-        case "RecentToOldest":
-          sortedDocs = querySnapshot.docs.sort(
-            (a, b) => b.data().timestamp - a.data().timestamp
-          );
-          break;
-        case "LowestToUrgent":
-          sortedDocs = querySnapshot.docs.sort((a, b) => {
-            const priorityOrder = ["Low", "Medium", "Important", "Urgent"];
-            return (
-              priorityOrder.indexOf(a.data().priority) -
-              priorityOrder.indexOf(b.data().priority)
-            );
-          });
-          break;
-        case "UrgentToLowest":
-          sortedDocs = querySnapshot.docs.sort((a, b) => {
-            const priorityOrder = ["Urgent", "Important", "Medium", "Low"];
-            return (
-              priorityOrder.indexOf(a.data().priority) -
-              priorityOrder.indexOf(b.data().priority)
-            );
-          });
-          break;
-        default:
-          sortedDocs = querySnapshot.docs.sort(
-            (a, b) => a.data().timestamp - b.data().timestamp
-          );
-      }
       sortedDocs.forEach((doc) => {
         const taskData = doc.data();
-  
         if (filterValue === "" || taskData.tag.includes(filterValue)) {
-          displayTask(taskData, doc.id);
+          displayTask(taskData, doc.id);  // Assuming displayTask is defined elsewhere
         }
       });
     });
   }
-
-  displayTasksRealtime();
-
-  const filterDropdown = document.getElementById("filter");
-  filterDropdown.addEventListener("change", () => {
-    displayTasksRealtime();
-  });
-
-  const sortingDropdown = document.getElementById("sorting");
-  sortingDropdown.addEventListener("change", () => {
-    const selectedValue = sortingDropdown.value;
-    switch (selectedValue) {
-      case "Recent to Oldest":
-        displayTasksRealtime("RecentToOldest");
-        break;
-      case "Oldest to Recent":
-        displayTasksRealtime("OldestToRecent");
-        break;
-      case "Lowest to Urgent":
-        displayTasksRealtime("LowestToUrgent");
-        break;
-      case "Urgent to Lowest":
-        displayTasksRealtime("UrgentToLowest");
-        break;
-      default:
-        displayTasksRealtime();
-    }
-  });
   
   // Event listeners for buttons and windows
   const addTaskButton = document.getElementById("addTaskButton");
@@ -279,29 +251,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const taskData = Object.fromEntries(
       Array.from(formFields).map((field) => [field.id, field.value])
     );
+    taskData.tag = getUniqueTags(tagSelect);
 
-    const selectedTags = Array.from(tagSelect.selectedOptions).map(
-      (option) => option.value
-    );
-
-    // Ensure unique selections
-    const uniqueTags = Array.from(new Set(selectedTags));
-    
-    taskData.tag = uniqueTags.join(", ")
-    
-    // Validate required form fields
-    if (
-      !taskData.taskName ||
-      !taskData.tag ||
-      !taskData.storyPoint ||
-      !taskData.priority ||
-      !taskData.assignee ||
-      !taskData.taskDescription ||
-      !taskData.taskStatus ||
-      !taskData.category
-    ) {
+    if (!isValidTaskData(taskData)) {
       alert("Please fill out all fields.");
-      return; // Don't proceed with saving if validation fails
+      return;
     }
 
     taskData.timestamp = Date.now();
