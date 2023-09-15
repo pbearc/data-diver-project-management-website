@@ -158,6 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <p>Category: ${taskData.category}</p>
       <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
       <p>Assignee: ${taskData.assignee}</p>
+      <p>Task Stage: ${taskData.taskStatus}</p>
       <p>Task Description: ${taskData.taskDescription}</p>
       <p>Task Status: ${taskData.taskStatus}</p>
     `;
