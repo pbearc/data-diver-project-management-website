@@ -142,7 +142,6 @@ document.addEventListener("DOMContentLoaded", function () {
       displayTaskDetails(taskData); // Call a function to display task details
     });
 
-    // Style your task item
     taskItem.className = "task-item";
 
     const deleteButton = createButton(
@@ -172,8 +171,15 @@ document.addEventListener("DOMContentLoaded", function () {
         floatingWindow.style.display = "block";
       }
     );
+    
+    const tagColors = {
+      api: "#FFD700",   // Yellow
+      backend: "#00FF00" // Green
+      // Add more tags and colors as needed
+    };
 
     const priorityClass = getPriorityClass(taskData.priority);
+  
     taskItem.innerHTML = `
     <p class="task-name">Name: ${taskData.taskName}</p>
     <p class="task-name">Tag: ${taskData.tag}</p>

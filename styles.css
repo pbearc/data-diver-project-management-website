@@ -18,6 +18,16 @@ body {
   margin-right: 10px;
 }
 
+.tag-api-colour {
+  background-color: #007bff;
+}
+.tag-backend-colour {
+  background-color: #26da26;
+}
+.tag-default-colour {
+  background-color: white;
+}
+
 .brand {
   font-size: 28px;
   font-weight: bold;
