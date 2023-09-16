@@ -87,6 +87,14 @@ const sortTasks = (querySnapshot, sortOrder) => {
   return sortedDocs;
 }
 
+const getColoredTags = (tagString) => {
+  const tagsArray = tagString.split(", ");
+  const coloredTags = tagsArray.map(tag => {
+    const tagClass = `tag-${tag.toLowerCase()}`;
+    return `<span class="${tagClass}">${tag}</span>`;
+  }).join(", ");
+  return coloredTags;
+}
 // Main code
 document.addEventListener("DOMContentLoaded", function () {
   let editingTaskId = null;
@@ -172,35 +180,29 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     );
     
-    const tagColors = {
-      api: "#FFD700",   // Yellow
-      backend: "#00FF00" // Green
-      // Add more tags and colors as needed
-    };
-
     const priorityClass = getPriorityClass(taskData.priority);
+    const coloredTags = getColoredTags(taskData.tag);
   
     taskItem.innerHTML = `
-    <p class="task-name">Name: ${taskData.taskName}</p>
-    <p class="task-name">Tag: ${taskData.tag}</p>
-    <p>Story Point: ${taskData.storyPoint}</p>
-    <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
-  `;
+      <p class="task-name">Name: ${taskData.taskName}</p>
+      <p class="task-name">Tag: ${coloredTags}</p>
+      <p>Story Point: ${taskData.storyPoint}</p>
+      <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
+    `;
 
-    [deleteButton, editButton].forEach((button) =>
-      taskItem.appendChild(button)
-    );
+    [deleteButton, editButton].forEach((button) => taskItem.appendChild(button));
     taskList.appendChild(taskItem);
   }
 
   function displayTaskDetails(taskData) {
     const taskDetailsContent = document.getElementById("taskDetailsContent");
     const priorityClass = getPriorityClass(taskData.priority);
+    const coloredTags = getColoredTags(taskData.tag);
     
     // Populate the task details in the pop-up window
     taskDetailsContent.innerHTML = `
       <p>Name: ${taskData.taskName}</p>
-      <p>Tag: ${taskData.tag}</p>
+      <p>Tag: ${coloredTags}</p>
       <p>Story Point: ${taskData.storyPoint}</p>
       <p>Category: ${taskData.category}</p>
       <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>

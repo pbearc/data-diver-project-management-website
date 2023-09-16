@@ -207,3 +207,35 @@ body {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+.tag-api {
+  background-color: #79ff77; 
+}
+
+.tag-backend {
+  background-color: #ffc078; 
+}
+
+.tag-database {
+  background-color: #7ea3ff; 
+}
+
+.tag-frontend {
+  background-color: #76b18e; 
+}
+
+.tag-framework {
+  background-color: #bb77ff; 
+}
+
+.tag-testing {
+  background-color: #88b860; 
+}
+
+.tag-ui {
+  background-color: #9281ff; 
+}
+
+.tag-ux {
+  background-color: #5cb39e; 
+}
