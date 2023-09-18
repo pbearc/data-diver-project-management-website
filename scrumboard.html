@@ -9,6 +9,7 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="styles.css" />
+    <script type ="module" src="scrum-board.js"></script>
   </head>
   <body class="bg-lightblue">
     <div class="container">
@@ -29,5 +30,65 @@
         </div>
       </div>
 
+      <!-- Add Name and Date Range above the columns -->
+      <div class="row mt-5">
+        <div class="col-md-6">
+          <h4>Sprint Name:</h4>
+          <!-- Add the name here -->
+        </div>
+        <div class="col-md-6">
+          <h4>Date Range:</h4>
+          <!-- Add the date range here -->
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-md-3">
+          <div class="task-column-container">
+            <div class="task-column" id="column1">
+              <div class="column-title">Sprint Backlog</div>
+              <!-- Add tasks for Sprint Backlog here --> 
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="task-column-container" id="column2">
+            <div class="task-column">
+              <div class="column-title">Not Started</div>
+              <!-- Add tasks for Sprint Backlog here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="task-column-container" id="column3">
+            <div class="task-column">
+              <div class="column-title">Active</div>
+              <!-- Add tasks for Sprint Backlog here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="task-column-container">
+            <div class="task-column" id="column4">
+              <div class="column-title">Completed</div>
+              <!-- Add tasks for Sprint Backlog here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+       <!-- Floating window for task details -->
+    <div id="taskDetailsWindow" class="task-view-window task-details">
+      <div id="taskDetailsContent">
+        <!-- Task details will be displayed here -->
+      </div>
+      <button id="closeTaskDetails" class="btn btn-secondary">Close</button>
+    </div>
+
       <!-- Content for the new page goes here -->
-      
+    </div>
+  </body>
+</html>

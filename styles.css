@@ -239,3 +239,32 @@ body {
 .tag-ux {
   background-color: #5cb39e; 
 }
+
+.mt-custom {
+  margin-top: 100px; /* Adjust this value to control the amount of spacing */
+}
+
+.task-column {
+  background-color: #f0f0f0; /* Background color of the column */
+  padding: 15px;
+  border: 1px solid #ddd;
+  margin: 10px;
+  border-radius: 5px;
+}
+.column-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.task {
+  background-color: #fff; /* Background color of task (sticky note) */
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.task-column-container {
+  height: 500px; /* Set a fixed height for the container */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds the height */
+}
