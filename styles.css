@@ -118,13 +118,14 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #FFFFFF; /* Light blue color */
+  background-color: #ffffff; /* Light blue color */
   padding: 20px;
   font-size: 20px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
   width: 60%;
-  max-height: 80%; /* Set a maximum height as a percentage of the viewport height */
-  overflow-y: auto; /* Enable vertical scrolling if content overflows */
+  height: 80%;
+  overflow-x: auto;
+  overflow-y: auto;
 }
 
 .task-view-window label,
@@ -196,8 +197,8 @@ body {
 }
 
 .custom-filter-button {
-  margin-right: 20px; 
-  margin-bottom: 100px; 
+  margin-right: 20px;
+  margin-bottom: 100px;
   font-size: large;
 }
 
@@ -209,35 +210,35 @@ body {
 }
 
 .tag-api {
-  background-color: #79ff77; 
+  background-color: #79ff77;
 }
 
 .tag-backend {
-  background-color: #ffc078; 
+  background-color: #ffc078;
 }
 
 .tag-database {
-  background-color: #7ea3ff; 
+  background-color: #7ea3ff;
 }
 
 .tag-frontend {
-  background-color: #76b18e; 
+  background-color: #76b18e;
 }
 
 .tag-framework {
-  background-color: #bb77ff; 
+  background-color: #bb77ff;
 }
 
 .tag-testing {
-  background-color: #88b860; 
+  background-color: #88b860;
 }
 
 .tag-ui {
-  background-color: #9281ff; 
+  background-color: #9281ff;
 }
 
 .tag-ux {
-  background-color: #5cb39e; 
+  background-color: #5cb39e;
 }
 
 .mt-custom {
@@ -267,4 +268,56 @@ body {
 .task-column-container {
   height: 500px; /* Set a fixed height for the container */
   overflow-y: auto; /* Enable vertical scrolling if content exceeds the height */
+}
+
+.edit-buttons .btn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.edit-content {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  overflow-y: auto;
+  background: white;
+  border-radius: 5px;
+  margin: 0 auto;
+}
+
+.edit-title {
+  margin-bottom: 20px;
+}
+
+.edit-options {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+}
+
+.edit-option {
+  display: flex;
+  align-items: left;
+  margin: 10px 0;
+}
+
+/* Fixed width for labels to create uniform spacing */
+.label-width {
+  width: 150px;
+}
+
+/* Style the time input elements and unit labels */
+.slider-row {
+  display: flex;
+  align-items: center;
+}
+
+.slider-row input[type="number"] {
+  width: 60px;
+  margin: 0 5px;
+}
+
+.slider-row label.unit-label {
+  margin: 0 5px;
 }

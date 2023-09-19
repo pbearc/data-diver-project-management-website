@@ -9,12 +9,14 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="styles.css" />
-    <script type ="module" src="scrum-board.js"></script>
+    <script type="module" src="scrum-board.js"></script>
   </head>
   <body class="bg-lightblue">
     <div class="container">
       <div class="row">
-        <div class="col-md-12 d-flex justify-content-between align-items-center">
+        <div
+          class="col-md-12 d-flex justify-content-between align-items-center"
+        >
           <a href="index.html" class="btn btn-primary">Back</a>
           <ul class="nav nav-tabs justify-content-end">
             <li class="nav-item">
@@ -47,7 +49,7 @@
           <div class="task-column-container">
             <div class="task-column" id="column1">
               <div class="column-title">Sprint Backlog</div>
-              <!-- Add tasks for Sprint Backlog here --> 
+              <!-- Add tasks for Sprint Backlog here -->
             </div>
           </div>
         </div>
@@ -80,14 +82,72 @@
         </div>
       </div>
 
-       <!-- Floating window for task details -->
-    <div id="taskDetailsWindow" class="task-view-window task-details">
-      <div id="taskDetailsContent">
-        <!-- Task details will be displayed here -->
+      <!-- Floating window for task details -->
+      <div id="taskDetailsWindow" class="task-view-window task-details">
+        <div id="taskDetailsContent"></div>
+        <div class="edit-buttons">
+          <div class="btn-group">
+            <button id="editLogButton" class="btn btn-primary">Edit Log</button>
+            <button id="closeTaskDetails" class="btn btn-secondary">
+              Close
+            </button>
+          </div>
+        </div>
       </div>
-      <button id="closeTaskDetails" class="btn btn-secondary">Close</button>
-    </div>
 
+      <!-- Floating window for editing task logs -->
+      <div id="editTaskLogWindow" class="task-view-window task-edit-log">
+        <div id="editTaskLogContent" class="edit-content">
+          <div class="edit-title">
+            <h3>Edit Task Log</h3>
+          </div>
+          <div class="edit-options">
+            <div class="edit-option">
+              <label for="teamMember" class="label-width">Team Member: </label>
+              <select id="teamMember">
+                <option value="member1">Member 1</option>
+                <option value="member2">Member 2</option>
+              </select>
+            </div>
+            <div class="edit-option">
+              <label for="logDate" class="label-width">Date: </label>
+              <input type="date" id="logDate" value="" />
+            </div>
+            <div class="edit-option">
+              <label for="timeSpent" class="label-width">Time Spent:</label>
+              <div id="timeSpentSlider" class="slider-row">
+                <input
+                  type="number"
+                  id="hours"
+                  min="0"
+                  max="23"
+                  step="1"
+                  value="0"
+                />
+                <label for="hours" class="unit-label">Hour</label>
+                <input
+                  type="number"
+                  id="minutes"
+                  min="0"
+                  max="59"
+                  step="1"
+                  value="0"
+                />
+                <label for="minutes" class="unit-label">Minute</label>
+              </div>
+            </div>
+          </div>
+          <br />
+          <div class="edit-buttons">
+            <div class="btn-group">
+              <button id="saveLogButton" class="btn btn-primary">Save</button>
+              <button id="cancelLogButton" class="btn btn-secondary">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Content for the new page goes here -->
     </div>
   </body>
