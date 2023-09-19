@@ -35,6 +35,21 @@ async function populateTasks(columnId) {
     const taskElement = document.createElement("div");
     taskElement.className = "task";
     taskElement.textContent = taskData.taskName;
+    taskElement.draggable = true;
+    taskElement.id = doc.id; // Set a unique ID for each task card
+
+    const taskElements = columnElement.querySelectorAll(".task");
+
+    taskElements.forEach((taskElement) => {
+      taskElement.draggable = true; // Make the task card draggable
+      taskElement.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", e.target.id);
+      });
+    });
+
+    taskElement.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", e.target.id);
+    });
 
     // Add a click event listener to show task details in the modal
     taskElement.addEventListener("click", () => {
@@ -43,6 +58,39 @@ async function populateTasks(columnId) {
 
     columnElement.appendChild(taskElement);
   });
+}
+
+const columns = document.querySelectorAll(".task-column");
+
+columns.forEach((column) => {
+  column.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+
+  document.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData("text/plain");
+    const taskElement = document.getElementById(taskId);
+  
+    // Check if the drop target is a column
+    if (e.target.classList.contains("task-column")) {
+      e.target.appendChild(taskElement);
+    }
+  });
+
+  column.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData("text/plain");
+    const taskElement = document.getElementById(taskId);
+    column.appendChild(taskElement);
+  });
+});
+
+function drop(event) {
+  event.preventDefault();
+  const taskId = event.dataTransfer.getData("text/plain");
+  const taskElement = document.getElementById(taskId);
+  event.target.appendChild(taskElement);
 }
 
 const getColoredTags = (tagString) => {
