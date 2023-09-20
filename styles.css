@@ -336,11 +336,12 @@ body {
 }
 
 .past-sprint-card {
-  width: 30%; /* Make each card smaller to fit 3 in a row */
+  width: 25%; /* Make each card smaller to fit 3 in a row */
   margin-right: 2%; /* Add space between cards */
   margin-bottom: 2%; /* Add space between rows */
 }
 
 .past-sprint-card .card-body {
   text-align: left; /* Align text to the left */
+  padding: 5px; /* Reduce the padding to make the card smaller */
 }
