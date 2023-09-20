@@ -321,3 +321,17 @@ body {
 .slider-row label.unit-label {
   margin: 0 5px;
 }
+
+.time-spent-entry {
+  display: flex;
+  justify-content: space-between;
+}
+.time-spent {
+  margin-left: 10px;
+  justify-content: space-between;
+  background-color: rgb(195, 196, 196);
+}
+.total-time-spent {
+  text-align: right;
+}
+
