@@ -31,22 +31,16 @@ const pastSprints = [
         name: "Sprint 1",
         startDate: "2023-08-01",
         endDate: "2023-08-15",
-        status: "Complete",
-        retrospective: "Achieved all goals.",
     },
     {
         name: "Sprint 2",
         startDate: "2023-08-16",
         endDate: "2023-08-30",
-        status: "Incomplete",
-        retrospective: "Work in progress.",
     },
     {
         name: "Sprint 3",
         startDate: "2023-09-01",
         endDate: "2023-09-15",
-        status: "Cancelled",
-        retrospective: "Project scope changed.",
     },
 ];
 
@@ -65,8 +59,6 @@ function displayPastSprints() {
                 <h5 class="card-title">${sprint.name}</h5>
                 <p class="card-text"><strong>Start Date:</strong> ${sprint.startDate}</p>
                 <p class="card-text"><strong>End Date:</strong> ${sprint.endDate}</p>
-                <p class="card-text"><strong>Status:</strong> ${sprint.status}</p>
-                <p class="card-text"><strong>Retrospective:</strong> ${sprint.retrospective}</p>
             </div>
         `;
 
