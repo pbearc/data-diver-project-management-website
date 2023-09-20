@@ -126,6 +126,9 @@ function showTaskDetails(taskData) {
   const priorityClass = getPriorityClass(taskData.priority);
   const coloredTags = getColoredTags(taskData.tag);
 
+   // Clear the timeSpentEntries array before displaying the time spent details
+   timeSpentEntries.length = 0;
+   
   taskDetailsContent.innerHTML = `
       <p>Name: ${taskData.taskName}</p>
       <p>Tag: ${coloredTags}</p>
@@ -140,6 +143,13 @@ function showTaskDetails(taskData) {
 
   // Show the modal
   taskDetailsWindow.style.display = "block";
+
+  // Create a div to display time spent details
+  const timeSpentDiv = document.createElement("div");
+  timeSpentDiv.id = "timeSpentDetails";
+
+  // Append the time spent div to the task details content
+  taskDetailsContent.appendChild(timeSpentDiv);
 
   // Edit Log button click event
   const editLogButton = document.getElementById("editLogButton");
@@ -179,7 +189,7 @@ function showEditTaskLogWindow(taskData) {
 
   // Show the edit task log window
   editTaskLogWindow.style.display = "block";
-
+  
   saveLogButton.addEventListener("click", () => {
     saveTaskLog(taskData); // Save the task log data
   });
@@ -190,6 +200,65 @@ function showEditTaskLogWindow(taskData) {
     const editTaskLogWindow = document.getElementById("editTaskLogWindow");
     editTaskLogWindow.style.display = "none";
   });
+}
+
+// Initialize a variable to keep track of all time spent entries
+const timeSpentEntries = [];
+
+// Function to format time spent details
+function formatTimeSpentDetails(logDate, hours, minutes) {
+  const formattedLogDate = new Date(logDate);
+  const formattedDate = formattedLogDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const formattedHours = hours.toString().padStart(2, "0");
+  const formattedMinutes = minutes.toString().padStart(2, "0");
+
+  return `<div class="time-spent-entry">${formattedDate}<span class="time-spent">${formattedHours} hours ${formattedMinutes} mins</span></div>`;
+}
+
+
+// Function to update the time spent display
+function updateTimeSpentDisplay() {
+  const timeSpentDiv = document.getElementById("timeSpentDetails");
+
+  // Initialize the content with "Time Spent:"
+  let content = "<p>Time Spent:</p>";
+
+  // Display each time spent entry
+  timeSpentEntries.forEach((entry) => {
+    const timeSpentDetails = formatTimeSpentDetails(entry.logDate, entry.hours, entry.minutes);
+    content += `<p>${timeSpentDetails}</p>`;
+  });
+
+  // Calculate and display the total time spent
+  let totalHours = 0;
+  let totalMinutes = 0;
+
+  timeSpentEntries.forEach((entry) => {
+    totalHours += entry.hours;
+    totalMinutes += entry.minutes;
+  });
+
+  // Adjust totalMinutes if it exceeds 60
+  if (totalMinutes >= 60) {
+    totalHours += Math.floor(totalMinutes / 60);
+    totalMinutes = totalMinutes % 60;
+  }
+
+  const formattedTotalHours = totalHours.toString().padStart(2, "0");
+  const formattedTotalMinutes = totalMinutes.toString().padStart(2, "0");
+
+  const formattedTotalTimeSpent = `<p class="total-time-spent">Total Time Spent: <span class="time-spent">${formattedTotalHours} hours ${formattedTotalMinutes} mins</span></p>`;
+
+  // Add the "Total Time Spent" to the content
+  content += formattedTotalTimeSpent;
+
+  // Set the innerHTML with the constructed content
+  timeSpentDiv.innerHTML = content;
 }
 
 // Function to save task log to the database
@@ -225,7 +294,6 @@ async function saveTaskLog(taskData) {
   };
 
   try {
-    alert("Saved!");
 
     // Create a new document in the "task_logs" collection
     const logDocRef = await addDoc(collection(db, "task_logs"), log);
@@ -241,6 +309,23 @@ async function saveTaskLog(taskData) {
   } catch (error) {
     console.error("Error saving task log: ", error);
   }
+
+  // Check if a similar entry already exists based on the log date
+  const existingEntry = timeSpentEntries.find((entry) => entry.logDate === logDate);
+
+  if (existingEntry) {
+    // If a similar entry exists, update it instead of adding a new one
+    existingEntry.hours = hours;
+    existingEntry.minutes = minutes;
+    existingEntry.timeSpent = timeSpent;
+  } else {
+    // If no similar entry exists, add the new entry to the array
+    timeSpentEntries.push({ logDate, hours, minutes });
+  }
+
+    // Update the display
+    updateTimeSpentDisplay();
+
 
   // Close the edit task log window after saving
   const editTaskLogWindow = document.getElementById("editTaskLogWindow");
