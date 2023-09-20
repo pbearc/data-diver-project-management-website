@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint History - Project Management Website</title>
+    <link
+        rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="sprint-history.css" /> <!-- Include the new CSS file -->
+    <script type="module" src="sprint-history.js"></script>
+</head>
+<body class="bg-lightblue">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 d-flex justify-content-between align-items-center">
+                <a href="index.html" class="btn btn-primary">Back</a>
+                <ul class="nav nav-tabs justify-content-end">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Change Password</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Log Out</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Account</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Removed the sorting buttons -->
+    </div>
+    <div class="container">
+        <div id="sprintList" class="row">
+            <!-- Past sprints will be displayed here -->
+        </div>
+    </div>
+</body>
+</html>
