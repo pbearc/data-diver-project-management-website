@@ -1,120 +1,213 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot, deleteDoc } 
+from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-<<<<<<< Updated upstream
   apiKey: "AIzaSyBbyuRShsNdaTzIcuKKzlvTDl8bCDr8pJY",
   authDomain: "fit2101-project-database.firebaseapp.com",
-  databaseURL: "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL:
+  "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "fit2101-project-database",
   storageBucket: "fit2101-project-database.appspot.com",
   messagingSenderId: "841276992676",
   appId: "1:841276992676:web:c7761b64a8d7d43d230a31",
-  measurementId: "G-9936B4VLCD"
-=======
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID",
->>>>>>> Stashed changes
+  measurementId: "G-9936B4VLCD",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig, "Data Diver");
-const db = getFirestore(app)
+const db = getFirestore(app);
 
+// Helper functions
+const resetFormFields = (fields, initialValues) => {
+  fields.forEach((field) => {
+    field.value = initialValues[field.id] || "";
+  });
+};
+
+const createButton = (text, position, eventHandler) => {
+  const button = document.createElement("button");
+  button.innerHTML = text;
+  button.style.position = "absolute";
+  button.style[position.y] = "10px";
+  button.style[position.x] = "10px";
+  button.addEventListener("click", eventHandler);
+  return button;
+};
+
+const getPriorityClass = (priority) => {
+  let priorityClass = "priority-text-";
+  switch (priority.toLowerCase()) {
+    case "low": return priorityClass += "low";
+    case "medium": return priorityClass += "medium";
+    case "important": return priorityClass += "important";
+    case "urgent": return priorityClass += "urgent";
+    default: return priorityClass += "default";
+  }
+};
+
+const isValidTaskData = (data) => {
+  const requiredFields = [
+    "taskName",
+    "tag",
+    "storyPoint",
+    "priority",
+    "assignee",
+    "taskStage",
+    "taskDescription",
+    "taskStatus",
+    "category",
+  ];
+  return requiredFields.every((field) => Boolean(data[field]));
+};
+
+const getUniqueTags = (tagSelect) => {
+  const selectedTags = Array.from(tagSelect.selectedOptions).map(
+    (option) => option.value
+  );
+  return Array.from(new Set(selectedTags)).join(", ");
+};
+
+const sortTasks = (querySnapshot, sortOrder) => {
+  let sortedDocs;
+
+  switch (sortOrder) {
+    case "RecentToOldest":
+      sortedDocs = querySnapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+      break;
+    case "LowestToUrgent":
+    case "UrgentToLowest":
+      const priorityOrder = sortOrder === "LowestToUrgent" ? ["Low", "Medium", "Important", "Urgent"] : ["Urgent", "Important", "Medium", "Low"];
+      sortedDocs = querySnapshot.docs.sort((a, b) => priorityOrder.indexOf(a.data().priority) - priorityOrder.indexOf(b.data().priority));
+      break;
+    default:
+      sortedDocs = querySnapshot.docs.sort((a, b) => a.data().timestamp - b.data().timestamp);
+  }
+
+  return sortedDocs;
+}
+
+const getColoredTags = (tagString) => {
+  const tagsArray = tagString.split(", ");
+  const coloredTags = tagsArray.map(tag => {
+    const tagClass = `tag-${tag.toLowerCase()}`;
+    return `<span class="${tagClass}">${tag}</span>`;
+  }).join(", ");
+  return coloredTags;
+}
+// Main code
 document.addEventListener("DOMContentLoaded", function () {
-<<<<<<< Updated upstream
-  
-  function displayTask(taskData) {
-=======
   let editingTaskId = null;
   const formFields = document.querySelectorAll(".form-control");
-
+  const tagSelect = document.getElementById("tag");
   const initialFormValues = {};
   formFields.forEach((field) => {
     initialFormValues[field.id] = field.value;
   });
 
-<<<<<<< Updated upstream
-// Add these lines at the beginning of your DOMContentLoaded event listener
-let tags = [];
-const tagInput = document.getElementById("tagInput");
-const tagContainer = document.getElementById("tagContainer");
-=======
-  // Initialize taskData with an empty array for tags
-  const taskData = {
-    tags: [],
-  };
+  displayTasksRealtime();
 
+  async function deleteTask(taskId) {
+    const taskRef = doc(db, "tasks", taskId);
+    await deleteDoc(taskRef);
+  }
+
+  async function updateTask(taskId, newData) {
+    const taskRef = doc(db, "tasks", taskId);
+    await updateDoc(taskRef, newData);
+  }
+
+  const filterDropdown = document.getElementById("filter");
+  filterDropdown.addEventListener("change", () => {
+    displayTasksRealtime();
+  });
+
+  const sortingDropdown = document.getElementById("sorting");
+  sortingDropdown.addEventListener("change", () => {
+    const selectedValue = sortingDropdown.value;
+    switch (selectedValue) {
+      case "Recent to Oldest":
+        displayTasksRealtime("RecentToOldest");
+        break;
+      case "Oldest to Recent":
+        displayTasksRealtime("OldestToRecent");
+        break;
+      case "Lowest to Urgent":
+        displayTasksRealtime("LowestToUrgent");
+        break;
+      case "Urgent to Lowest":
+        displayTasksRealtime("UrgentToLowest");
+        break;
+      default:
+        displayTasksRealtime();
+    }
+  });
 
   function displayTask(taskData, taskId) {
     const taskList = document.getElementById("taskList");
     const taskItem = document.createElement("div");
->>>>>>> Stashed changes
-
-tagInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && tagInput.value) {
-    event.preventDefault();
-    tags.push(tagInput.value);
-    const newTag = document.createElement("span");
-    newTag.textContent = tagInput.value;
-    const deleteButton = createButton("X", { x: "right", y: "top" }, () => {
-      const index = tags.indexOf(tagInput.value);
-      if (index > -1) {
-        tags.splice(index, 1);
-      }
-      tagContainer.removeChild(newTag);
+    taskItem.addEventListener("click", () => {
+      displayTaskDetails(taskData); // Call a function to display task details
     });
-    newTag.appendChild(deleteButton);
-    tagContainer.appendChild(newTag);
-    tagInput.value = "";
-  }
-});
 
-function displayTask(taskData, taskId) {
->>>>>>> Stashed changes
-    const taskList = document.getElementById("taskList");
+    taskItem.className = "task-item";
 
-    // Create HTML elements to display the task data
-    const taskItem = document.createElement("div");
+    const deleteButton = createButton(
+      "X",
+      { x: "left", y: "bottom" },
+      (event) => {
+        event.stopPropagation();
+        const confirmDelete = confirm("Do you want to delete this task?");
+        if (confirmDelete) {
+          deleteTask(taskId);
+        }
+      }
+    );
+
+    const editButton = createButton(
+      "Edit",
+      { x: "right", y: "bottom" },
+      (event) => {
+        event.stopPropagation();
+        Object.keys(taskData).forEach((key) => {
+          const field = document.getElementById(key);
+          if (field) {
+            field.value = taskData[key];
+          }
+        });
+        editingTaskId = taskId;
+        floatingWindow.style.display = "block";
+      }
+    );
+    
+    const priorityClass = getPriorityClass(taskData.priority);
+    const coloredTags = getColoredTags(taskData.tag);
+  
     taskItem.innerHTML = `
-      <h3>${taskData.taskName}</h3>
-      <p>Category: ${taskData.category}</p>
+      <p class="task-name">Name: ${taskData.taskName}</p>
+      <p class="task-name">Tag: ${coloredTags}</p>
       <p>Story Point: ${taskData.storyPoint}</p>
-      <p>Assignee: ${taskData.assignee}</p>
-      <p>Description: ${taskData.taskDescription}</p>
-      <p>Status: ${taskData.taskStatus}</p>
+      <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
     `;
 
-    // Append the task item to the task list
+    [deleteButton, editButton].forEach((button) => taskItem.appendChild(button));
     taskList.appendChild(taskItem);
   }
 
-<<<<<<< Updated upstream
-  // Update Task Function
-=======
-function displayTaskDetails(taskData) {
+  function displayTaskDetails(taskData) {
     const taskDetailsContent = document.getElementById("taskDetailsContent");
-
+    const priorityClass = getPriorityClass(taskData.priority);
+    const coloredTags = getColoredTags(taskData.tag);
+    
     // Populate the task details in the pop-up window
     taskDetailsContent.innerHTML = `
       <p>Name: ${taskData.taskName}</p>
-      <p>Tag: ${taskData.tag}</p>
+      <p>Tag: ${coloredTags}</p>
       <p>Story Point: ${taskData.storyPoint}</p>
       <p>Category: ${taskData.category}</p>
-      <p>Priority: ${taskData.priority}</p>
+      <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
       <p>Assignee: ${taskData.assignee}</p>
+      <p>Task Stage: ${taskData.taskStage}</p>
       <p>Task Description: ${taskData.taskDescription}</p>
       <p>Task Status: ${taskData.taskStatus}</p>
     `;
@@ -129,133 +222,51 @@ function displayTaskDetails(taskData) {
     });
   }
 
-  async function deleteTask(taskId) {
-    const taskRef = doc(db, "tasks", taskId);
-    await deleteDoc(taskRef);
-  }
-
->>>>>>> Stashed changes
-  async function updateTask(taskId, newData) {
-    const taskRef = doc(db, "tasks", taskId);
-
-    // Update the document with the new data
-    try {
-      await updateDoc(taskRef, newData);
-      console.log("Document updated successfully!");
-    } catch (error) {
-      console.error("Error updating document: ", error);
-    }
-  }
-
-  // Function to retrieve and display data in real-time
-  function displayTasksRealtime() {
+  function displayTasksRealtime(sortOrder = "OldestToRecent") {
     const tasksCollection = collection(db, "tasks");
-
-    // Create a real-time listener for changes in the collection
+    const filterValue = document.getElementById("filter").value.replace("-filter", "");
+  
     onSnapshot(tasksCollection, (querySnapshot) => {
       const taskList = document.getElementById("taskList");
-
-      // Clear the existing task list
       taskList.innerHTML = "";
-
-      querySnapshot.forEach((doc) => {
+  
+      const sortedDocs = sortTasks(querySnapshot, sortOrder);
+  
+      sortedDocs.forEach((doc) => {
         const taskData = doc.data();
-
-        // Display each task immediately
-        displayTask(taskData);
+        if (filterValue === "" || taskData.tag.includes(filterValue)) {
+          displayTask(taskData, doc.id);  // Assuming displayTask is defined elsewhere
+        }
       });
     });
   }
-
-  displayTasksRealtime();
-
+  
+  // Event listeners for buttons and windows
   const addTaskButton = document.getElementById("addTaskButton");
   const floatingWindow = document.getElementById("floatingWindow");
   const closeFloatingWindow = document.getElementById("closeFloatingWindow");
   const saveTaskButton = document.getElementById("saveTaskButton");
-  const formFields = document.querySelectorAll(".form-control"); // Select all form fields
 
-  // Store initial/default values for dropdown menus
-  const initialCategory = document.getElementById("category").value;
-  const initialTag = document.getElementById("tag").value;
-  const initialPriority = document.getElementById("priority").value;
-  const initialAssignee = document.getElementById("assignee").value;
-  const initialTaskStatus = document.getElementById("taskStatus").value;
-
-  addTaskButton.addEventListener("click", function () {
-    floatingWindow.style.display = "block"; // Show the floating window
-    // Reset text fields
-    formFields.forEach((field) => {
-      field.value = ""; // Clear the value of each text field
-    });
-    // Reset dropdown menus to their initial/default values
-    document.getElementById("category").value = initialCategory;
-    document.getElementById("tag").value = initialTag;
-    document.getElementById("priority").value = initialPriority;
-    document.getElementById("assignee").value = initialAssignee;
-    document.getElementById("taskStatus").value = initialTaskStatus;
+  addTaskButton.addEventListener("click", () => {
+    floatingWindow.style.display = "block";
+    resetFormFields(formFields, initialFormValues);
   });
 
-  closeFloatingWindow.addEventListener("click", function () {
-    floatingWindow.style.display = "none"; // Hide the floating window
+  closeFloatingWindow.addEventListener("click", () => {
+    floatingWindow.style.display = "none";
   });
 
-<<<<<<< Updated upstream
-  saveTaskButton.addEventListener("click", function () {
-    // Get data from form fields
-    const taskName = document.getElementById("taskName").value;
-    const category = document.getElementById("category").value;
-    const tag = document.getElementById("tag").value;
-    const priority = document.getElementById("priority").value;
-    const assignee = document.getElementById("assignee").value;
-    const storyPoint = document.getElementById("storyPoint").value;
-    const taskDescription = document.getElementById("taskDescription").value;
-    const taskStatus = document.getElementById("taskStatus").value;
-
-    // Create an object with the data
-    const taskData = {
-      taskName,
-      category,
-      tag,
-      priority,
-      assignee,
-      storyPoint,
-      taskDescription,
-      taskStatus,
-    };
-=======
-  // Save Task Button Event Listener
   saveTaskButton.addEventListener("click", () => {
-    // Validate required form fields including tags
-    if (
-      !taskData.taskName ||
-      taskData.tags.length === 0 || // Ensure at least one tag is provided
-      !taskData.storyPoint ||
-      !taskData.priority ||
-      !taskData.assignee ||
-      !taskData.taskDescription ||
-      !taskData.taskStatus ||
-      !taskData.category
-    ) {
-      alert("Please fill out all fields and provide at least one tag.");
-      return; // Don't proceed with saving if validation fails
-    }
->>>>>>> Stashed changes
+    const taskData = Object.fromEntries(
+      Array.from(formFields).map((field) => [field.id, field.value])
+    );
+    taskData.tag = getUniqueTags(tagSelect);
 
-<<<<<<< Updated upstream
-    // Add the data to Firestore
-    const tasksCollection = collection(db, "tasks"); // Replace "tasks" with your Firestore collection name
-    addDoc(tasksCollection, taskData)
-      .then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-        // Optionally, you can clear the form fields or close the floating window here
-      })
-      .catch((error) => {
-        console.error("Error adding document: ", error);
-      });
-    floatingWindow.style.display = "none"; // Hide the floating window
-  });
-=======
+    if (!isValidTaskData(taskData)) {
+      alert("Please fill out all fields.");
+      return;
+    }
+
     taskData.timestamp = Date.now();
 
     if (editingTaskId) {
@@ -266,81 +277,7 @@ function displayTaskDetails(taskData) {
       const tasksCollection = collection(db, "tasks");
       addDoc(tasksCollection, taskData).then(() => {
         floatingWindow.style.display = "none";
-<<<<<<< Updated upstream
-        resetFormFields(formFields, initialFormValues);
-        tags.length = 0;
-        tagContainer.innerHTML = "";
-        editingTaskId = null;
-        });
-     }
-   });
->>>>>>> Stashed changes
-});
-
-=======
       });
     }
   });
-
-  // Helper function to initialize tags input field
-  const initializeTagsInput = () => {
-    const tagsInput = document.getElementById("tags");
-    const tagsList = document.getElementById("tagsList");
-
-    tagsInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        const tag = tagsInput.value.trim();
-        if (tag !== "") {
-          addTag(tag);
-          tagsInput.value = ""; // Clear the input field after adding the tag
-        }
-      }
-    });
-
-    // Event listener for deleting tags
-    tagsList.addEventListener("click", (event) => {
-      const target = event.target;
-      if (target.classList.contains("delete-tag")) {
-        const tag = target.dataset.tag;
-        deleteTag(tag);
-        tagsList.removeChild(target.parentElement);
-      }
-    });
-  };
-
-  // Helper function to add a tag to the task data
-  const addTag = (tag) => {
-    const tagsList = document.getElementById("tagsList");
-    const tagItem = document.createElement("div");
-    tagItem.className = "tag-item";
-
-    const deleteTagButton = createButton(
-      "X",
-      { x: "right", y: "top" },
-      () => {
-        deleteTag(tag);
-        tagsList.removeChild(tagItem);
-      }
-    );
-
-    tagItem.innerHTML = `${tag}`;
-    tagItem.appendChild(deleteTagButton);
-    tagsList.appendChild(tagItem);
-
-    // Add the tag to the task data
-    taskData.tags.push(tag);
-  };
-
-  // Helper function to delete a tag from the task data
-  const deleteTag = (tag) => {
-    const index = taskData.tags.indexOf(tag);
-    if (index !== -1) {
-      taskData.tags.splice(index, 1);
-    }
-  };
-
-  // Initialize tags input field
-  initializeTagsInput();
 });
->>>>>>> Stashed changes
