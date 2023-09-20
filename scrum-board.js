@@ -71,7 +71,7 @@ columns.forEach((column) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("text/plain");
     const taskElement = document.getElementById(taskId);
-  
+
     // Check if the drop target is a column
     if (e.target.classList.contains("task-column")) {
       e.target.appendChild(taskElement);
@@ -180,11 +180,70 @@ function showEditTaskLogWindow(taskData) {
   // Show the edit task log window
   editTaskLogWindow.style.display = "block";
 
+  saveLogButton.addEventListener("click", () => {
+    saveTaskLog(taskData); // Save the task log data
+  });
+
   const cancelLogButton = document.getElementById("cancelLogButton");
   cancelLogButton.addEventListener("click", () => {
     // Close the edit task log window
     const editTaskLogWindow = document.getElementById("editTaskLogWindow");
     editTaskLogWindow.style.display = "none";
   });
+}
+
+// Function to save task log to the database
+async function saveTaskLog(taskData) {
+  const teamMemberSelect = document.getElementById("teamMember");
+  const logDateInput = document.getElementById("logDate");
+  const hoursInput = document.getElementById("hours");
+  const minutesInput = document.getElementById("minutes");
+
+  if (
+    !teamMemberSelect.value ||
+    !logDateInput.value ||
+    !hoursInput.value ||
+    !minutesInput.value
+  ) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  const teamMember = teamMemberSelect.value;
+  const logDate = logDateInput.value;
+  const hours = parseInt(hoursInput.value) || 0;
+  const minutes = parseInt(minutesInput.value) || 0;
+  const timeSpent = hours + minutes / 60;
+
+  const log = {
+    teamMember,
+    logDate,
+    hours,
+    minutes,
+    timeSpent,
+    taskName: taskData.taskName,
+  };
+
+  try {
+    alert("Saved!");
+
+    // Create a new document in the "task_logs" collection
+    const logDocRef = await addDoc(collection(db, "task_logs"), log);
+
+    // Associate the log entry with the task by storing its ID in the task's log list
+    const taskLogData = {
+      logs: [...taskData.logs, logDocRef.id], // Store the log document ID
+    };
+
+    // Update the task document with the new log entry reference
+    const taskDocRef = doc(db, "tasks", taskData.id);
+    await updateDoc(taskDocRef, taskLogData);
+  } catch (error) {
+    console.error("Error saving task log: ", error);
+  }
+
+  // Close the edit task log window after saving
+  const editTaskLogWindow = document.getElementById("editTaskLogWindow");
+  editTaskLogWindow.style.display = "none";
 }
 populateTasks("column1");
