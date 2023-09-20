@@ -57,6 +57,7 @@ function displayPastSprints() {
     pastSprints.forEach((sprint) => {
         const sprintCard = document.createElement("div");
         sprintCard.classList.add("card");
+        sprintCard.classList.add("past-sprint-card"); // Add the class name "past-sprint-card"
         sprintCard.classList.add("mb-3");
 
         sprintCard.innerHTML = `
