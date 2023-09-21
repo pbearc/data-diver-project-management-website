@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
       sortedDocs.forEach((doc) => {
         const taskData = doc.data();
-        if (filterValue === "" || taskData.tag.includes(filterValue)) {
+        if (filterValue === "All" || filterValue === "" || taskData.tag.includes(filterValue)) {
           displayTask(taskData, doc.id);  // Assuming displayTask is defined elsewhere
         }
       });
