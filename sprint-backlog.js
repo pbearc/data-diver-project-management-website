@@ -126,9 +126,9 @@ function showTaskDetails(taskData) {
   const priorityClass = getPriorityClass(taskData.priority);
   const coloredTags = getColoredTags(taskData.tag);
 
-   // Clear the timeSpentEntries array before displaying the time spent details
-   timeSpentEntries.length = 0;
-   
+  // Clear the timeSpentEntries array before displaying the time spent details
+  timeSpentEntries.length = 0;
+
   taskDetailsContent.innerHTML = `
       <p>Name: ${taskData.taskName}</p>
       <p>Tag: ${coloredTags}</p>
@@ -189,7 +189,7 @@ function showEditTaskLogWindow(taskData) {
 
   // Show the edit task log window
   editTaskLogWindow.style.display = "block";
-  
+
   saveLogButton.addEventListener("click", () => {
     saveTaskLog(taskData); // Save the task log data
   });
@@ -220,7 +220,6 @@ function formatTimeSpentDetails(logDate, hours, minutes) {
   return `<div class="time-spent-entry">${formattedDate}<span class="time-spent">${formattedHours} hours ${formattedMinutes} mins</span></div>`;
 }
 
-
 // Function to update the time spent display
 function updateTimeSpentDisplay() {
   const timeSpentDiv = document.getElementById("timeSpentDetails");
@@ -230,7 +229,11 @@ function updateTimeSpentDisplay() {
 
   // Display each time spent entry
   timeSpentEntries.forEach((entry) => {
-    const timeSpentDetails = formatTimeSpentDetails(entry.logDate, entry.hours, entry.minutes);
+    const timeSpentDetails = formatTimeSpentDetails(
+      entry.logDate,
+      entry.hours,
+      entry.minutes
+    );
     content += `<p>${timeSpentDetails}</p>`;
   });
 
@@ -294,7 +297,6 @@ async function saveTaskLog(taskData) {
   };
 
   try {
-
     // Create a new document in the "task_logs" collection
     const logDocRef = await addDoc(collection(db, "task_logs"), log);
 
@@ -311,7 +313,9 @@ async function saveTaskLog(taskData) {
   }
 
   // Check if a similar entry already exists based on the log date
-  const existingEntry = timeSpentEntries.find((entry) => entry.logDate === logDate);
+  const existingEntry = timeSpentEntries.find(
+    (entry) => entry.logDate === logDate
+  );
 
   if (existingEntry) {
     // If a similar entry exists, update it instead of adding a new one
@@ -323,9 +327,8 @@ async function saveTaskLog(taskData) {
     timeSpentEntries.push({ logDate, hours, minutes });
   }
 
-    // Update the display
-    updateTimeSpentDisplay();
-
+  // Update the display
+  updateTimeSpentDisplay();
 
   // Close the edit task log window after saving
   const editTaskLogWindow = document.getElementById("editTaskLogWindow");

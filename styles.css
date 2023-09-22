@@ -34,6 +34,11 @@ body {
   color: #333;
 }
 
+.nav-container {
+  display: flex;
+  align-items: center;
+}
+
 .nav-tabs {
   background-color: transparent;
   border: none;
