@@ -8,6 +8,8 @@ import {
   getDocs,
   onSnapshot,
   deleteDoc,
+  query as firestoreQuery,
+  where,
 } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -190,6 +192,7 @@ function showEditTaskLogWindow(taskData) {
   // Show the edit task log window
   editTaskLogWindow.style.display = "block";
 
+  saveLogButton.removeEventListener("click", saveTaskLog);
   saveLogButton.addEventListener("click", () => {
     saveTaskLog(taskData); // Save the task log data
   });
@@ -264,6 +267,8 @@ function updateTimeSpentDisplay() {
   timeSpentDiv.innerHTML = content;
 }
 
+let isSaving = false;
+
 // Function to save task log to the database
 async function saveTaskLog(taskData) {
   const teamMemberSelect = document.getElementById("teamMember");
@@ -288,44 +293,49 @@ async function saveTaskLog(taskData) {
   const timeSpent = hours + minutes / 60;
 
   const log = {
-    teamMember,
-    logDate,
-    hours,
-    minutes,
-    timeSpent,
     taskName: taskData.taskName,
+    logDate,
+    timeSpent,
   };
 
+  if (isSaving) {
+    // If a save operation is already in progress, ignore the click
+    return;
+  }
+
+  isSaving = true;
+
+  saveLogButton.disabled = true;
+
+  const taskLogsCollection = collection(db, "task_logs");
+
   try {
-    // Create a new document in the "task_logs" collection
-    const logDocRef = await addDoc(collection(db, "task_logs"), log);
+    // Query the "task_logs" collection for a document with the same task name and logDate
+    const q = firestoreQuery(
+      taskLogsCollection,
+      where("taskName", "==", log.taskName),
+      where("logDate", "==", log.logDate)
+    );
 
-    // Associate the log entry with the task by storing its ID in the task's log list
-    const taskLogData = {
-      logs: [...taskData.logs, logDocRef.id], // Store the log document ID
-    };
+    const querySnapshot = await getDocs(q);
 
-    // Update the task document with the new log entry reference
-    const taskDocRef = doc(db, "tasks", taskData.id);
-    await updateDoc(taskDocRef, taskLogData);
+    if (querySnapshot.empty) {
+      // If no matching documents found, add a new document to the collection
+      await addDoc(taskLogsCollection, log);
+      console.log("Task log entry saved successfully.");
+    } else {
+      // If matching documents found, update the first matching document
+      const docRef = querySnapshot.docs[0].ref;
+      await updateDoc(docRef, {
+        timeSpent: log.timeSpent, // Update the timeSpent field
+      });
+      console.log("Task log entry updated successfully.");
+    }
   } catch (error) {
-    console.error("Error saving task log: ", error);
+    console.error("Error saving or updating task log entry: ", error);
   }
 
-  // Check if a similar entry already exists based on the log date
-  const existingEntry = timeSpentEntries.find(
-    (entry) => entry.logDate === logDate
-  );
-
-  if (existingEntry) {
-    // If a similar entry exists, update it instead of adding a new one
-    existingEntry.hours = hours;
-    existingEntry.minutes = minutes;
-    existingEntry.timeSpent = timeSpent;
-  } else {
-    // If no similar entry exists, add the new entry to the array
-    timeSpentEntries.push({ logDate, hours, minutes });
-  }
+  isSaving = false;
 
   // Update the display
   updateTimeSpentDisplay();
@@ -333,5 +343,6 @@ async function saveTaskLog(taskData) {
   // Close the edit task log window after saving
   const editTaskLogWindow = document.getElementById("editTaskLogWindow");
   editTaskLogWindow.style.display = "none";
+  saveLogButton.disabled = false;
 }
 populateTasks("column1");
