@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot, deleteDoc, query as firestoreQuery, where } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot, deleteDoc, query as firestoreQuery, where, getDoc } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBbyuRShsNdaTzIcuKKzlvTDl8bCDr8pJY",
@@ -16,65 +16,98 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app);
+const addedTaskIds = new Set();
+const removedTaskIds = new Set();
+const columns = document.querySelectorAll(".task-column");
+const addButton = document.getElementById("addButton");
+addButton.addEventListener("click", addTaskToColumn);
 
-async function populateTasks(columnId) {
-  const columnElement = document.getElementById(columnId);
+async function populateDropdown() {
   const querySnapshot = await getDocs(collection(db, "tasks"));
+  const dropdown = document.getElementById("taskDropdown");
+  dropdown.innerHTML = ""; 
 
   querySnapshot.forEach((doc) => {
-    const taskData = doc.data();
-    const taskElement = document.createElement("div");
-    taskElement.className = "task";
-    taskElement.textContent = taskData.taskName;
-    taskElement.draggable = true;
-    taskElement.id = doc.id; // Set a unique ID for each task card
-
-    const taskElements = columnElement.querySelectorAll(".task");
-
-    taskElements.forEach((taskElement) => {
-      taskElement.draggable = true; // Make the task card draggable
-      taskElement.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", e.target.id);
-      });
-    });
-
-    taskElement.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", e.target.id);
-    });
-
-    // Add a click event listener to show task details in the modal
-    taskElement.addEventListener("click", () => {
-      showTaskDetails(taskData); // Pass the task data to the function
-    });
-
-    columnElement.appendChild(taskElement);
+    const id = doc.id;
+    const data = doc.data();
+    
+    if (!addedTaskIds.has(id) || removedTaskIds.has(id)) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = data.taskName;
+      dropdown.appendChild(option);
+    }
   });
 }
 
-const columns = document.querySelectorAll(".task-column");
+async function addTaskToColumn() {
+  const dropdown = document.getElementById("taskDropdown");
+  const selectedTaskId = dropdown.value;
+  if (!selectedTaskId) return; // No task selected
+  
+  // Add to the set of added task IDs
+  addedTaskIds.add(selectedTaskId);
+
+  // Retrieve task data from Firestore
+  const taskDoc = await getDoc(doc(db, "tasks", selectedTaskId));
+  const taskData = taskDoc.data();
+
+  // Create the task element (replace this with your task structure)
+  const taskElement = document.createElement("div");
+  taskElement.id = selectedTaskId;
+  taskElement.className = "task";
+  taskElement.textContent = dropdown.options[dropdown.selectedIndex].text;
+  taskElement.draggable = true; // Make the task draggable
+  
+  taskElement.addEventListener("click", () => {
+    showTaskDetails(taskData);
+  });
+
+  taskElement.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData("text/plain", taskElement.id);
+  });
+
+  // Add the task element to column1
+  const column1 = document.getElementById("column1");
+  column1.appendChild(taskElement);
+
+  removedTaskIds.delete(selectedTaskId);
+
+  // Repopulate the dropdown to remove the added task
+  populateDropdown();
+}
 
 columns.forEach((column) => {
   column.addEventListener("dragover", (e) => {
     e.preventDefault();
   });
 
-  document.addEventListener("drop", (e) => {
-    e.preventDefault();
-    const taskId = e.dataTransfer.getData("text/plain");
-    const taskElement = document.getElementById(taskId);
-
-    // Check if the drop target is a column
-    if (e.target.classList.contains("task-column")) {
-      e.target.appendChild(taskElement);
-    }
-  });
-
   column.addEventListener("drop", (e) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("text/plain");
     const taskElement = document.getElementById(taskId);
-    column.appendChild(taskElement);
+
+    if (e.target.classList.contains("task-column")) {
+      e.target.appendChild(taskElement);
+    }
   });
+});
+
+const deleteArea = document.getElementById("deleteArea");
+
+deleteArea.addEventListener("dragover", (e) => {
+  e.preventDefault();
+});
+
+deleteArea.addEventListener("drop", (e) => {
+  e.preventDefault();
+  const taskId = e.dataTransfer.getData("text/plain");
+  const taskElement = document.getElementById(taskId);
+
+  taskElement.remove();
+  addedTaskIds.delete(taskId);
+  removedTaskIds.add(taskId);
+  populateDropdown();
 });
 
 function drop(event) {
@@ -110,6 +143,7 @@ const getPriorityClass = (priority) => {
       return (priorityClass += "default");
   }
 };
+
 // Function to display task details in the modal
 function showTaskDetails(taskData) {
   const taskDetailsWindow = document.getElementById("taskDetailsWindow");
@@ -334,4 +368,5 @@ async function saveTaskLog(taskData) {
   editTaskLogWindow.style.display = "none";
   saveLogButton.disabled = false;
 }
-populateTasks("column1");
+
+populateDropdown();
