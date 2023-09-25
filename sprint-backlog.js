@@ -22,6 +22,8 @@ const columns = document.querySelectorAll(".task-column");
 const addButton = document.getElementById("addButton");
 addButton.addEventListener("click", addTaskToColumn);
 
+const timeSpentEntriesMap = new Map(); // Map to store time spent entries for each task
+
 async function populateDropdown() {
   const querySnapshot = await getDocs(collection(db, "tasks"));
   const dropdown = document.getElementById("taskDropdown");
@@ -51,6 +53,11 @@ async function addTaskToColumn() {
   // Retrieve task data from Firestore
   const taskDoc = await getDoc(doc(db, "tasks", selectedTaskId));
   const taskData = taskDoc.data();
+
+  // Check if the task already exists in the timeSpentEntriesMap, and initialize if not
+  if (!timeSpentEntriesMap.has(taskData.taskName)) {
+    timeSpentEntriesMap.set(taskData.taskName, []);
+  }
 
   // Create the task element (replace this with your task structure)
   const taskElement = document.createElement("div");
@@ -145,14 +152,11 @@ const getPriorityClass = (priority) => {
 };
 
 // Function to display task details in the modal
-function showTaskDetails(taskData) {
+async function showTaskDetails(taskData) {
   const taskDetailsWindow = document.getElementById("taskDetailsWindow");
   const taskDetailsContent = document.getElementById("taskDetailsContent");
   const priorityClass = getPriorityClass(taskData.priority);
   const coloredTags = getColoredTags(taskData.tag);
-
-  // Clear the timeSpentEntries array before displaying the time spent details
-  timeSpentEntries.length = 0;
 
   taskDetailsContent.innerHTML = `
       <p>Name: ${taskData.taskName}</p>
@@ -176,6 +180,9 @@ function showTaskDetails(taskData) {
   // Append the time spent div to the task details content
   taskDetailsContent.appendChild(timeSpentDiv);
 
+  // Fetch and display time spent entries from Firestore
+  await displayTimeSpentEntries(taskData.taskName);
+
   // Edit Log button click event
   const editLogButton = document.getElementById("editLogButton");
   editLogButton.addEventListener("click", () => {
@@ -189,6 +196,76 @@ function showTaskDetails(taskData) {
   closeTaskDetailsButton.addEventListener("click", () => {
     taskDetailsWindow.style.display = "none";
   });
+}
+
+// Function to fetch and display time spent entries from Firestore
+async function displayTimeSpentEntries(taskName) {
+  const timeSpentDiv = document.getElementById("timeSpentDetails");
+
+  // Initialize the content with "Time Spent:"
+  let content = "<p>Time Spent:</p>";
+
+  let totalHours = 0;
+  let totalMinutes = 0;
+
+  try {
+    const taskLogsCollection = collection(db, "task_logs");
+    const q = firestoreQuery(taskLogsCollection, where("taskName", "==", taskName));
+    const querySnapshot = await getDocs(q);
+
+    const timeSpentEntries = [];
+
+    querySnapshot.forEach((doc) => {
+      const logData = doc.data();
+      const timeSpentDetails = formatTimeSpentDetails(
+        logData.logDate,
+        Math.floor(logData.timeSpent),
+        (logData.timeSpent - Math.floor(logData.timeSpent)) * 60
+      );
+      content += `<p>${timeSpentDetails}</p>`;
+
+      // Update total time spent
+      totalHours += Math.floor(logData.timeSpent);
+      totalMinutes += (logData.timeSpent - Math.floor(logData.timeSpent)) * 60;
+
+      // Add the log entry to the timeSpentEntries array
+      timeSpentEntries.push({
+        logDate: logData.logDate,
+        hours: Math.floor(logData.timeSpent),
+        minutes: (logData.timeSpent - Math.floor(logData.timeSpent)) * 60,
+      });
+    });
+
+    // Calculate total hours and minutes
+    totalHours += Math.floor(totalMinutes / 60);
+    totalMinutes = totalMinutes % 60;
+
+    // Retrieve existing time spent entries from the map
+    const existingTimeSpentEntries = timeSpentEntriesMap.get(taskName) || [];
+
+    // Combine existing entries with new entries
+    const updatedTimeSpentEntries = [...existingTimeSpentEntries, ...timeSpentEntries];
+
+    // Update the timeSpentEntriesMap with the combined entries
+    timeSpentEntriesMap.set(taskName, updatedTimeSpentEntries);
+
+    // Add the "Total Time Spent" to the content
+    const formattedTotalTimeSpent = formatTotalTimeSpent(totalHours, totalMinutes);
+    content += formattedTotalTimeSpent;
+  } catch (error) {
+    console.error("Error fetching time spent entries: ", error);
+  }
+
+  // Set the innerHTML with the constructed content
+  timeSpentDiv.innerHTML = content;
+}
+
+// Create a new function to format total time spent
+function formatTotalTimeSpent(hours, minutes) {
+  const formattedHours = hours.toString().padStart(2, "0");
+  const formattedMinutes = Math.round(minutes).toString().padStart(2, "0");
+
+  return `<p class="total-time-spent">Total Time Spent: <span class="time-spent">${formattedHours} hours ${formattedMinutes} mins</span></p>`;
 }
 
 // Inside showEditTaskLogWindow function
@@ -228,9 +305,6 @@ function showEditTaskLogWindow(taskData) {
   });
 }
 
-// Initialize a variable to keep track of all time spent entries
-const timeSpentEntries = [];
-
 // Function to format time spent details
 function formatTimeSpentDetails(logDate, hours, minutes) {
   const formattedLogDate = new Date(logDate);
@@ -241,19 +315,20 @@ function formatTimeSpentDetails(logDate, hours, minutes) {
     day: "numeric",
   });
   const formattedHours = hours.toString().padStart(2, "0");
-  const formattedMinutes = minutes.toString().padStart(2, "0");
+  const formattedMinutes = Math.round(minutes).toString().padStart(2, "0");
 
   return `<div class="time-spent-entry">${formattedDate}<span class="time-spent">${formattedHours} hours ${formattedMinutes} mins</span></div>`;
 }
 
 // Function to update the time spent display
-function updateTimeSpentDisplay() {
+function updateTimeSpentDisplay(taskData) {
   const timeSpentDiv = document.getElementById("timeSpentDetails");
 
   // Initialize the content with "Time Spent:"
   let content = "<p>Time Spent:</p>";
 
-  // Display each time spent entry
+  const timeSpentEntries = timeSpentEntriesMap.get(taskData.taskName) || [];
+
   timeSpentEntries.forEach((entry) => {
     const timeSpentDetails = formatTimeSpentDetails(
       entry.logDate,
@@ -262,29 +337,6 @@ function updateTimeSpentDisplay() {
     );
     content += `<p>${timeSpentDetails}</p>`;
   });
-
-  // Calculate and display the total time spent
-  let totalHours = 0;
-  let totalMinutes = 0;
-
-  timeSpentEntries.forEach((entry) => {
-    totalHours += entry.hours;
-    totalMinutes += entry.minutes;
-  });
-
-  // Adjust totalMinutes if it exceeds 60
-  if (totalMinutes >= 60) {
-    totalHours += Math.floor(totalMinutes / 60);
-    totalMinutes = totalMinutes % 60;
-  }
-
-  const formattedTotalHours = totalHours.toString().padStart(2, "0");
-  const formattedTotalMinutes = totalMinutes.toString().padStart(2, "0");
-
-  const formattedTotalTimeSpent = `<p class="total-time-spent">Total Time Spent: <span class="time-spent">${formattedTotalHours} hours ${formattedTotalMinutes} mins</span></p>`;
-
-  // Add the "Total Time Spent" to the content
-  content += formattedTotalTimeSpent;
 
   // Set the innerHTML with the constructed content
   timeSpentDiv.innerHTML = content;
@@ -354,14 +406,27 @@ async function saveTaskLog(taskData) {
       });
       console.log("Task log entry updated successfully.");
     }
+
+    // Update the display
+    updateTimeSpentDisplay(taskData.taskName);
+
+    // Add the new entry to the timeSpentEntriesMap
+    const timeSpentEntries = timeSpentEntriesMap.get(taskData.taskName) || [];
+    timeSpentEntries.push({
+      logDate,
+      hours,
+      minutes,
+    });
+    timeSpentEntriesMap.set(taskData.taskName, timeSpentEntries);
+
+    // Fetch and display time spent entries from Firestore after saving
+    await displayTimeSpentEntries(taskData.taskName); 
+
   } catch (error) {
     console.error("Error saving or updating task log entry: ", error);
   }
-
+  
   isSaving = false;
-
-  // Update the display
-  updateTimeSpentDisplay();
 
   // Close the edit task log window after saving
   const editTaskLogWindow = document.getElementById("editTaskLogWindow");
