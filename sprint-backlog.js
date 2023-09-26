@@ -75,48 +75,6 @@ async function addTaskToColumn() {
   populateColumnsFromSprintData();
 }
 
-async function addTaskToColumn() {
-  const dropdown = document.getElementById("taskDropdown");
-  const selectedTaskId = dropdown.value;
-  if (!selectedTaskId) return; // No task selected
-  
-  // Add to the set of added task IDs
-  addedTaskIds.add(selectedTaskId);
-
-  // Retrieve task data from Firestore
-  const taskDoc = await getDoc(doc(db, "tasks", selectedTaskId));
-  const taskData = taskDoc.data();
-
-  // Check if the task already exists in the timeSpentEntriesMap, and initialize if not
-  if (!timeSpentEntriesMap.has(taskData.taskName)) {
-    timeSpentEntriesMap.set(taskData.taskName, []);
-  }
-
-  // Create the task element (replace this with your task structure)
-  const taskElement = document.createElement("div");
-  taskElement.id = selectedTaskId;
-  taskElement.className = "task";
-  taskElement.textContent = dropdown.options[dropdown.selectedIndex].text;
-  taskElement.draggable = true; // Make the task draggable
-  
-  taskElement.addEventListener("click", () => {
-    showTaskDetails(taskData);
-  });
-
-  taskElement.addEventListener("dragstart", (e) => {
-    e.dataTransfer.setData("text/plain", taskElement.id);
-  });
-
-  // Add the task element to column1
-  const column1 = document.getElementById("column1");
-  column1.appendChild(taskElement);
-
-  removedTaskIds.delete(selectedTaskId);
-
-  // Repopulate the dropdown to remove the added task
-  populateDropdown();
-}
-
 async function fetchTaskData(taskId) {
   const taskDoc = await getDoc(doc(db, "tasks", taskId));
   return taskDoc.data();
