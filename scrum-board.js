@@ -29,8 +29,6 @@ const db = getFirestore(app);
 document.getElementById("createSprintButton").addEventListener("click", () => {
     // Generate a unique sprint name or ID, you can use a timestamp for simplicity
     const sprintName = `Sprint ${Date.now()}`;
-
-    console.log("Success")
   
     // Get a reference to the "sprints" collection in Firestore
     const sprintsCollection = collection(db, "sprints");
@@ -39,6 +37,11 @@ document.getElementById("createSprintButton").addEventListener("click", () => {
     addDoc(sprintsCollection, {
       name: sprintName,
       date: new Date().toLocaleDateString(), // You can format the date as desired
+      notStarted: [],
+      inProgress: [],
+      completed: [],
+      addedTaskID:[],
+      removedTaskID: [],
     })
       .then((docRef) => {
         console.log("Sprint created with ID: ", docRef.id);

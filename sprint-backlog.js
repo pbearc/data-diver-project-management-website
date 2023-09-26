@@ -16,30 +16,63 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app);
-const addedTaskIds = new Set();
-const removedTaskIds = new Set();
 const columns = document.querySelectorAll(".task-column");
 const addButton = document.getElementById("addButton");
 addButton.addEventListener("click", addTaskToColumn);
+const sprintsCollection = collection(db, "sprints");
+const sprintId = getSprintIdFromURL();
+const sprintDocRef = doc(sprintsCollection, sprintId);
+const sprintData = (await getDoc(sprintDocRef)).data();
+
+// Inside sprint-backlog.js
+function getSprintIdFromURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get("id");
+}
 
 const timeSpentEntriesMap = new Map(); // Map to store time spent entries for each task
 
 async function populateDropdown() {
   const querySnapshot = await getDocs(collection(db, "tasks"));
   const dropdown = document.getElementById("taskDropdown");
-  dropdown.innerHTML = ""; 
+  dropdown.innerHTML = "";
 
   querySnapshot.forEach((doc) => {
     const id = doc.id;
     const data = doc.data();
-    
-    if (!addedTaskIds.has(id) || removedTaskIds.has(id)) {
-      const option = document.createElement("option");
-      option.value = id;
-      option.textContent = data.taskName;
+
+    if (!sprintData.addedTaskID.includes(id) || sprintData.removedTaskID.includes(id)) {
+      const option = createDropdownOption(id, data.taskName);
       dropdown.appendChild(option);
     }
   });
+}
+
+function createDropdownOption(value, text) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = text;
+  return option;
+}
+
+async function addTaskToColumn() {
+  const dropdown = document.getElementById("taskDropdown");
+  const selectedTaskId = dropdown.value;
+  if (!selectedTaskId) return; // No task selected
+
+  // Add to the set of added task IDs
+  sprintData.addedTaskID.push(selectedTaskId);
+  sprintData.notStarted.push(selectedTaskId)
+
+  const indexToRemove = sprintData.removedTaskID.indexOf(selectedTaskId);
+  sprintData.removedTaskID.splice(indexToRemove, 1);
+  // removedTaskIds.delete(selectedTaskId);
+
+  await updateDoc(sprintDocRef, sprintData);
+
+  // Repopulate the dropdown to remove the added task
+  populateDropdown();
+  populateColumnsFromSprintData();
 }
 
 async function addTaskToColumn() {
@@ -84,45 +117,176 @@ async function addTaskToColumn() {
   populateDropdown();
 }
 
-columns.forEach((column) => {
+async function fetchTaskData(taskId) {
+  const taskDoc = await getDoc(doc(db, "tasks", taskId));
+  return taskDoc.data();
+}
+
+function populateColumnsFromSprintData() {
+  const column1TaskContainer = document.getElementById("taskContainer1");
+  column1TaskContainer.innerHTML = "";
+  const column2TaskContainer = document.getElementById("taskContainer2");
+  column2TaskContainer.innerHTML = "";
+  const column3TaskContainer = document.getElementById("taskContainer3");
+  column3TaskContainer.innerHTML = "";
+
+  // Iterate through the task IDs in sprintData.notStarted
+  for (const taskId of sprintData.notStarted) {
+    // Fetch task data for each taskId
+    fetchTaskData(taskId)
+      .then((taskData) => {
+        // Create and append task element
+        const taskElement = createTaskElement(taskId, taskData, taskData.taskName);
+        column1TaskContainer.appendChild(taskElement);
+      })
+      .catch((error) => {
+        console.error(`Error fetching task data for taskId ${taskId}: ${error}`);
+      });
+  }
+  for (const taskId of sprintData.inProgress) {
+    // Fetch task data for each taskId
+    fetchTaskData(taskId)
+      .then((taskData) => {
+        // Create and append task element
+        const taskElement = createTaskElement(taskId, taskData, taskData.taskName);
+        column2TaskContainer.appendChild(taskElement);
+      })
+      .catch((error) => {
+        console.error(`Error fetching task data for taskId ${taskId}: ${error}`);
+      });
+  }
+  for (const taskId of sprintData.completed) {
+    // Fetch task data for each taskId
+    fetchTaskData(taskId)
+      .then((taskData) => {
+        // Create and append task element
+        const taskElement = createTaskElement(taskId, taskData, taskData.taskName);
+        column3TaskContainer.appendChild(taskElement);
+      })
+      .catch((error) => {
+        console.error(`Error fetching task data for taskId ${taskId}: ${error}`);
+      });
+  }
+}
+
+function createTaskElement(id, data, text) {
+  const taskElement = document.createElement("div");
+  taskElement.id = id;
+  taskElement.className = "task";
+  taskElement.textContent = text;
+  taskElement.draggable = true;
+
+  taskElement.addEventListener("click", () => {
+    showTaskDetails(data);
+  });
+
+  taskElement.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData("text/plain", id);
+  });
+  return taskElement;
+}
+
+function handleDragAndDrop(column) {
   column.addEventListener("dragover", (e) => {
     e.preventDefault();
   });
 
-  column.addEventListener("drop", (e) => {
+  column.addEventListener("drop", async(e) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("text/plain");
     const taskElement = document.getElementById(taskId);
 
     if (e.target.classList.contains("task-column")) {
+      const sourceColumnId = taskElement.parentElement.parentElement.id;
+      const targetColumnId = column.id;
+
       e.target.appendChild(taskElement);
+
+      // Update sprintData based on the source and target columns
+      if (sourceColumnId === "column1") {
+        // Remove the task from sprintData.notStarted
+        const indexToRemove = sprintData.notStarted.indexOf(taskId);
+        if (indexToRemove !== -1) {
+          sprintData.notStarted.splice(indexToRemove, 1);
+        }
+      } 
+      else if (sourceColumnId === "column2") {
+        // Remove the task from sprintData.inProgress
+        const indexToRemove = sprintData.inProgress.indexOf(taskId);
+        if (indexToRemove !== -1) {
+          sprintData.inProgress.splice(indexToRemove, 1);
+        }
+      }
+      else if (sourceColumnId === "column3") {
+        // Remove the task from sprintData.inProgress
+        const indexToRemove = sprintData.completed.indexOf(taskId);
+        if (indexToRemove !== -1) {
+          sprintData.completed.splice(indexToRemove, 1);
+        }
+      }
+
+      if (targetColumnId === "column1") {
+        // Add the task to sprintData.notStarted
+        sprintData.notStarted.push(taskId);
+      } 
+      else if (targetColumnId === "column2") {
+        // Add the task to sprintData.inProgress
+        sprintData.inProgress.push(taskId);
+      }
+      else if (targetColumnId === "column3") {
+        // Add the task to sprintData.inProgress
+        sprintData.completed.push(taskId);
+      }
+
+      // Update the Firestore document
+      await updateDoc(sprintDocRef, sprintData);
     }
   });
-});
+}
+columns.forEach(handleDragAndDrop);
 
 const deleteArea = document.getElementById("deleteArea");
-
 deleteArea.addEventListener("dragover", (e) => {
   e.preventDefault();
 });
 
-deleteArea.addEventListener("drop", (e) => {
+deleteArea.addEventListener("drop", async(e) => {
   e.preventDefault();
   const taskId = e.dataTransfer.getData("text/plain");
   const taskElement = document.getElementById(taskId);
+  const sourceColumnId = taskElement.parentElement.parentElement.id;
 
   taskElement.remove();
-  addedTaskIds.delete(taskId);
-  removedTaskIds.add(taskId);
+  const indexToRemove = sprintData.addedTaskID.indexOf(taskId);
+  sprintData.addedTaskID.splice(indexToRemove, 1);
+  sprintData.removedTaskID.push(taskId);
+
+  // Update sprintData based on the source and target columns
+  if (sourceColumnId === "column1") {
+    // Remove the task from sprintData.notStarted
+    const indexToRemove = sprintData.notStarted.indexOf(taskId);
+    if (indexToRemove !== -1) {
+      sprintData.notStarted.splice(indexToRemove, 1);
+    }
+  } 
+  else if (sourceColumnId === "column2") {
+    // Remove the task from sprintData.inProgress
+    const indexToRemove = sprintData.inProgress.indexOf(taskId);
+    if (indexToRemove !== -1) {
+      sprintData.inProgress.splice(indexToRemove, 1);
+    }
+  }
+  else if (sourceColumnId === "column3") {
+    // Remove the task from sprintData.inProgress
+    const indexToRemove = sprintData.completed.indexOf(taskId);
+    if (indexToRemove !== -1) {
+      sprintData.completed.splice(indexToRemove, 1);
+    }
+  }
+
+  await updateDoc(sprintDocRef, sprintData);
   populateDropdown();
 });
-
-function drop(event) {
-  event.preventDefault();
-  const taskId = event.dataTransfer.getData("text/plain");
-  const taskElement = document.getElementById(taskId);
-  event.target.appendChild(taskElement);
-}
 
 const getColoredTags = (tagString) => {
   const tagsArray = tagString.split(", ");
@@ -207,6 +371,11 @@ async function displayTimeSpentEntries(taskName) {
 
   let totalHours = 0;
   let totalMinutes = 0;
+
+  // Check if the task already exists in the timeSpentEntriesMap, and initialize if not
+  if (!timeSpentEntriesMap.has(taskName)) {
+    timeSpentEntriesMap.set(taskName, []);
+  }
 
   try {
     const taskLogsCollection = collection(db, "task_logs");
@@ -435,3 +604,4 @@ async function saveTaskLog(taskData) {
 }
 
 populateDropdown();
+populateColumnsFromSprintData();
