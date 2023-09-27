@@ -1,5 +1,17 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot, deleteDoc, query as firestoreQuery, where, getDoc } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  getDocs,
+  onSnapshot,
+  deleteDoc,
+  query as firestoreQuery,
+  where,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBbyuRShsNdaTzIcuKKzlvTDl8bCDr8pJY",
@@ -41,7 +53,10 @@ async function populateDropdown() {
     const id = doc.id;
     const data = doc.data();
 
-    if (!sprintData.addedTaskID.includes(id) || sprintData.removedTaskID.includes(id)) {
+    if (
+      !sprintData.addedTaskID.includes(id) ||
+      sprintData.removedTaskID.includes(id)
+    ) {
       const option = createDropdownOption(id, data.taskName);
       dropdown.appendChild(option);
     }
@@ -62,7 +77,7 @@ async function addTaskToColumn() {
 
   // Add to the set of added task IDs
   sprintData.addedTaskID.push(selectedTaskId);
-  sprintData.notStarted.push(selectedTaskId)
+  sprintData.notStarted.push(selectedTaskId);
 
   const indexToRemove = sprintData.removedTaskID.indexOf(selectedTaskId);
   sprintData.removedTaskID.splice(indexToRemove, 1);
@@ -94,11 +109,17 @@ function populateColumnsFromSprintData() {
     fetchTaskData(taskId)
       .then((taskData) => {
         // Create and append task element
-        const taskElement = createTaskElement(taskId, taskData, taskData.taskName);
+        const taskElement = createTaskElement(
+          taskId,
+          taskData,
+          taskData.taskName
+        );
         column1TaskContainer.appendChild(taskElement);
       })
       .catch((error) => {
-        console.error(`Error fetching task data for taskId ${taskId}: ${error}`);
+        console.error(
+          `Error fetching task data for taskId ${taskId}: ${error}`
+        );
       });
   }
   for (const taskId of sprintData.inProgress) {
@@ -106,11 +127,17 @@ function populateColumnsFromSprintData() {
     fetchTaskData(taskId)
       .then((taskData) => {
         // Create and append task element
-        const taskElement = createTaskElement(taskId, taskData, taskData.taskName);
+        const taskElement = createTaskElement(
+          taskId,
+          taskData,
+          taskData.taskName
+        );
         column2TaskContainer.appendChild(taskElement);
       })
       .catch((error) => {
-        console.error(`Error fetching task data for taskId ${taskId}: ${error}`);
+        console.error(
+          `Error fetching task data for taskId ${taskId}: ${error}`
+        );
       });
   }
   for (const taskId of sprintData.completed) {
@@ -118,11 +145,17 @@ function populateColumnsFromSprintData() {
     fetchTaskData(taskId)
       .then((taskData) => {
         // Create and append task element
-        const taskElement = createTaskElement(taskId, taskData, taskData.taskName);
+        const taskElement = createTaskElement(
+          taskId,
+          taskData,
+          taskData.taskName
+        );
         column3TaskContainer.appendChild(taskElement);
       })
       .catch((error) => {
-        console.error(`Error fetching task data for taskId ${taskId}: ${error}`);
+        console.error(
+          `Error fetching task data for taskId ${taskId}: ${error}`
+        );
       });
   }
 }
@@ -149,7 +182,7 @@ function handleDragAndDrop(column) {
     e.preventDefault();
   });
 
-  column.addEventListener("drop", async(e) => {
+  column.addEventListener("drop", async (e) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("text/plain");
     const taskElement = document.getElementById(taskId);
@@ -167,15 +200,13 @@ function handleDragAndDrop(column) {
         if (indexToRemove !== -1) {
           sprintData.notStarted.splice(indexToRemove, 1);
         }
-      } 
-      else if (sourceColumnId === "column2") {
+      } else if (sourceColumnId === "column2") {
         // Remove the task from sprintData.inProgress
         const indexToRemove = sprintData.inProgress.indexOf(taskId);
         if (indexToRemove !== -1) {
           sprintData.inProgress.splice(indexToRemove, 1);
         }
-      }
-      else if (sourceColumnId === "column3") {
+      } else if (sourceColumnId === "column3") {
         // Remove the task from sprintData.inProgress
         const indexToRemove = sprintData.completed.indexOf(taskId);
         if (indexToRemove !== -1) {
@@ -186,12 +217,10 @@ function handleDragAndDrop(column) {
       if (targetColumnId === "column1") {
         // Add the task to sprintData.notStarted
         sprintData.notStarted.push(taskId);
-      } 
-      else if (targetColumnId === "column2") {
+      } else if (targetColumnId === "column2") {
         // Add the task to sprintData.inProgress
         sprintData.inProgress.push(taskId);
-      }
-      else if (targetColumnId === "column3") {
+      } else if (targetColumnId === "column3") {
         // Add the task to sprintData.inProgress
         sprintData.completed.push(taskId);
       }
@@ -208,7 +237,7 @@ deleteArea.addEventListener("dragover", (e) => {
   e.preventDefault();
 });
 
-deleteArea.addEventListener("drop", async(e) => {
+deleteArea.addEventListener("drop", async (e) => {
   e.preventDefault();
   const taskId = e.dataTransfer.getData("text/plain");
   const taskElement = document.getElementById(taskId);
@@ -226,15 +255,13 @@ deleteArea.addEventListener("drop", async(e) => {
     if (indexToRemove !== -1) {
       sprintData.notStarted.splice(indexToRemove, 1);
     }
-  } 
-  else if (sourceColumnId === "column2") {
+  } else if (sourceColumnId === "column2") {
     // Remove the task from sprintData.inProgress
     const indexToRemove = sprintData.inProgress.indexOf(taskId);
     if (indexToRemove !== -1) {
       sprintData.inProgress.splice(indexToRemove, 1);
     }
-  }
-  else if (sourceColumnId === "column3") {
+  } else if (sourceColumnId === "column3") {
     // Remove the task from sprintData.inProgress
     const indexToRemove = sprintData.completed.indexOf(taskId);
     if (indexToRemove !== -1) {
@@ -337,7 +364,10 @@ async function displayTimeSpentEntries(taskName) {
 
   try {
     const taskLogsCollection = collection(db, "task_logs");
-    const q = firestoreQuery(taskLogsCollection, where("taskName", "==", taskName));
+    const q = firestoreQuery(
+      taskLogsCollection,
+      where("taskName", "==", taskName)
+    );
     const querySnapshot = await getDocs(q);
 
     const timeSpentEntries = [];
@@ -371,13 +401,19 @@ async function displayTimeSpentEntries(taskName) {
     const existingTimeSpentEntries = timeSpentEntriesMap.get(taskName) || [];
 
     // Combine existing entries with new entries
-    const updatedTimeSpentEntries = [...existingTimeSpentEntries, ...timeSpentEntries];
+    const updatedTimeSpentEntries = [
+      ...existingTimeSpentEntries,
+      ...timeSpentEntries,
+    ];
 
     // Update the timeSpentEntriesMap with the combined entries
     timeSpentEntriesMap.set(taskName, updatedTimeSpentEntries);
 
     // Add the "Total Time Spent" to the content
-    const formattedTotalTimeSpent = formatTotalTimeSpent(totalHours, totalMinutes);
+    const formattedTotalTimeSpent = formatTotalTimeSpent(
+      totalHours,
+      totalMinutes
+    );
     content += formattedTotalTimeSpent;
   } catch (error) {
     console.error("Error fetching time spent entries: ", error);
@@ -398,6 +434,7 @@ function formatTotalTimeSpent(hours, minutes) {
 // Inside showEditTaskLogWindow function
 function showEditTaskLogWindow(taskData) {
   const editTaskLogWindow = document.getElementById("editTaskLogWindow");
+  const taskSelected = document.getElementById("taskSelected");
   const teamMemberSelect = document.getElementById("teamMember");
   const logDateInput = document.getElementById("logDate");
   const hoursInput = document.getElementById("hours");
@@ -412,6 +449,7 @@ function showEditTaskLogWindow(taskData) {
   logDateInput.value = formattedDate;
 
   // Populate input fields with existing task data
+  taskSelected.value = taskData.taskName;
   teamMemberSelect.value = taskData.assignee; // Assignee can be used as the team member here
   hoursInput.value = Math.floor(taskData.timeSpent) || 0;
   minutesInput.value = (taskData.timeSpent - hoursInput.value) * 60 || 0;
@@ -473,6 +511,7 @@ let isSaving = false;
 
 // Function to save task log to the database
 async function saveTaskLog(taskData) {
+  const taskSelect = document.getElementById("taskSelected");
   const teamMemberSelect = document.getElementById("teamMember");
   const logDateInput = document.getElementById("logDate");
   const hoursInput = document.getElementById("hours");
@@ -488,6 +527,7 @@ async function saveTaskLog(taskData) {
     return;
   }
 
+  const taskName = taskSelect.value;
   const teamMember = teamMemberSelect.value;
   const logDate = logDateInput.value;
   const hours = parseInt(hoursInput.value) || 0;
@@ -495,7 +535,7 @@ async function saveTaskLog(taskData) {
   const timeSpent = hours + minutes / 60;
 
   const log = {
-    taskName: taskData.taskName,
+    taskName,
     logDate,
     timeSpent,
   };
@@ -547,12 +587,11 @@ async function saveTaskLog(taskData) {
     timeSpentEntriesMap.set(taskData.taskName, timeSpentEntries);
 
     // Fetch and display time spent entries from Firestore after saving
-    await displayTimeSpentEntries(taskData.taskName); 
-
+    await displayTimeSpentEntries(taskData.taskName);
   } catch (error) {
     console.error("Error saving or updating task log entry: ", error);
   }
-  
+
   isSaving = false;
 
   // Close the edit task log window after saving
