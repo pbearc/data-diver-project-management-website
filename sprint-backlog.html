@@ -10,6 +10,9 @@
     />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script type="module" src="sprint-backlog.js"></script>
     <script src="sidebar.js"></script>
   </head>
@@ -142,6 +145,7 @@
           <div id="taskDetailsContent"></div>
           <div class="edit-buttons">
             <div class="btn-group">
+              <button id="showEffortChartButton">Accumulation of Effort Chart</button>
               <button id="editLogButton" class="btn btn-primary">
                 Edit Log
               </button>
@@ -149,6 +153,14 @@
                 Close
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- Add this to your HTML -->
+        <div id="effortChartModal" class="modal">
+          <div class="modal-content">
+            <span class="close" id="closeEffortChart">&times;</span>
+            <canvas id="effortChartCanvas"></canvas>
           </div>
         </div>
 
