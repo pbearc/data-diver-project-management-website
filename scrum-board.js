@@ -61,45 +61,57 @@ function displaySprintBacklogs() {
   // Get all documents in the "sprints" collection
   getDocs(sprintsCollection)
     .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        const sprintData = doc.data();
+      querySnapshot.forEach((docs) => {
+        const sprintData = docs.data();
+        const sprintId = docs.id; // Extract the sprintId here
+
         // Create a card or element to display sprintData.name and sprintData.date
         const sprintCard = document.createElement("div");
-        const sprintId = doc.id; // Extract the sprintId here
-        sprintCard.innerHTML = `
-          <div class="card" data-sprint-id="${sprintId}"> <!-- Add data-sprint-id attribute -->
-            <div class="card-body">
-              <h5 class="card-title">${sprintData.name}</h5>
-              <p class="card-text">${sprintData.date}</p>
-            </div>
-          </div>
+        sprintCard.className = "card"; // Add class for styling
+        sprintCard.setAttribute("data-sprint-id", sprintId);
+
+        // Close button
+        const closeButton = document.createElement("div");
+        closeButton.className = "close-button";
+        closeButton.innerText = "x";
+        closeButton.addEventListener("click", async(event) => {
+          // Prevent the click event from propagating to the card click event
+          event.stopPropagation();
+          const confirmDelete = confirm("Do you want to delete this sprint?");
+          if (confirmDelete) {
+            await deleteDoc(doc(db, "sprints", sprintId));
+
+            sprintCard.remove();
+          }
+        });
+
+        // Card body
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body";
+        cardBody.innerHTML = `
+          <h5 class="card-title">${sprintData.name}</h5>
+          <p class="card-text">${sprintData.date}</p>
         `;
+
+        // Append close button and card body to the card
+        sprintCard.appendChild(closeButton);
+        sprintCard.appendChild(cardBody);
+
+        // Append the card to the container
         sprintsContainer.appendChild(sprintCard);
 
         // Attach a click event listener to the card
-        sprintsContainer.addEventListener("click", (event) => {
-          // Find the closest parent with the class "card"
-          const sprintCard = event.target.closest(".card");
-      
-          // Extract the sprintId from the card's data-sprint-id attribute
-          const clickedSprintId = sprintCard.getAttribute("data-sprint-id")
-          
-          // Check if the data-sprint-id attribute exists
-          if (clickedSprintId) {
-            console.log("data-sprint-id exists:", clickedSprintId);
-            // Construct the URL with the sprintId parameter and navigate to the Sprint Backlog page
-            window.location.href = `sprint-backlog.html?id=${clickedSprintId}`;
-          } else {
-            console.log("data-sprint-id does not exist");
-          }
+        sprintCard.addEventListener("click", () => {
+          // Construct the URL with the sprintId parameter and navigate to the Sprint Backlog page
+          window.location.href = `sprint-backlog.html?id=${sprintId}`;
         });
-        
       });
     })
     .catch((error) => {
       console.error("Error fetching sprint backlogs: ", error);
     });
 }
+
 
 // Call the function to display Sprint Backlogs when the page loads
 window.addEventListener("load", () => {

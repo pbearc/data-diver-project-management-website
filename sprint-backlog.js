@@ -72,8 +72,14 @@ function createDropdownOption(value, text) {
 
 async function addTaskToColumn() {
   const dropdown = document.getElementById("taskDropdown");
+  addButton.disabled = true; // Disable the button to prevent multiple clicks
+
   const selectedTaskId = dropdown.value;
-  if (!selectedTaskId) return; // No task selected
+  if (!selectedTaskId) {
+    addButton.disabled = false; // Enable the button in case of error or no selection
+    return; // No task selected
+  }
+
 
   // Add to the set of added task IDs
   sprintData.addedTaskID.push(selectedTaskId);
@@ -81,13 +87,17 @@ async function addTaskToColumn() {
 
   const indexToRemove = sprintData.removedTaskID.indexOf(selectedTaskId);
   sprintData.removedTaskID.splice(indexToRemove, 1);
-  // removedTaskIds.delete(selectedTaskId);
 
-  await updateDoc(sprintDocRef, sprintData);
-
-  // Repopulate the dropdown to remove the added task
-  populateDropdown();
-  populateColumnsFromSprintData();
+  try {
+    await updateDoc(sprintDocRef, sprintData);
+    // Repopulate the dropdown to remove the added task
+    populateDropdown();
+    populateColumnsFromSprintData();
+  } catch (error) {
+    console.error("Error adding task:", error);
+  } finally {
+    addButton.disabled = false; // Enable the button after the operation is complete
+  }
 }
 
 async function fetchTaskData(taskId) {
