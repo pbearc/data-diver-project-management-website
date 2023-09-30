@@ -72,14 +72,13 @@ function createDropdownOption(value, text) {
 
 async function addTaskToColumn() {
   const dropdown = document.getElementById("taskDropdown");
-  addButton.disabled = true; // Disable the button to prevent multiple clicks
+addButton.disabled = true; // Disable the button to prevent multiple clicks
 
   const selectedTaskId = dropdown.value;
   if (!selectedTaskId) {
     addButton.disabled = false; // Enable the button in case of error or no selection
     return; // No task selected
-  }
-
+}
 
   // Add to the set of added task IDs
   sprintData.addedTaskID.push(selectedTaskId);
@@ -87,13 +86,13 @@ async function addTaskToColumn() {
 
   const indexToRemove = sprintData.removedTaskID.indexOf(selectedTaskId);
   sprintData.removedTaskID.splice(indexToRemove, 1);
-
-  try {
-    await updateDoc(sprintDocRef, sprintData);
-    // Repopulate the dropdown to remove the added task
-    populateDropdown();
-    populateColumnsFromSprintData();
-  } catch (error) {
+  
+try {
+  await updateDoc(sprintDocRef, sprintData);
+  // Repopulate the dropdown to remove the added task
+  populateDropdown();
+  populateColumnsFromSprintData();
+} catch (error) {
     console.error("Error adding task:", error);
   } finally {
     addButton.disabled = false; // Enable the button after the operation is complete
@@ -349,6 +348,12 @@ async function showTaskDetails(taskData) {
     showEditTaskLogWindow(taskData);
   });
 
+  // // Add an event listener to the "Show Effort Chart" button
+  const showEffortChartButton = document.getElementById("showEffortChartButton");
+  showEffortChartButton.addEventListener("click", async () => {
+    await displayEffortChart(taskData.taskName);
+  });
+
   // Close the modal when the close button or overlay is clicked
   // Add an event listener to close the pop-up window
   const closeTaskDetailsButton = document.getElementById("closeTaskDetails");
@@ -383,23 +388,27 @@ async function displayTimeSpentEntries(taskName) {
 
     querySnapshot.forEach((doc) => {
       const logData = doc.data();
-      const timeSpentDetails = formatTimeSpentDetails(
-        logData.logDate,
-        Math.floor(logData.timeSpent),
-        (logData.timeSpent - Math.floor(logData.timeSpent)) * 60
-      );
-      content += `<p>${timeSpentDetails}</p>`;
-
-      // Update total time spent
-      totalHours += Math.floor(logData.timeSpent);
-      totalMinutes += (logData.timeSpent - Math.floor(logData.timeSpent)) * 60;
-
-      // Add the log entry to the timeSpentEntries array
       timeSpentEntries.push({
         logDate: logData.logDate,
         hours: Math.floor(logData.timeSpent),
         minutes: (logData.timeSpent - Math.floor(logData.timeSpent)) * 60,
       });
+    });
+
+    // Sort time entries based on log date
+    timeSpentEntries.sort((a, b) => new Date(a.logDate) - new Date(b.logDate));
+
+    timeSpentEntries.forEach((entry) => {
+      const timeSpentDetails = formatTimeSpentDetails(
+        entry.logDate,
+        entry.hours,
+        entry.minutes
+      );
+      content += `<p>${timeSpentDetails}</p>`;
+
+      // Update total time spent
+      totalHours += entry.hours;
+      totalMinutes += entry.minutes;
     });
 
     // Calculate total hours and minutes
@@ -543,6 +552,7 @@ async function saveTaskLog(taskData) {
 
   const log = {
     taskName,
+    assignee: teamMember,
     logDate,
     timeSpent,
   };
@@ -602,6 +612,202 @@ async function saveTaskLog(taskData) {
   const editTaskLogWindow = document.getElementById("editTaskLogWindow");
   editTaskLogWindow.style.display = "none";
   saveLogButton.disabled = false;
+}
+
+// Function to display the accumulation of effort chart
+async function displayEffortChart(taskName) {
+  // Fetch data for the accumulation of effort chart from the database
+  const effortChartData = await fetchEffortChartData(taskName);
+
+  // Check if effortChartData is successfully obtained
+  if (effortChartData.dates && effortChartData.members && effortChartData.timeSpent) {
+    // Get the chart container
+    const chartContainer = document.getElementById("effortChartCanvas");
+
+    // Check if a chart already exists
+    const existingChart = Chart.getChart(chartContainer);
+
+    // Destroy the existing chart if it exists
+    if (existingChart) {
+      existingChart.destroy();
+    }
+
+    // Create the line chart
+    const ctx = chartContainer.getContext("2d");
+
+    // Create the new chart
+    const newChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: effortChartData.dates,
+        datasets: effortChartData.members.map((member, index) => ({
+          label: member,
+          borderColor: getRandomColor(),
+          data: effortChartData.timeSpent[index],
+        })),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: "time",
+            time: { unit: "day" },
+            title: {
+              display: true,
+              text: "Date",
+              font: { weight: "bold", size: 18 },
+            },
+            ticks: {
+              font: { weight: "bold" },
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: "Time Spent (hours)",
+              font: { weight: "bold", size: 18 },
+            },
+            ticks: {
+              font: { weight: "bold" },
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: "black",
+              font: {
+                size: 20,
+              },
+            },
+          },
+          title: {
+            display: true,
+            text: 'Accumulation of Effort Chart',
+            font: {
+              size: 23,
+            },
+            padding: {
+              top: 10,
+              bottom: 30,
+            },
+          },
+          tooltip: {
+        callbacks: {
+          label: (tooltipItem) => {
+            const datasetLabel = tooltipItem.dataset.label || "";
+            const dataIndex = tooltipItem.dataIndex;
+            const timeSpent = tooltipItem.chart.data.datasets[tooltipItem.datasetIndex].data[dataIndex];
+            return `${datasetLabel}: ${timeSpent} hours`;
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Show the modal
+    const modal = document.getElementById("effortChartModal");
+    modal.style.display = "block";
+
+    // Close modal event
+    const closeEffortChart = document.getElementById("closeEffortChart");
+    closeEffortChart.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+  } else {
+    console.error('Failed to fetch effortChartData');
+  }
+}
+
+// Function to fetch data for the accumulation of effort chart
+async function fetchEffortChartData(taskName) {
+  const dates = []; // Array of dates
+  const members = []; // Array of member names
+  const timeSpent = []; // Array of time spent data
+
+  try {
+    const taskLogsCollection = collection(db, "task_logs");
+    const q = firestoreQuery(
+      taskLogsCollection,
+      where("taskName", "==", taskName)
+    );
+    const querySnapshot = await getDocs(q);
+
+    // Create a map to organize data by members
+    const memberDataMap = new Map();
+
+    querySnapshot.forEach((doc) => {
+      const logData = doc.data();
+
+      // Parse the date string into a Date object
+      const logDate = new Date(logData.logDate);
+
+      // Check if this member's data already exists in the map
+      if (!memberDataMap.has(logData.assignee)) {
+        // If not, initialize their data
+        memberDataMap.set(logData.assignee, {
+          member: logData.assignee,
+          data: new Map(),
+        });
+      }
+
+      const memberData = memberDataMap.get(logData.assignee);
+
+      // Format the date as YYYY-MM-DD
+      const formattedDate = `${logDate.getFullYear()}-${(logDate.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}-${logDate.getDate().toString().padStart(2, "0")}`;
+
+      // Update the member's data map with the time spent on this date
+      if (!memberData.data.has(formattedDate)) {
+        memberData.data.set(formattedDate, 0);
+      }
+
+      memberData.data.set(
+        formattedDate,
+        memberData.data.get(formattedDate) + logData.timeSpent
+      );
+    });
+
+    // Convert the map data to arrays for the chart
+    memberDataMap.forEach((memberData) => {
+      members.push(memberData.member);
+
+      // Sort dates
+      const sortedDates = Array.from(memberData.data.keys()).sort();
+
+      const memberTimeSpentData = sortedDates.map((date) => {
+        dates.push(date);
+        return memberData.data.get(date);
+      });
+
+      timeSpent.push(memberTimeSpentData);
+    });
+
+    return { dates, members, timeSpent };
+  } catch (error) {
+    console.error("Error fetching effort chart data: ", error);
+    return { dates: [], members: [], timeSpent: [] };
+  }
+}
+
+// Function to generate a random color for chart lines
+function getRandomColor() {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }
 
 populateDropdown();
