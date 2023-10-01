@@ -200,7 +200,13 @@ function handleDragAndDrop(column) {
       const sourceColumnId = taskElement.parentElement.parentElement.id;
       const targetColumnId = column.id;
 
-      e.target.appendChild(taskElement);
+      const taskContainerId = `taskContainer${targetColumnId.charAt(targetColumnId.length - 1)}`;
+      const taskContainer = document.getElementById(taskContainerId);
+
+      if (taskContainer) {
+        // Append the taskElement to taskContainer
+        taskContainer.appendChild(taskElement);
+      }
 
       // Update sprintData based on the source and target columns
       if (sourceColumnId === "column1") {
