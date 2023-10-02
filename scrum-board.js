@@ -84,15 +84,16 @@ function displaySprintBacklogs() {
             sprintCard.remove();
           }
         });
-
+        
         // Card body
         const cardBody = document.createElement("div");
         cardBody.className = "card-body";
         cardBody.innerHTML = `
-          <h5 class="card-title">${sprintData.name}</h5>
-          <p class="card-text">${sprintData.date}</p>
+          <h5 class="card-title">${sprintData.sprintName}</h5>
+          <p class="card-text">${sprintData.startDate} - ${sprintData.endDate}</p>
+          
         `;
-
+        
         // Append close button and card body to the card
         sprintCard.appendChild(closeButton);
         sprintCard.appendChild(cardBody);
@@ -111,6 +112,7 @@ function displaySprintBacklogs() {
       console.error("Error fetching sprint backlogs: ", error);
     });
 }
+
 
 
 // Call the function to display Sprint Backlogs when the page loads

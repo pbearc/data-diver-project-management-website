@@ -816,5 +816,74 @@ function getRandomColor() {
   return color;
 }
 
+// const saveButton = document.getElementById('saveButton');
+
+// saveButton.addEventListener('click', async function() {
+//   const sprintName = document.getElementById('sprintNameInput').value;
+//   const startDate = document.getElementById('startDateInput').value;
+//   const endDate = document.getElementById('endDateInput').value;
+
+//   const sprintsCollection = collection(db, "sprints");
+
+//   try {
+//     const docRef = await addDoc(sprintsCollection, {
+//       sprintName: sprintName,
+//       startDate: startDate,
+//       endDate: endDate
+//     });
+//     console.log("Document written with ID: ", docRef.id);
+  
+//   } catch (error) {
+//     console.error("Error adding document: ", error);
+//   }
+// });
+
+const saveButton = document.getElementById('saveButton');
+
+saveButton.addEventListener('click', async function() {
+  const sprintName = document.getElementById('sprintNameInput').value;
+  const startDate = document.getElementById('startDateInput').value;
+  const endDate = document.getElementById('endDateInput').value;
+
+  if (!sprintName.trim() || !startDate.trim() || !endDate.trim()) {
+    alert("All field must be filled");
+    return;
+  }
+
+  if (new Date(endDate) < new Date(startDate)) {
+    alert("End date cannot be earlier than start date");
+    return;}
+  
+  const sprintsCollection = collection(db, "sprints");
+  const sprintId = getSprintIdFromURL(); 
+  
+  const sprintDocRef = doc(sprintsCollection, sprintId);
+  const sprintData = (await getDoc(sprintDocRef)).data();
+
+  if (sprintData) {
+    try {
+      await updateDoc(sprintDocRef, {
+        sprintName: sprintName,
+        startDate: startDate,
+        endDate: endDate
+      });
+      
+      console.log("Document updated");
+
+      document.getElementById('displaySprintName').textContent = sprintName;
+      document.getElementById('displayStartDate').textContent = startDate;
+      document.getElementById('displayEndDate').textContent = endDate;
+
+      localStorage.setItem('sprintName', sprintName);
+      localStorage.setItem('startDate', startDate);
+      localStorage.setItem('endDate', endDate);
+
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
+  }
+});
+
+
 populateDropdown();
 populateColumnsFromSprintData();

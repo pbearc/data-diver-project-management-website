@@ -15,6 +15,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script type="module" src="sprint-backlog.js"></script>
     <script src="sidebar.js"></script>
+
+    <!-- Add these in the <head> section -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </head>
   <body style="background-color: #e9c6d8">
     <!-- the following implementation of sidebar is from w3schools: https://www.w3schools.com/w3css/tryit.asp?filename=tryw3css_sidebar_shift -->
@@ -81,7 +87,7 @@
         // Open the sidebar by default
         w3_open();
       </script> -->
-
+      
       <div class="container">
         <div class="row mt-0">
           <div class="col-md-6">
@@ -89,12 +95,15 @@
             <input type="text" id="sprintNameInput" class="form-control" placeholder="Enter Sprint Name">
           </div>
           <div class="col-md-6">
-            <h4>Date Range:</h4>
-            <input type="text" id="dateRangeInput" class="form-control" placeholder="Enter Date Range">
+            <h4>Start date:</h4>
+            <input type="date" id="startDateInput" class="form-control" placeholder="Enter Start Date">
+          </div>
+          <div class="col-md-6 offset-md-6">
+            <h4>End date</h4>
+            <input type="date" id="endDateInput" class="form-control" placeholder="Enter End Date">
           </div>
         </div>
         <button id="saveButton" class="btn btn-primary">Save</button>
-      
 
         <div class="row mt-4">
           <div class="col-md-3">
