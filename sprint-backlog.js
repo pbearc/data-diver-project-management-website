@@ -884,17 +884,13 @@ saveButton.addEventListener('click', async function() {
   }
 });
 
-async function getTotalStoryPoints(sprintData, db) {
+function getTotalStoryPoints(sprintData) {
   const allTasks = [...sprintData.notStarted, ...sprintData.inProgress, ...sprintData.completed];
   let totalStoryPoints = 0;
 
-  // Loop through all task IDs and retrieve their data from Firestore
-  for (const taskId of allTasks) {
-      const taskDocRef = doc(db, 'tasks', taskId);
-      const taskData = (await getDoc(taskDocRef)).data();
-      
-      // Add the task's story points to the total
-      totalStoryPoints += taskData.storyPoints;
+  // Loop through all task objects and add their story points to the total
+  for (const task of allTasks) {
+      totalStoryPoints += task.storyPoints;
   }
 
   return totalStoryPoints;
@@ -924,8 +920,6 @@ function getSprintDates(sprintData) {
 document.getElementById("plotButton").addEventListener("click", plotStoryPoints);
 
 async function plotStoryPoints() {
-  // Initialize Firebase and get a reference to your database here
-  const db = getFirestore(app);  // Replace null with your actual Firebase initialization
   
   // Get sprint ID from URL and fetch sprint data from Firestore
   const sprintId = getSprintIdFromURL();
@@ -933,7 +927,7 @@ async function plotStoryPoints() {
   const sprintData = (await getDoc(sprintDocRef)).data();
   
   // Get total story points and dates using the previously defined functions
-  const totalStoryPoints = await getTotalStoryPoints(sprintData, db);
+  const totalStoryPoints = getTotalStoryPoints(sprintData);
   const dates = getSprintDates(sprintData).map(date => date.toISOString().slice(0, 10));
 
   // Plotting the chart
