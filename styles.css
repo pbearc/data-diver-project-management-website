@@ -387,6 +387,21 @@ body {
   color: white; /* Change text color to white when hovering */
 }
 
+.chart-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 5px 10px;
+  color: black;
+  cursor: pointer;
+  transition: background-color 0.3s; /* Add a transition for smooth color change */
+}
+
+.chart-button:hover {
+  background-color: red; /* Change background color to red when hovering */
+  color: white; /* Change text color to white when hovering */
+}
+
 .modal {
   display: none;
   position: fixed;

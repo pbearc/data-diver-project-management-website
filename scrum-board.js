@@ -41,6 +41,7 @@ document.getElementById("createSprintButton").addEventListener("click", () => {
       completed: [],
       addedTaskID:[],
       removedTaskID: [],
+      storyPoint: 0,
     })
       .then((docRef) => {
         console.log("Sprint created with ID: ", docRef.id);
@@ -84,6 +85,21 @@ function displaySprintBacklogs() {
           }
         });
 
+        // Burndown Chart button
+        const chartButton = document.createElement("div");
+        chartButton.className = "chart-button";
+        chartButton.innerText = "Burndown Chart";
+        chartButton.addEventListener("click", async(event) => {
+          // Prevent the click event from propagating to the card click event
+          event.stopPropagation();
+          const confirmDelete = confirm("Do you want to delete this sprint?");
+          if (confirmDelete) {
+            await deleteDoc(doc(db, "sprints", sprintId));
+
+            sprintCard.remove();
+          }
+        });
+
         // Card body
         const cardBody = document.createElement("div");
         cardBody.className = "card-body";
@@ -95,6 +111,7 @@ function displaySprintBacklogs() {
         // Append close button and card body to the card
         sprintCard.appendChild(closeButton);
         sprintCard.appendChild(cardBody);
+        sprintCard.appendChild(chartButton);
 
         // Append the card to the container
         sprintsContainer.appendChild(sprintCard);

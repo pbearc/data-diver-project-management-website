@@ -42,9 +42,8 @@ const endDateInput = document.getElementById("endDateInput");
 // Event listener for sprint name input
 sprintNameInput.addEventListener("input", async function() {
   const sprintName = sprintNameInput.value;
-  await updateDoc(sprintDocRef, {
-    name: sprintName,
-  });
+  sprintData.name = sprintName
+  await updateDoc(sprintDocRef, sprintData)
 });
 
 // Event listener for start date input
@@ -52,10 +51,9 @@ startDateInput.addEventListener("change", async function() {
   const startDate = new Date(startDateInput.value);
   // Update the min attribute of endDateInput to restrict selection of dates earlier than start date
   endDateInput.min = startDate.toISOString().split('T')[0];
+  sprintData.startDate = startDateInput.value
 
-  await updateDoc(sprintDocRef, {
-    startDate: startDateInput.value,
-  });
+  await updateDoc(sprintDocRef, sprintData)
 });
 
 // Event listener for end date input
@@ -67,12 +65,13 @@ endDateInput.addEventListener("change", async function() {
     // If end date is earlier than start date, show an error message or handle it accordingly
     alert("End date cannot be earlier than start date");
     endDateInput.value = ""; // Reset the end date input field
-  } else {
-    await updateDoc(sprintDocRef, {
-      endDate: endDateInput.value,
-    });
-  }
+  } 
+  else {
+    sprintData.endDate = endDateInput.value
+    await updateDoc(sprintDocRef, sprintData)
+  };
 });
+
 
 // Inside sprint-backlog.js
 function getSprintIdFromURL() {
@@ -130,6 +129,7 @@ try {
   // Repopulate the dropdown to remove the added task
   populateDropdown();
   populateColumnsFromSprintData();
+  calculateTotalStoryPoints()
 } catch (error) {
     console.error("Error adding task:", error);
   } finally {
@@ -854,8 +854,22 @@ function getRandomColor() {
   return color;
 }
 
+async function calculateTotalStoryPoints() {
+  let totalStoryPoints = 0;
+  for (const taskId of sprintData.addedTaskID) {
+    // Fetch task data for each taskId
+    const taskData = await fetchTaskData(taskId);
+
+    totalStoryPoints += parseInt(taskData.storyPoint, 10);
+  }
+  await updateDoc(sprintDocRef, {
+    storyPoint: totalStoryPoints,
+  });
+}
+
 populateDropdown();
 populateColumnsFromSprintData();
+calculateTotalStoryPoints();
 
 sprintNameInput.value = sprintData.name || ""; // Use empty string as fallback if name is null or undefined
 startDateInput.value = sprintData.startDate || "";
