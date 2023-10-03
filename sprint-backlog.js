@@ -911,7 +911,26 @@ window.addEventListener('load', function() {
   }
 });
 
+function getDatesBetween() {
+  // Retrieve dates from the HTML
+
+  const dateArray = [];
+  let currentDate = new Date(startDate);
+
+  while (currentDate <= new Date(endDate)) {
+      dateArray.push(new Date(currentDate));
+      // Move to the next day
+      currentDate.setDate(currentDate.getDate() + 1);
+  }
+  return dateArray;
+}
+
+document.getElementById('generateDatesButton').addEventListener('click', () => {
+  const dates = getDatesBetween();
+  const formattedDates = dates.map(date => date.toISOString().split('T')[0]).join(', ');
+
+  document.getElementById('outputDates').innerText = formattedDates;
+});
+
 populateDropdown();
 populateColumnsFromSprintData();
-
-
