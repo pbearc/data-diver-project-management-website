@@ -816,6 +816,7 @@ function getRandomColor() {
   return color;
 }
 
+<<<<<<< Updated upstream
 // const saveButton = document.getElementById('saveButton');
 
 // saveButton.addEventListener('click', async function() {
@@ -941,12 +942,54 @@ async function plotStoryPoints() {
               data: new Array(dates.length).fill(null), // Filling with null for an empty chart
               borderColor: 'rgb(75, 192, 192)',
               tension: 0.1
+=======
+function calculateTotalStoryPoints(sprintData) {
+  let total = 0;
+  ['notStarted', 'inProgress', 'completed'].forEach((status) => {
+      sprintData[status].forEach((task) => {
+          total += task.storyPoint;
+      });
+  });
+  return total;
+}
+
+function generateBurndownData(sprintData) {
+  const totalStoryPoints = calculateTotalStoryPoints(sprintData);
+  const startDate = new Date(sprintData.startDate);
+  const endDate = new Date(sprintData.endDate);
+  let currentDate = new Date(startDate);
+  const labels = [];
+  const data = [];
+  while (currentDate <= endDate) {
+      labels.push(currentDate.toISOString().split('T')[0]); // YYYY-MM-DD
+      data.push(totalStoryPoints - data.length); // assuming each task is completed per day
+      currentDate.setDate(currentDate.getDate() + 1); // increment date
+  }
+  return { labels, data };
+}
+
+function createBurndownChart(data, labels) {
+  const ctx = document.getElementById('burndownChart').getContext('2d');
+  new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'Burndown Chart',
+              data: data,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+              fill: false
+>>>>>>> Stashed changes
           }]
       },
       options: {
           scales: {
               y: {
+<<<<<<< Updated upstream
                   max: totalStoryPoints,
+=======
+>>>>>>> Stashed changes
                   beginAtZero: true
               }
           }
@@ -954,5 +997,19 @@ async function plotStoryPoints() {
   });
 }
 
+<<<<<<< Updated upstream
+=======
+document.getElementById('showChartBtn').addEventListener('click', function() {
+  document.getElementById('chartModal').style.display = 'block';
+  const { data, labels } = generateBurndownData(sprintData);
+  createBurndownChart(data, labels);
+});
+
+document.getElementById('closeModalBtn').addEventListener('click', function() {
+  document.getElementById('chartModal').style.display = 'none';
+});
+
+
+>>>>>>> Stashed changes
 populateDropdown();
 populateColumnsFromSprintData();

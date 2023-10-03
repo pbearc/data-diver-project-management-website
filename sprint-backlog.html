@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script type="module" src="sprint-backlog.js"></script>
@@ -233,6 +234,14 @@
           </div>
         </div>
         <!-- Content for the new page goes here -->
+        <button id="showChartBtn">Show Burndown Chart</button>
+
+        <div id="chartModal" class="modal">
+            <div class="modal-content">
+                <span id="closeModalBtn" class="close">&times;</span>
+                <canvas id="burndownChart" width="400" height="200"></canvas>
+            </div>
+        </div>
       </div>
     </div>
   </body>
