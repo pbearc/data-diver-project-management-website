@@ -27,16 +27,15 @@ const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app);
 
 document.getElementById("createSprintButton").addEventListener("click", () => {
-    // Generate a unique sprint name or ID, you can use a timestamp for simplicity
-    const sprintName = `Sprint ${Date.now()}`;
   
     // Get a reference to the "sprints" collection in Firestore
     const sprintsCollection = collection(db, "sprints");
   
     // Add a new document with a unique ID to the "sprints" collection
     addDoc(sprintsCollection, {
-      name: sprintName,
-      date: new Date().toLocaleDateString(), // You can format the date as desired
+      name: '',
+      startDate: '', 
+      endDate: '',
       notStarted: [],
       inProgress: [],
       completed: [],
@@ -84,16 +83,15 @@ function displaySprintBacklogs() {
             sprintCard.remove();
           }
         });
-        
+
         // Card body
         const cardBody = document.createElement("div");
         cardBody.className = "card-body";
         cardBody.innerHTML = `
-          <h5 class="card-title">${sprintData.sprintName}</h5>
+          <h5 class="card-title">${sprintData.name}</h5>
           <p class="card-text">${sprintData.startDate} - ${sprintData.endDate}</p>
-          
         `;
-        
+
         // Append close button and card body to the card
         sprintCard.appendChild(closeButton);
         sprintCard.appendChild(cardBody);
@@ -112,7 +110,6 @@ function displaySprintBacklogs() {
       console.error("Error fetching sprint backlogs: ", error);
     });
 }
-
 
 
 // Call the function to display Sprint Backlogs when the page loads

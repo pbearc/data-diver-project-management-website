@@ -35,6 +35,44 @@ const sprintsCollection = collection(db, "sprints");
 const sprintId = getSprintIdFromURL();
 const sprintDocRef = doc(sprintsCollection, sprintId);
 const sprintData = (await getDoc(sprintDocRef)).data();
+const sprintNameInput = document.getElementById("sprintNameInput");
+const startDateInput = document.getElementById("startDateInput");
+const endDateInput = document.getElementById("endDateInput");
+
+// Event listener for sprint name input
+sprintNameInput.addEventListener("input", async function() {
+  const sprintName = sprintNameInput.value;
+  await updateDoc(sprintDocRef, {
+    name: sprintName,
+  });
+});
+
+// Event listener for start date input
+startDateInput.addEventListener("change", async function() {
+  const startDate = new Date(startDateInput.value);
+  // Update the min attribute of endDateInput to restrict selection of dates earlier than start date
+  endDateInput.min = startDate.toISOString().split('T')[0];
+
+  await updateDoc(sprintDocRef, {
+    startDate: startDateInput.value,
+  });
+});
+
+// Event listener for end date input
+endDateInput.addEventListener("change", async function() {
+  const endDate = new Date(endDateInput.value);
+  const startDate = new Date(startDateInput.value);
+  
+  if (endDate < startDate) {
+    // If end date is earlier than start date, show an error message or handle it accordingly
+    alert("End date cannot be earlier than start date");
+    endDateInput.value = ""; // Reset the end date input field
+  } else {
+    await updateDoc(sprintDocRef, {
+      endDate: endDateInput.value,
+    });
+  }
+});
 
 // Inside sprint-backlog.js
 function getSprintIdFromURL() {
@@ -816,121 +854,10 @@ function getRandomColor() {
   return color;
 }
 
-// const saveButton = document.getElementById('saveButton');
-
-// saveButton.addEventListener('click', async function() {
-//   const sprintName = document.getElementById('sprintNameInput').value;
-//   const startDate = document.getElementById('startDateInput').value;
-//   const endDate = document.getElementById('endDateInput').value;
-
-//   const sprintsCollection = collection(db, "sprints");
-
-//   try {
-//     const docRef = await addDoc(sprintsCollection, {
-//       sprintName: sprintName,
-//       startDate: startDate,
-//       endDate: endDate
-//     });
-//     console.log("Document written with ID: ", docRef.id);
-  
-//   } catch (error) {
-//     console.error("Error adding document: ", error);
-//   }
-// });
-
-const saveButton = document.getElementById('saveButton');
-
-saveButton.addEventListener('click', async function() {
-  const sprintName = document.getElementById('sprintNameInput').value;
-  const startDate = document.getElementById('startDateInput').value;
-  const endDate = document.getElementById('endDateInput').value;
-
-  if (!sprintName.trim() || !startDate.trim() || !endDate.trim()) {
-    alert("All field must be filled");
-    return;
-  }
-
-  if (new Date(endDate) < new Date(startDate)) {
-    alert("End date cannot be earlier than start date");
-    return;}
-
-  document.getElementById('sprintNameDisplay').textContent = sprintName;
-  document.getElementById('startDateDisplay').textContent = startDate;
-  document.getElementById('endDateDisplay').textContent = endDate;
-
-  localStorage.setItem('sprintName', sprintName);
-  localStorage.setItem('startDate', startDate);
-  localStorage.setItem('endDate', endDate);
-
-  const sprintsCollection = collection(db, "sprints");
-  const sprintId = getSprintIdFromURL(); 
-  
-  const sprintDocRef = doc(sprintsCollection, sprintId);
-  const sprintData = (await getDoc(sprintDocRef)).data();
-
-  if (sprintData) {
-    try {
-      await updateDoc(sprintDocRef, {
-        sprintName: sprintName,
-        startDate: startDate,
-        endDate: endDate
-      });
-      
-      console.log("Document updated");
-
-    } catch (error) {
-      console.error("Error updating document: ", error);
-    }
-  }
-});
-
-async function calculateTotalStoryPoints() {
-  const notStarted=sprintData.notStarted;
-  const inProgress=sprintData.inProgress;
-  const completed=sprintData.completed
-
-  // Combine all tasks and calculate total story points
-  const allTasks = [...notStarted, ...inProgress, ...completed];
-  return allTasks.reduce((total, task) => total + task.storyPoint, 0);
-}
-
-document.getElementById('calculateStoryPointsButton').addEventListener('click', async () => {
-  const totalStoryPoints = await calculateTotalStoryPoints();
-  document.getElementById('totalStoryPoints').innerText = totalStoryPoints;
-});
-
-window.addEventListener('load', function() {
-  const storedSprintName = localStorage.getItem('sprintName');
-  const storedStartDate = localStorage.getItem('startDate');
-  const storedEndDate = localStorage.getItem('endDate');
-
-  if (storedSprintName && storedStartDate && storedEndDate) {
-    document.getElementById('sprintNameDisplay').textContent = storedSprintName;
-    document.getElementById('startDateDisplay').textContent = storedStartDate;
-    document.getElementById('endDateDisplay').textContent = storedEndDate;
-  }
-});
-
-function getDatesBetween() {
-  // Retrieve dates from the HTML
-
-  const dateArray = [];
-  let currentDate = new Date(startDate);
-
-  while (currentDate <= new Date(endDate)) {
-      dateArray.push(new Date(currentDate));
-      // Move to the next day
-      currentDate.setDate(currentDate.getDate() + 1);
-  }
-  return dateArray;
-}
-
-document.getElementById('generateDatesButton').addEventListener('click', () => {
-  const dates = getDatesBetween();
-  const formattedDates = dates.map(date => date.toISOString().split('T')[0]).join(', ');
-
-  document.getElementById('outputDates').innerText = formattedDates;
-});
-
 populateDropdown();
 populateColumnsFromSprintData();
+
+sprintNameInput.value = sprintData.name || ""; // Use empty string as fallback if name is null or undefined
+startDateInput.value = sprintData.startDate || "";
+endDateInput.value = sprintData.endDate || "";
+
