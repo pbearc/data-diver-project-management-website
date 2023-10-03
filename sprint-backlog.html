@@ -98,7 +98,35 @@
             <input type="date" id="endDateInput" />
           </div>
         </div>
-
+        <div class="row">
+          <div class="col-md-12 button-container d-flex justify-content-start align-items-center">
+            <div class="row">
+              <div class="nav-link new-button custom-filter-button">
+                <label for="filterColumn1">Filter:</label>
+                <select class="form-control filter-dropdown" id="filterColumn1" data-column-id="column1">
+                  <option value="All">Show All</option>
+                  <option value="API">API</option>
+                  <option value="Backend">Backend</option>
+                  <option value="Database">Database</option>
+                  <option value="Frontend">Frontend</option>
+                  <option value="Framework">Framework</option>
+                  <option value="Testing">Testing</option>
+                  <option value="UI">UI</option>
+                  <option value="UX">UX</option>
+                </select>
+              </div>
+              <div class="nav-link new-button custom-filter-button">
+                <label for="sortColumn1">Sorting:</label>
+                <select class="form-control sort-dropdown" id="sortColumn1" data-column-id="column1">
+                  <option value="Lowest to Urgent">Lowest to Urgent</option>
+                  <option value="Urgent to Lowest">Urgent to Lowest</option>
+                  <option value="Recent to Oldest">Recent to Oldest</option>
+                  <option value="Oldest to Recent">Oldest to Recent</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="row mt-4">
           <div class="col-md-3">
             <div class="task-column-container">

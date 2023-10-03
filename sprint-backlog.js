@@ -142,69 +142,86 @@ async function fetchTaskData(taskId) {
   return taskDoc.data();
 }
 
+const filterColumn1 = document.getElementById('filterColumn1');
+const sortColumn1 = document.getElementById('sortColumn1');
+
+filterColumn1.addEventListener('change', function() {
+  populateColumnsFromSprintData();
+});
+
+sortColumn1.addEventListener('change', function() {
+  populateColumnsFromSprintData();
+});
+
+function priorityToNumber(priority) {
+  switch (priority) {
+    case 'Low':
+      return 1;
+    case 'Medium':
+      return 2;
+    case 'Important':
+      return 3;
+    case 'Urgent':
+      return 4;
+    default:
+      return 0;
+  }
+}
+
+async function populateColumn(taskIds, columnTaskContainer) {
+  columnTaskContainer.innerHTML = "";
+
+  // Create an array to hold the task data for sorting
+  const tasksDataArray = [];
+
+  for (const taskId of taskIds) {
+    const taskData = await fetchTaskData(taskId);
+    tasksDataArray.push({ id: taskId, data: taskData });
+  }
+
+  // Filtering
+  const filterValue = filterColumn1.value;
+
+  let filteredTasks = tasksDataArray;
+  
+  if (filterValue !== 'All') {
+    filteredTasks = tasksDataArray.filter(task => task.data.tag && task.data.tag.includes(filterValue));
+  }
+  
+  // Sorting
+  const sortValue = sortColumn1.value;
+  filteredTasks.sort((a, b) => {
+    if (sortValue === "Lowest to Urgent") {
+      return priorityToNumber(a.data.priority) - priorityToNumber(b.data.priority);
+    } else if (sortValue === "Urgent to Lowest") {
+      return priorityToNumber(b.data.priority) - priorityToNumber(a.data.priority);
+    } else if (sortValue === "Recent to Oldest") {
+      return new Date(b.data.timestamp) - new Date(a.data.timestamp);
+    } else if (sortValue === "Oldest to Recent") {
+      return new Date(a.data.timestamp) - new Date(b.data.timestamp);
+    }
+    return 0;
+  });
+
+  // Populate column with sorted and filtered tasks
+  for (const task of filteredTasks) {
+    const taskElement = createTaskElement(
+      task.id,
+      task.data,
+      task.data.taskName
+    );
+    columnTaskContainer.appendChild(taskElement);
+  }
+}
+
 function populateColumnsFromSprintData() {
   const column1TaskContainer = document.getElementById("taskContainer1");
-  column1TaskContainer.innerHTML = "";
   const column2TaskContainer = document.getElementById("taskContainer2");
-  column2TaskContainer.innerHTML = "";
   const column3TaskContainer = document.getElementById("taskContainer3");
-  column3TaskContainer.innerHTML = "";
 
-  // Iterate through the task IDs in sprintData.notStarted
-  for (const taskId of sprintData.notStarted) {
-    // Fetch task data for each taskId
-    fetchTaskData(taskId)
-      .then((taskData) => {
-        // Create and append task element
-        const taskElement = createTaskElement(
-          taskId,
-          taskData,
-          taskData.taskName
-        );
-        column1TaskContainer.appendChild(taskElement);
-      })
-      .catch((error) => {
-        console.error(
-          `Error fetching task data for taskId ${taskId}: ${error}`
-        );
-      });
-  }
-  for (const taskId of sprintData.inProgress) {
-    // Fetch task data for each taskId
-    fetchTaskData(taskId)
-      .then((taskData) => {
-        // Create and append task element
-        const taskElement = createTaskElement(
-          taskId,
-          taskData,
-          taskData.taskName
-        );
-        column2TaskContainer.appendChild(taskElement);
-      })
-      .catch((error) => {
-        console.error(
-          `Error fetching task data for taskId ${taskId}: ${error}`
-        );
-      });
-  }
-  for (const taskId of sprintData.completed) {
-    // Fetch task data for each taskId
-    fetchTaskData(taskId)
-      .then((taskData) => {
-        // Create and append task element
-        const taskElement = createTaskElement(
-          taskId,
-          taskData,
-          taskData.taskName
-        );
-        column3TaskContainer.appendChild(taskElement);
-      })
-      .catch((error) => {
-        console.error(
-          `Error fetching task data for taskId ${taskId}: ${error}`
-        );
-      });
-  }
+  populateColumn(sprintData.notStarted, column1TaskContainer);
+  populateColumn(sprintData.inProgress, column2TaskContainer);
+  populateColumn(sprintData.completed, column3TaskContainer);
 }
 
 function createTaskElement(id, data, text) {
@@ -875,3 +892,4 @@ sprintNameInput.value = sprintData.name || ""; // Use empty string as fallback i
 startDateInput.value = sprintData.startDate || "";
 endDateInput.value = sprintData.endDate || "";
 
+  
