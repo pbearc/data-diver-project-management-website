@@ -91,22 +91,24 @@
       <div class="container">
         <div class="row mt-0">
           <div class="col-md-6">
-            <h4>Sprint Name:</h4>
+            <h4>Sprint Name: <span id="sprintNameDisplay"></span></h4>
             <input type="text" id="sprintNameInput" class="form-control" placeholder="Enter Sprint Name">
           </div>
           <div class="col-md-6">
-            <h4>Start date:</h4>
+            <h4>Start date: <span id="startDateDisplay"></span></h4>
             <input type="date" id="startDateInput" class="form-control" placeholder="Enter Start Date">
           </div>
           <div class="col-md-6 offset-md-6">
-            <h4>End date</h4>
+            <h4>End date: <span id="endDateDisplay"></span></h4>
             <input type="date" id="endDateInput" class="form-control" placeholder="Enter End Date">
           </div>
         </div>
+
         <button id="saveButton" class="btn btn-primary">Save</button>
         <button id="calculateStoryPointsButton">Calculate Story Points</button>
         <p>Total Story Points: <span id="totalStoryPoints">0</span></p>
         
+
 
         <div class="row mt-4">
           <div class="col-md-3">
