@@ -853,7 +853,15 @@ saveButton.addEventListener('click', async function() {
   if (new Date(endDate) < new Date(startDate)) {
     alert("End date cannot be earlier than start date");
     return;}
-  
+
+  document.getElementById('sprintNameDisplay').textContent = sprintName;
+  document.getElementById('startDateDisplay').textContent = startDate;
+  document.getElementById('endDateDisplay').textContent = endDate;
+
+  localStorage.setItem('sprintName', sprintName);
+  localStorage.setItem('startDate', startDate);
+  localStorage.setItem('endDate', endDate);
+
   const sprintsCollection = collection(db, "sprints");
   const sprintId = getSprintIdFromURL(); 
   
@@ -870,20 +878,23 @@ saveButton.addEventListener('click', async function() {
       
       console.log("Document updated");
 
-      document.getElementById('displaySprintName').textContent = sprintName;
-      document.getElementById('displayStartDate').textContent = startDate;
-      document.getElementById('displayEndDate').textContent = endDate;
-
-      localStorage.setItem('sprintName', sprintName);
-      localStorage.setItem('startDate', startDate);
-      localStorage.setItem('endDate', endDate);
-
     } catch (error) {
       console.error("Error updating document: ", error);
     }
   }
 });
 
+window.addEventListener('load', function() {
+  const storedSprintName = localStorage.getItem('sprintName');
+  const storedStartDate = localStorage.getItem('startDate');
+  const storedEndDate = localStorage.getItem('endDate');
+
+  if (storedSprintName && storedStartDate && storedEndDate) {
+    document.getElementById('sprintNameDisplay').textContent = storedSprintName;
+    document.getElementById('startDateDisplay').textContent = storedStartDate;
+    document.getElementById('endDateDisplay').textContent = storedEndDate;
+  }
+});
 
 populateDropdown();
 populateColumnsFromSprintData();
