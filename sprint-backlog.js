@@ -630,6 +630,12 @@ async function saveTaskLog(taskData) {
   const taskLogsCollection = collection(db, "task_logs");
 
   try {
+    // Check if the user wants to delete the time spent
+    if (timeSpent === 0) {
+      // If timeSpent is 0, delete the existing log entry
+      await deleteTaskLogEntry(taskName, logDate);
+      console.log("Task log entry deleted successfully.");
+    } else {
     // Query the "task_logs" collection for a document with the same task name and logDate
     const q = firestoreQuery(
       taskLogsCollection,
@@ -651,6 +657,7 @@ async function saveTaskLog(taskData) {
       });
       console.log("Task log entry updated successfully.");
     }
+  }
 
     // Update the display immediately
     await displayTimeSpentEntries(taskName);
@@ -673,6 +680,28 @@ async function saveTaskLog(taskData) {
   const editTaskLogWindow = document.getElementById("editTaskLogWindow");
   editTaskLogWindow.style.display = "none";
   saveLogButton.disabled = false;
+}
+
+// Function to delete a task log entry
+async function deleteTaskLogEntry(taskName, logDate) {
+  try {
+    const taskLogsCollection = collection(db, "task_logs");
+    const q = firestoreQuery(
+      taskLogsCollection,
+      where("taskName", "==", taskName),
+      where("logDate", "==", logDate)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      // If matching documents found, delete the first matching document
+      const docRef = querySnapshot.docs[0].ref;
+      await deleteDoc(docRef);
+    }
+  } catch (error) {
+    console.error("Error deleting task log entry: ", error);
+  }
 }
 
 // Function to display the accumulation of effort chart
