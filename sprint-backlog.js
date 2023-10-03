@@ -884,6 +884,23 @@ saveButton.addEventListener('click', async function() {
   }
 });
 
+async function calculateTotalStoryPoints() {
+  const notStarted=sprintData.notStarted;
+  const inProgress=sprintData.inProgress;
+  const completed=sprintData.completed
+
+  // Combine all tasks and calculate total story points
+  const allTasks = [...notStarted, ...inProgress, ...completed];
+  return allTasks.reduce((total, task) => total + task.storyPoint, 0);
+}
+
+document.getElementById('calculateStoryPointsButton').addEventListener('click', async () => {
+  const totalStoryPoints = await calculateTotalStoryPoints();
+  document.getElementById('totalStoryPoints').innerText = totalStoryPoints;
+});
+
 
 populateDropdown();
 populateColumnsFromSprintData();
+
+
