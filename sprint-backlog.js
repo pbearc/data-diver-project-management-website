@@ -911,7 +911,57 @@ async function calculateTotalStoryPoints() {
   await updateDoc(sprintDocRef, {
     storyPoint: totalStoryPoints,
   });
+  return totalStoryPoints;
 }
+
+function createBurndownChartLabels(sprintData) {
+  // Parse the start and end dates
+  const startDate = new Date(sprintData.startDate);
+  const endDate = new Date(sprintData.endDate);
+  
+  // Validate the dates
+  if (isNaN(startDate) || isNaN(endDate)) {
+      throw new Error("Invalid start or end date");
+  }
+
+  // Initialize an array to store the dates
+  const dateArray = [];
+  
+  // Loop through each date between startDate and endDate
+  for (let currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
+      // Push a copy of currentDate to dateArray
+      dateArray.push(new Date(currentDate));
+  }
+  
+  // Convert the date objects into a string format (optional, depending on your use-case)
+  const formattedDates = dateArray.map(date => date.toISOString().split('T')[0]);
+  
+  return formattedDates;
+}
+
+async function drawIdealChartData() {
+  // Assuming calculateTotalStoryPoints() and sprintData are accessible in this scope
+  const totalStoryPoints = await calculateTotalStoryPoints();
+  
+  const startDate = new Date(sprintData.startDate);
+  const endDate = new Date(sprintData.endDate);
+  const timeDiff = endDate - startDate;
+  const dayDiff = timeDiff / (1000 * 60 * 60 * 24) + 1; // +1 to include both start and end dates
+  
+  const idealNumberDecrease = totalStoryPoints / dayDiff;
+  
+  // Create an array with elements [totalStoryPoints, totalStoryPoints-idealNumberDecrease, ..., >=0]
+  const idealChartData = [];
+  for (let i = 0; i < dayDiff; i++) {
+      idealChartData.push(Math.max(totalStoryPoints - i * idealNumberDecrease, 0));
+  }
+
+  return idealChartData;
+}
+
+
+
+
 
 populateDropdown();
 populateColumnsFromSprintData();

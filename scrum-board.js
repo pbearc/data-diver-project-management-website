@@ -85,10 +85,10 @@ function displaySprintBacklogs() {
           }
         });
 
-        // Burndown Chart button
+        // Delete sprint button
         const chartButton = document.createElement("div");
         chartButton.className = "chart-button";
-        chartButton.innerText = "Burndown Chart";
+        chartButton.innerText = "Delete sprint";
         chartButton.addEventListener("click", async(event) => {
           // Prevent the click event from propagating to the card click event
           event.stopPropagation();
