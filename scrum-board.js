@@ -170,17 +170,16 @@ async function createAndDisplayModal(sprintId) {
   const tableBody = modal.querySelector(`#tableBody-${sprintId}`);
   addRowBtn.addEventListener("click", () => {
     const newRow = document.createElement('tr');
-
-    // Add cells to the new row
     newRow.innerHTML = `
         <td><input type="date"></td>
         <td contenteditable="true"></td>
         <td contenteditable="true"></td>
+        <td><button class="deleteRowBtn">Delete</button></td>
     `;
-
-    // Append the new row to the table body
+    newRow.querySelector(".deleteRowBtn").addEventListener("click", () => deleteRow(newRow, null, sprintId));
     tableBody.appendChild(newRow);
   });
+  
 
   const saveRowBtn = modal.querySelector(`#saveRowBtn-${sprintId}`);
   saveRowBtn.addEventListener("click", async (event) => {
@@ -233,9 +232,11 @@ async function createAndDisplayModal(sprintId) {
           <td><input type="date" value="${data.date}"></td>
           <td contenteditable="true">${data.idealRemainingTasks}</td>
           <td contenteditable="true">${data.actualRemainingTasks}</td>
+          <td><button class="deleteRowBtn">Delete</button></td>
         `;
+        newRow.querySelector(".deleteRowBtn").addEventListener("click", () => deleteRow(newRow, data.id, sprintId));
         tableBody.appendChild(newRow);
-      });
+      });      
 
       const newCanvas = document.createElement('canvas');
       newCanvas.id = `burndownChart-${sprintId}`;
@@ -298,6 +299,22 @@ async function createAndDisplayModal(sprintId) {
 
   // const chart = renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks);
 return modal;
+}
+
+async function deleteRow(row, rowId, sprintId) {
+  // Remove row from frontend
+  row.remove();
+
+  // If the row has an id, it exists in the backend and should be removed
+  if (rowId !== null) {
+    try {
+      const modalID = await findModalIdBySprintId(sprintId);
+      const rowRef = doc(db, "modals", modalID, "rows", rowId); // Adjust path if needed
+      await deleteDoc(rowRef);
+    } catch (error) {
+      console.error("Error deleting row data:", error);
+    }
+  }
 }
 
 function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks) {
