@@ -244,13 +244,18 @@ async function createAndDisplayModal(sprintId) {
 
       modal.appendChild(newCanvas);
 
-      console.log("HI")
       const canvas = modal.querySelector(`#burndownChart-${sprintId}`);
       const ctx = canvas.getContext("2d");
 
       const dates = sortedData.map((data) => data.date);
       const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
       const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
+
+      const existingChart = Chart.getChart(ctx);
+
+      if (existingChart) {
+        existingChart.destroy();
+      }
 
       renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks)
 
@@ -356,7 +361,7 @@ function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTas
         },
         title: {
           display: true,
-          text: 'Accumulation of Effort Chart',
+          text: 'Burndown Chart',
           font: {
             size: 23,
           },
