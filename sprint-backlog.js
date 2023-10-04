@@ -963,10 +963,10 @@ async function drawBurnDownChart() {
   // Fetching labels and data
   const labels = createBurndownChartLabels(sprintData);
   const idealChartData = await createIdealChartData();
-  const actualChartData = [/* Some arbitrary numbers */]; // Replace with actual data
+  const actualChartData = [10,5,6]; // Some arbitary numbers, Replace with actual data
   
   // Creating a chart using Chart.js
-  const ctx = document.getElementById('burndownChart').getContext('2d');
+  const ctx = document.getElementById('burndownChartCanvas').getContext('2d');
   const chart = new Chart(ctx, {
       type: 'line',
       data: {
