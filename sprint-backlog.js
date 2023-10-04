@@ -961,9 +961,9 @@ async function createIdealChartData() {
 
 async function drawBurnDownChart() {
   // Fetching labels and data
-  const labels = createBurndownChartLabels(sprintData);
-  const idealChartData = await createIdealChartData();
-  const actualChartData = [10,5,6]; // Some arbitary numbers, Replace with actual data
+  const labels = ["2023-10-01", "2023-10-02", "2023-10-03"];
+  const idealChartData = [8,7,4];
+  const actualChartData = [25,5,6]; // Some arbitary numbers, Replace with actual data
   
   // Creating a chart using Chart.js
   const ctx = document.getElementById('burndownChartCanvas').getContext('2d');
@@ -987,7 +987,7 @@ async function drawBurnDownChart() {
           responsive: true,
           scales: {
               x: {
-                  type: 'linear',
+                  type: 'category',
                   position: 'bottom'
               }
           }
