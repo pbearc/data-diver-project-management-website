@@ -183,8 +183,9 @@ async function createAndDisplayModal(sprintId) {
   });
 
   const saveRowBtn = modal.querySelector(`#saveRowBtn-${sprintId}`);
-  saveRowBtn.addEventListener("click", async () => {
-    // Get data from input fields
+  saveRowBtn.addEventListener("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
 
     // Get all rows in the table
     const rows = modal.querySelectorAll('tr');
@@ -196,7 +197,6 @@ async function createAndDisplayModal(sprintId) {
     const querySnapshot = await getDocs(rowsCollection);
     querySnapshot.forEach((doc) => {
       deleteDoc(doc.ref);
-      print("deleted")
 });
 
     try {
