@@ -15,6 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script type="module" src="sprint-backlog.js"></script>
     <script src="sidebar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body style="background-color: #e9c6d8">
     <!-- the following implementation of sidebar is from w3schools: https://www.w3schools.com/w3css/tryit.asp?filename=tryw3css_sidebar_shift -->
@@ -253,6 +254,15 @@
           </div>
         </div>
         <!-- Content for the new page goes here -->
+        <!-- Modal for the burndown chart -->
+        <button id="displayBurndownChartButton" class="burndown-chart-button">Display Burndown Chart</button>
+        <div id="burndownChartModal" class="burndown-chart-modal">
+          <div class="burndown-chart-modal-content">
+              <span class="burndown-chart-close-button">&times;</span>
+              <!-- Canvas element for rendering the chart -->
+              <canvas id="burndownChartCanvas"></canvas>
+          </div>
+        </div>
       </div>
     </div>
   </body>

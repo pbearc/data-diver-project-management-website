@@ -939,7 +939,7 @@ function createBurndownChartLabels(sprintData) {
   return formattedDates;
 }
 
-async function drawIdealChartData() {
+async function createIdealChartData() {
   // Assuming calculateTotalStoryPoints() and sprintData are accessible in this scope
   const totalStoryPoints = await calculateTotalStoryPoints();
   
@@ -959,8 +959,52 @@ async function drawIdealChartData() {
   return idealChartData;
 }
 
+async function drawBurnDownChart() {
+  // Fetching labels and data
+  const labels = createBurndownChartLabels(sprintData);
+  const idealChartData = await createIdealChartData();
+  const actualChartData = [/* Some arbitrary numbers */]; // Replace with actual data
+  
+  // Creating a chart using Chart.js
+  const ctx = document.getElementById('burndownChart').getContext('2d');
+  const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'Ideal Burn Down',
+              data: idealChartData,
+              borderColor: 'rgb(75, 192, 192)',
+              fill: false
+          }, {
+              label: 'Actual Burn Down',
+              data: actualChartData,
+              borderColor: 'rgb(255, 99, 132)',
+              fill: false
+          }]
+      },
+      options: {
+          responsive: true,
+          scales: {
+              x: {
+                  type: 'linear',
+                  position: 'bottom'
+              }
+          }
+      }
+  });
+}
 
+// Event listener to open the burndown chart modal
+document.getElementById('displayBurndownChartButton').addEventListener('click', () => {
+  document.getElementById('burndownChartModal').style.display = 'block';
+  drawBurnDownChart();
+});
 
+// Event listener to close the burndown chart modal
+document.getElementsByClassName('burndown-chart-close-button')[0].addEventListener('click', () => {
+  document.getElementById('burndownChartModal').style.display = 'none';
+});
 
 
 populateDropdown();
