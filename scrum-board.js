@@ -143,6 +143,7 @@ async function createAndDisplayModal(sprintId) {
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
+      <canvas id="burndownChart-${sprintId}" width="400" height="200"></canvas>
       <table class="table" style="background-color: white; margin-top: 20px;">
         <thead>
           <tr>
@@ -204,8 +205,10 @@ async function createAndDisplayModal(sprintId) {
         const rowsCollection = collection(db, "modals", modalID, "rows");
 
         // Iterate through each row in the table
+        console.log(rows)
         rows.forEach(async (row) => {
             // Extract data from the current row's input fields and table cells
+            console.log(row)
             const date = row.querySelector("input[type='date']").value;
             const idealRemainingTasks = row.querySelector('td:nth-child(2)').textContent;
             const actualRemainingTasks = row.querySelector('td:nth-child(3)').textContent;
@@ -220,10 +223,37 @@ async function createAndDisplayModal(sprintId) {
             // Add the row data as a new document in the "rows" subcollection
             await addDoc(rowsCollection, rowData);
 
-            console.log("Row data added to subcollection 'rows':", rowData);
         });
+      
+      tableBody.innerHTML = ''
+      const sortedData = await sortedChartData(sprintId)
+      sortedData.forEach(data => {
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = `
+          <td><input type="date" value="${data.date}"></td>
+          <td contenteditable="true">${data.idealRemainingTasks}</td>
+          <td contenteditable="true">${data.actualRemainingTasks}</td>
+        `;
+        tableBody.appendChild(newRow);
+      });
 
-        console.log("All row data added to subcollection 'rows'.");
+      const newCanvas = document.createElement('canvas');
+      newCanvas.id = `burndownChart-${sprintId}`;
+      newCanvas.width = 400;
+      newCanvas.height = 200;
+
+      modal.appendChild(newCanvas);
+
+      console.log("HI")
+      const canvas = modal.querySelector(`#burndownChart-${sprintId}`);
+      const ctx = canvas.getContext("2d");
+
+      const dates = sortedData.map((data) => data.date);
+      const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
+      const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
+
+      renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks)
+
     } catch (error) {
         console.error("Error adding row data:", error);
     }
@@ -244,6 +274,114 @@ async function createAndDisplayModal(sprintId) {
     console.error("Error displaying modal: ", error);
   }
 
+  const sortedData = await sortedChartData(sprintId)
+  sortedData.forEach(data => {
+    const newRow = document.createElement("tr");
+    newRow.innerHTML = `
+      <td><input type="date" value="${data.date}"></td>
+      <td contenteditable="true">${data.idealRemainingTasks}</td>
+      <td contenteditable="true">${data.actualRemainingTasks}</td>
+    `;
+    tableBody.appendChild(newRow);
+  });
+    
+  // // // Generate burndown chart using Chart.js
+  // const ctx = modal.querySelector(`#burndownChart-${sprintId}`).getContext("2d");
+  // const dates = sortedData.map((data) => data.date);
+  // const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
+  // const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
+
+  // const chart = renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks);
+return modal;
+}
+
+function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks) {
+  const chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: dates,
+      datasets: [
+        {
+          label: "Actual Remaining Tasks",
+          data: actualRemainingTasks,
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 2,
+          fill: false
+        },
+        {
+          label: "Ideal Remaining Tasks",
+          data: idealRemainingTasks,
+          borderColor: "rgba(255, 99, 132, 1)",
+          borderWidth: 2,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        x: {
+          type: "time",
+          time: { unit: "day" },
+          title: {
+            display: true,
+            text: "Date",
+            font: { weight: "bold", size: 18 },
+          },
+          ticks: {
+            font: { weight: "bold" },
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: "Time Spent (hours)",
+            font: { weight: "bold", size: 18 },
+          },
+          ticks: {
+            font: { weight: "bold" },
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: "black",
+            font: {
+              size: 20,
+            },
+          },
+        },
+        title: {
+          display: true,
+          text: 'Accumulation of Effort Chart',
+          font: {
+            size: 23,
+          },
+          padding: {
+            top: 10,
+            bottom: 30,
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: (tooltipItem) => {
+              const datasetLabel = tooltipItem.dataset.label || "";
+              const dataIndex = tooltipItem.dataIndex;
+              const timeSpent = tooltipItem.chart.data.datasets[tooltipItem.datasetIndex].data[dataIndex];
+              return `${datasetLabel}: ${timeSpent} hours`;
+            },
+          },
+        },
+      },
+    },
+  });
+  return chart;
+}
+
+async function sortedChartData(sprintId) {
   const modalId = await findModalIdBySprintId(sprintId);
 
   if (modalId) {
@@ -258,35 +396,32 @@ async function createAndDisplayModal(sprintId) {
       const rowsSnapshot = await getDocs(rowsCollection);
 
       modalData.sprintChartData = [];
+      const rowContainer = [];
+      const temp = [];
 
       // Iterate through subcollection documents and add them to modalData.rows
       rowsSnapshot.forEach((doc) => {
         modalData.sprintChartData.push(doc.data());
       });
-      const entriesToRemove = modalData.sprintChartData.length
+      const entriesToRemove = modalData.sprintChartData.length;
 
       await updateDoc(modalDocRef, { sprintChartData: modalData.sprintChartData });
 
-      console.log(modalData.sprintChartData)
-
       for (let i = 0; i < entriesToRemove; i++) {
         const data = modalData.sprintChartData.pop();
-        console.log(data);
-        const tableBody = modal.querySelector(`#tableBody-${sprintId}`);
-        const newRow = document.createElement("tr");
-        newRow.innerHTML = `
-          <td><input type="date" value="${data.date}"></td>
-          <td contenteditable="true">${data.idealRemainingTasks}</td>
-          <td contenteditable="true">${data.actualRemainingTasks}</td>
-        `;
-        console.log(newRow)
-        tableBody.appendChild(newRow);
-      }
+        temp.push(data)
+      } 
+      temp.sort((a, b) => {
+        // Convert the date strings to Date objects for comparison
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+      
+        // Compare the dates and return the result of the comparison
+        return dateA - dateB;
+      });
+      return temp;
     }
-
   }
-
-  return modal;
 }
 
 function findModalIdBySprintId(sprintId) {
