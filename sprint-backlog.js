@@ -40,38 +40,60 @@ const startDateInput = document.getElementById("startDateInput");
 const endDateInput = document.getElementById("endDateInput");
 
 // Event listener for sprint name input
-sprintNameInput.addEventListener("input", async function() {
+sprintNameInput.addEventListener("input", async function () {
   const sprintName = sprintNameInput.value;
-  sprintData.name = sprintName
-  await updateDoc(sprintDocRef, sprintData)
+  sprintData.name = sprintName;
+  await updateDoc(sprintDocRef, sprintData);
 });
 
 // Event listener for start date input
-startDateInput.addEventListener("change", async function() {
+startDateInput.addEventListener("change", async function () {
   const startDate = new Date(startDateInput.value);
   // Update the min attribute of endDateInput to restrict selection of dates earlier than start date
-  endDateInput.min = startDate.toISOString().split('T')[0];
-  sprintData.startDate = startDateInput.value
+  endDateInput.min = startDate.toISOString().split("T")[0];
+  sprintData.startDate = startDateInput.value;
 
-  await updateDoc(sprintDocRef, sprintData)
+  await updateDoc(sprintDocRef, sprintData);
 });
 
 // Event listener for end date input
-endDateInput.addEventListener("change", async function() {
+endDateInput.addEventListener("change", async function () {
   const endDate = new Date(endDateInput.value);
   const startDate = new Date(startDateInput.value);
-  
+
   if (endDate < startDate) {
     // If end date is earlier than start date, show an error message or handle it accordingly
     alert("End date cannot be earlier than start date");
     endDateInput.value = ""; // Reset the end date input field
-  } 
-  else {
-    sprintData.endDate = endDateInput.value
-    await updateDoc(sprintDocRef, sprintData)
-  };
+  } else {
+    sprintData.endDate = endDateInput.value;
+    await updateDoc(sprintDocRef, sprintData);
+  }
 });
 
+// Get references to the hour and minute input elements
+const hoursInput = document.getElementById("hours");
+const minutesInput = document.getElementById("minutes");
+
+// Add event listeners to the input elements for validation
+hoursInput.addEventListener("input", validateHoursInput);
+minutesInput.addEventListener("input", validateMinutesInput);
+
+function validateHoursInput() {
+  const hours = parseInt(hoursInput.value);
+  if (isNaN(hours) || hours < 0 || hours > 23) {
+    // Invalid input, reset to 0
+    hoursInput.value = 0;
+  }
+}
+
+function validateMinutesInput() {
+  const minutes = parseInt(minutesInput.value);
+  if (isNaN(minutes) || minutes < 0 || minutes > 59) {
+    // Invalid input, reset to 0
+    minutesInput.value = 0;
+  }
+}
 
 // Inside sprint-backlog.js
 function getSprintIdFromURL() {
@@ -109,13 +131,13 @@ function createDropdownOption(value, text) {
 
 async function addTaskToColumn() {
   const dropdown = document.getElementById("taskDropdown");
-addButton.disabled = true; // Disable the button to prevent multiple clicks
+  addButton.disabled = true; // Disable the button to prevent multiple clicks
 
   const selectedTaskId = dropdown.value;
   if (!selectedTaskId) {
     addButton.disabled = false; // Enable the button in case of error or no selection
     return; // No task selected
-}
+  }
 
   // Add to the set of added task IDs
   sprintData.addedTaskID.push(selectedTaskId);
@@ -123,14 +145,14 @@ addButton.disabled = true; // Disable the button to prevent multiple clicks
 
   const indexToRemove = sprintData.removedTaskID.indexOf(selectedTaskId);
   sprintData.removedTaskID.splice(indexToRemove, 1);
-  
-try {
-  await updateDoc(sprintDocRef, sprintData);
-  // Repopulate the dropdown to remove the added task
-  populateDropdown();
-  populateColumnsFromSprintData();
-  calculateTotalStoryPoints()
-} catch (error) {
+
+  try {
+    await updateDoc(sprintDocRef, sprintData);
+    // Repopulate the dropdown to remove the added task
+    populateDropdown();
+    populateColumnsFromSprintData();
+    calculateTotalStoryPoints();
+  } catch (error) {
     console.error("Error adding task:", error);
   } finally {
     addButton.disabled = false; // Enable the button after the operation is complete
@@ -142,26 +164,26 @@ async function fetchTaskData(taskId) {
   return taskDoc.data();
 }
 
-const filterColumn1 = document.getElementById('filterColumn1');
-const sortColumn1 = document.getElementById('sortColumn1');
+const filterColumn1 = document.getElementById("filterColumn1");
+const sortColumn1 = document.getElementById("sortColumn1");
 
-filterColumn1.addEventListener('change', function() {
+filterColumn1.addEventListener("change", function () {
   populateColumnsFromSprintData();
 });
 
-sortColumn1.addEventListener('change', function() {
+sortColumn1.addEventListener("change", function () {
   populateColumnsFromSprintData();
 });
 
 function priorityToNumber(priority) {
   switch (priority) {
-    case 'Low':
+    case "Low":
       return 1;
-    case 'Medium':
+    case "Medium":
       return 2;
-    case 'Important':
+    case "Important":
       return 3;
-    case 'Urgent':
+    case "Urgent":
       return 4;
     default:
       return 0;
@@ -183,18 +205,24 @@ async function populateColumn(taskIds, columnTaskContainer) {
   const filterValue = filterColumn1.value;
 
   let filteredTasks = tasksDataArray;
-  
-  if (filterValue !== 'All') {
-    filteredTasks = tasksDataArray.filter(task => task.data.tag && task.data.tag.includes(filterValue));
+
+  if (filterValue !== "All") {
+    filteredTasks = tasksDataArray.filter(
+      (task) => task.data.tag && task.data.tag.includes(filterValue)
+    );
   }
-  
+
   // Sorting
   const sortValue = sortColumn1.value;
   filteredTasks.sort((a, b) => {
     if (sortValue === "Lowest to Urgent") {
-      return priorityToNumber(a.data.priority) - priorityToNumber(b.data.priority);
+      return (
+        priorityToNumber(a.data.priority) - priorityToNumber(b.data.priority)
+      );
     } else if (sortValue === "Urgent to Lowest") {
-      return priorityToNumber(b.data.priority) - priorityToNumber(a.data.priority);
+      return (
+        priorityToNumber(b.data.priority) - priorityToNumber(a.data.priority)
+      );
     } else if (sortValue === "Recent to Oldest") {
       return new Date(b.data.timestamp) - new Date(a.data.timestamp);
     } else if (sortValue === "Oldest to Recent") {
@@ -255,7 +283,9 @@ function handleDragAndDrop(column) {
       const sourceColumnId = taskElement.parentElement.parentElement.id;
       const targetColumnId = column.id;
 
-      const taskContainerId = `taskContainer${targetColumnId.charAt(targetColumnId.length - 1)}`;
+      const taskContainerId = `taskContainer${targetColumnId.charAt(
+        targetColumnId.length - 1
+      )}`;
       const taskContainer = document.getElementById(taskContainerId);
 
       if (taskContainer) {
@@ -410,7 +440,9 @@ async function showTaskDetails(taskData) {
   });
 
   // // Add an event listener to the "Show Effort Chart" button
-  const showEffortChartButton = document.getElementById("showEffortChartButton");
+  const showEffortChartButton = document.getElementById(
+    "showEffortChartButton"
+  );
   showEffortChartButton.addEventListener("click", async () => {
     await displayEffortChart(taskData.taskName);
   });
@@ -636,28 +668,28 @@ async function saveTaskLog(taskData) {
       await deleteTaskLogEntry(taskName, logDate);
       console.log("Task log entry deleted successfully.");
     } else {
-    // Query the "task_logs" collection for a document with the same task name and logDate
-    const q = firestoreQuery(
-      taskLogsCollection,
-      where("taskName", "==", log.taskName),
-      where("logDate", "==", log.logDate)
-    );
+      // Query the "task_logs" collection for a document with the same task name and logDate
+      const q = firestoreQuery(
+        taskLogsCollection,
+        where("taskName", "==", log.taskName),
+        where("logDate", "==", log.logDate)
+      );
 
-    const querySnapshot = await getDocs(q);
+      const querySnapshot = await getDocs(q);
 
-    if (querySnapshot.empty) {
-      // If no matching documents found, add a new document to the collection
-      await addDoc(taskLogsCollection, log);
-      console.log("Task log entry saved successfully.");
-    } else {
-      // If matching documents found, update the first matching document
-      const docRef = querySnapshot.docs[0].ref;
-      await updateDoc(docRef, {
-        timeSpent: log.timeSpent, // Update the timeSpent field
-      });
-      console.log("Task log entry updated successfully.");
+      if (querySnapshot.empty) {
+        // If no matching documents found, add a new document to the collection
+        await addDoc(taskLogsCollection, log);
+        console.log("Task log entry saved successfully.");
+      } else {
+        // If matching documents found, update the first matching document
+        const docRef = querySnapshot.docs[0].ref;
+        await updateDoc(docRef, {
+          timeSpent: log.timeSpent, // Update the timeSpent field
+        });
+        console.log("Task log entry updated successfully.");
+      }
     }
-  }
 
     // Update the display immediately
     await displayTimeSpentEntries(taskName);
@@ -710,7 +742,11 @@ async function displayEffortChart(taskName) {
   const effortChartData = await fetchEffortChartData(taskName);
 
   // Check if effortChartData is successfully obtained
-  if (effortChartData.dates && effortChartData.members && effortChartData.timeSpent) {
+  if (
+    effortChartData.dates &&
+    effortChartData.members &&
+    effortChartData.timeSpent
+  ) {
     // Get the chart container
     const chartContainer = document.getElementById("effortChartCanvas");
 
@@ -775,7 +811,7 @@ async function displayEffortChart(taskName) {
           },
           title: {
             display: true,
-            text: 'Accumulation of Effort Chart',
+            text: "Accumulation of Effort Chart",
             font: {
               size: 23,
             },
@@ -785,12 +821,14 @@ async function displayEffortChart(taskName) {
             },
           },
           tooltip: {
-        callbacks: {
-          label: (tooltipItem) => {
-            const datasetLabel = tooltipItem.dataset.label || "";
-            const dataIndex = tooltipItem.dataIndex;
-            const timeSpent = tooltipItem.chart.data.datasets[tooltipItem.datasetIndex].data[dataIndex];
-            return `${datasetLabel}: ${timeSpent} hours`;
+            callbacks: {
+              label: (tooltipItem) => {
+                const datasetLabel = tooltipItem.dataset.label || "";
+                const dataIndex = tooltipItem.dataIndex;
+                const timeSpent =
+                  tooltipItem.chart.data.datasets[tooltipItem.datasetIndex]
+                    .data[dataIndex];
+                return `${datasetLabel}: ${timeSpent} hours`;
               },
             },
           },
@@ -814,7 +852,7 @@ async function displayEffortChart(taskName) {
       }
     };
   } else {
-    console.error('Failed to fetch effortChartData');
+    console.error("Failed to fetch effortChartData");
   }
 }
 
@@ -920,5 +958,3 @@ calculateTotalStoryPoints();
 sprintNameInput.value = sprintData.name || ""; // Use empty string as fallback if name is null or undefined
 startDateInput.value = sprintData.startDate || "";
 endDateInput.value = sprintData.endDate || "";
-
-  

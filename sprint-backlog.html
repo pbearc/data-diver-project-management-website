@@ -88,7 +88,11 @@
           <div class="col-md-6">
             <h4>Sprint Name:</h4>
             <!-- Add the name here -->
-            <input type="text" id="sprintNameInput" placeholder="Enter sprint name" />
+            <input
+              type="text"
+              id="sprintNameInput"
+              placeholder="Enter sprint name"
+            />
           </div>
           <div class="col-md-6">
             <h4>Date Range:</h4>
@@ -99,11 +103,17 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12 button-container d-flex justify-content-start align-items-center">
+          <div
+            class="col-md-12 button-container d-flex justify-content-start align-items-center"
+          >
             <div class="row">
               <div class="nav-link new-button custom-filter-button">
                 <label for="filterColumn1">Filter:</label>
-                <select class="form-control filter-dropdown" id="filterColumn1" data-column-id="column1">
+                <select
+                  class="form-control filter-dropdown"
+                  id="filterColumn1"
+                  data-column-id="column1"
+                >
                   <option value="All">Show All</option>
                   <option value="API">API</option>
                   <option value="Backend">Backend</option>
@@ -117,7 +127,11 @@
               </div>
               <div class="nav-link new-button custom-filter-button">
                 <label for="sortColumn1">Sorting:</label>
-                <select class="form-control sort-dropdown" id="sortColumn1" data-column-id="column1">
+                <select
+                  class="form-control sort-dropdown"
+                  id="sortColumn1"
+                  data-column-id="column1"
+                >
                   <option value="Lowest to Urgent">Lowest to Urgent</option>
                   <option value="Urgent to Lowest">Urgent to Lowest</option>
                   <option value="Recent to Oldest">Recent to Oldest</option>
@@ -177,7 +191,9 @@
           <div id="taskDetailsContent"></div>
           <div class="edit-buttons">
             <div class="btn-group">
-              <button id="showEffortChartButton">Accumulation of Effort Chart</button>
+              <button id="showEffortChartButton">
+                Accumulation of Effort Chart
+              </button>
               <button id="editLogButton" class="btn btn-primary">
                 Edit Log
               </button>
