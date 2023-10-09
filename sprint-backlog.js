@@ -51,11 +51,8 @@ if (sprintData && sprintData.isStarted) {
 startSprintButton.addEventListener("click", async function () {
   const startDate = new Date(startDateInput.value);
   const endDate = new Date(endDateInput.value);
-  const today = new Date();
-  if (startDate > today) {
-    alert("Start date cannot be earlier than today");
-    startDateInput.value = "";
-  } else if (endDate < startDate) {
+
+  if (endDate < startDate) {
     alert("End date cannot be earlier than start date");
     endDateInput.value = "";
   } else {
