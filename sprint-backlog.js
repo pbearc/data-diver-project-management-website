@@ -35,15 +35,38 @@ const sprintsCollection = collection(db, "sprints");
 const sprintId = getSprintIdFromURL();
 const sprintDocRef = doc(sprintsCollection, sprintId);
 const sprintData = (await getDoc(sprintDocRef)).data();
+const startSprintButton = document.getElementById("startSprintButton");
 const sprintNameInput = document.getElementById("sprintNameInput");
 const startDateInput = document.getElementById("startDateInput");
 const endDateInput = document.getElementById("endDateInput");
 
 function disableAddTaskButton() {
-  document.getElementById("addButton").disabled = true;
-  document.getElementById("startSprintButton").disable = true;
+  addButton.disabled = true;
 }
-startSprintButton.addEventListener("click", disableAddTaskButton);
+
+if (sprintData && sprintData.isStarted) {
+  disableAddTaskButton();
+}
+
+startSprintButton.addEventListener("click", async function () {
+  const startDate = new Date(startDateInput.value);
+  const endDate = new Date(endDateInput.value);
+  const today = new Date();
+  if (startDate > today) {
+    alert("Start date cannot be earlier than today");
+    startDateInput.value = "";
+  } else if (endDate < startDate) {
+    alert("End date cannot be earlier than start date");
+    endDateInput.value = "";
+  } else {
+    sprintData.startDate = startDateInput.value;
+    sprintData.endDate = endDateInput.value;
+    sprintData.isStarted = true;
+
+    await updateDoc(sprintDocRef, sprintData);
+    disableAddTaskButton();
+  }
+});
 
 // Event listener for sprint name input
 sprintNameInput.addEventListener("input", async function () {
