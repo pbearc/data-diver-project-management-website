@@ -65,24 +65,6 @@
         </div>
       </div>
 
-      <!-- <script>
-        function w3_open() {
-          document.getElementById("main").style.marginLeft = "20%";
-          document.getElementById("mySidebar").style.width = "20%";
-          document.getElementById("mySidebar").style.display = "block";
-          document.getElementById("openNav").style.display = "none";
-        }
-
-        function w3_close() {
-          document.getElementById("main").style.marginLeft = "0%";
-          document.getElementById("mySidebar").style.display = "none";
-          document.getElementById("openNav").style.display = "inline-block";
-        }
-
-        // Open the sidebar by default
-        w3_open();
-      </script> -->
-
       <div class="container">
         <!-- Add Name and Date Range above the columns -->
         <div class="row mt-0">
@@ -94,6 +76,9 @@
               id="sprintNameInput"
               placeholder="Enter sprint name"
             />
+            <button id="startSprintButton" onclick="disableAddTaskButton()">
+              Start Sprint
+            </button>
           </div>
           <div class="col-md-6">
             <h4>Date Range:</h4>

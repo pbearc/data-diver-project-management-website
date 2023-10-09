@@ -39,6 +39,12 @@ const sprintNameInput = document.getElementById("sprintNameInput");
 const startDateInput = document.getElementById("startDateInput");
 const endDateInput = document.getElementById("endDateInput");
 
+function disableAddTaskButton() {
+  document.getElementById("addButton").disabled = true;
+  document.getElementById("startSprintButton").disable = true;
+}
+startSprintButton.addEventListener("click", disableAddTaskButton);
+
 // Event listener for sprint name input
 sprintNameInput.addEventListener("input", async function () {
   const sprintName = sprintNameInput.value;
