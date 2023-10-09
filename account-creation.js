@@ -65,6 +65,16 @@ if (createAccountButton) {
     const username = document.getElementById("create_username").value;
     const password = document.getElementById("create_password").value;
 
+    if (username === "" ){
+      alert("Please fill in username.");
+      return
+    }
+
+    if (password === ""){
+      alert("Please set password.");
+      return
+    }
+
     const isTaken = await isUsernameTaken(username);
 
     if (isTaken) {
