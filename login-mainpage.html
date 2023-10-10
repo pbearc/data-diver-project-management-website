@@ -3,9 +3,6 @@
   <head>
     <title>Data Diver - Login</title>
     <link rel="icon" href="assets/logo.png">
-    <script src="authenticate-user.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js"></script>
     <link
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -13,6 +10,7 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="authenticate-user.js"></script>
   </head>
   <body style="background-color:#e9c6d8">
     <div id="main">
@@ -34,9 +32,6 @@
                 <li class="nav-item">
                   <a class="nav-link" href="#">About</a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#">Login</a>
-                </li>
               </ul>
             </div>
           </div>
@@ -44,26 +39,22 @@
       </div>
 
       <!-- Login Form -->
-      <form>
-        <div class="form-group">
-          <label for="InputUsername">Username</label>
-          <input type="email" class="form-control" id="userUsername" placeholder="Enter Username">
+      <div class="container mt-5">
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+              <div class="form-group">
+                <label for="userUsername">Username</label>
+                <input type="text" class="form-control" id="userUsername" name="username" placeholder="Enter Username">
+              </div>
+              <div class="form-group">
+                <label for="userPassword">Password</label>
+                <input type="password" class="form-control" id="userPassword" name="password" placeholder="Create Password">
+              </div>
+              <button type="submit" class="btn btn-primary" id="loginButton">Login</button>
+          </div>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label for="InputPassword">Password</label>
-          <input type="password" class="form-control" id="userPassword" placeholder="Enter Password">
-        </div>
-
-        <div class="form-group form-check">
-          <input type="checkbox" class="form-check-input" id="adminAccountCheck">
-          <label class="form-check-label" for="form-check">Admin account</label>
-        </div>
-      </form>
-
-        <button type="button" class="btn btn-primary" id="loginButton">Login</button>
-        
-        
         <div class="form-group text-center mt-3">
           <a href="account-creation.html">Create Account</a>
         </div>

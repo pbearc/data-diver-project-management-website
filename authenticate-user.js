@@ -67,7 +67,8 @@ async function authenticateUser(username, password) {
       const isAuthenticated = await authenticateUser(username, password);
   
       if (isAuthenticated) {
-        navigateToProductBacklog();
+        //navigateToProductBacklog();
+        window.location.href = "product-backlog.html"
       } else {
         alert("Invalid username or password");
       }
