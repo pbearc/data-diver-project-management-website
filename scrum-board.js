@@ -190,11 +190,11 @@ async function createAndDisplayModal(sprintId) {
 
     // Generate burndown chart using Chart.js
     const ctx = modal.querySelector(`#burndownChart-${sprintId}`).getContext("2d");
-    const dates = sortedData.map((data) => data.date);
+    const dates = createBurndownChartLabels(sprintId);
     const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
     const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
 
-    renderBurndownChart(ctx, [2,3,4,5], [1,1,5,2], [6,2,4,3]);
+    renderBurndownChart(ctx, [2,4,3,7], [1,1,5,2], [6,2,4,3]);
 
   } catch (error) {
     console.error("Error fetching and displaying data: ", error);
@@ -203,8 +203,9 @@ async function createAndDisplayModal(sprintId) {
   return modal;
 }
 
-function createBurndownChartLabels(sprintData) {
+function createBurndownChartLabels(sprintId) {
   // Parse the start and end dates
+  const sprintData=getSprintDataBySprintID(sprintId)
   const startDate = new Date(sprintData.startDate);
   const endDate = new Date(sprintData.endDate);
   
@@ -226,6 +227,7 @@ function createBurndownChartLabels(sprintData) {
   const formattedDates = dateArray.map(date => date.toISOString().split('T')[0]);
   
   return formattedDates;
+
 }
 
 function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks) {
@@ -376,6 +378,13 @@ function findModalIdBySprintId(sprintId) {
       console.error("Error finding modal ID: ", error);
       return null;
     });
+}
+
+async function getSprintDataBySprintID(sprintId){
+  const sprintsCollection = collection(db, "sprints");
+  const sprintDocRef = doc(sprintsCollection, sprintId);
+  const sprintData = (await getDoc(sprintDocRef)).data();
+  return sprintData
 }
 
 // Call the function to display Sprint Backlogs when the page loads
