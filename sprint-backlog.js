@@ -39,6 +39,26 @@ const startSprintButton = document.getElementById("startSprintButton");
 const sprintNameInput = document.getElementById("sprintNameInput");
 const startDateInput = document.getElementById("startDateInput");
 const endDateInput = document.getElementById("endDateInput");
+const productBacklogButton = document.getElementById("product_backlog_button")
+const scumboardButton = document.getElementById("scrum_board_button")
+
+console.log('sprint', window.history.state)
+scumboardButton.addEventListener("click", () => {
+  const routeTo = "scrum-board.html";
+  const username = window.history.state.username;
+  const admin = window.history.state.isAdmin;
+  window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+  window.location.href = routeTo; // Redirect to the desired page
+})
+
+productBacklogButton.addEventListener("click", () => {
+  const routeTo = "product-backlog.html";
+  const username = window.history.state.username;
+  const admin = window.history.state.isAdmin;
+  window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+  window.location.href = routeTo; // Redirect to the desired page
+})
+
 
 function disableAddTaskButton() {
   addButton.disabled = true;

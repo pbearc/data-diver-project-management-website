@@ -34,6 +34,7 @@ function createAccount(username, password) {
     return addDoc(collection(db, "users"), {
       username: username,
       password: password,
+      isAdmin: false,
     });
 }
 

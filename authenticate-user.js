@@ -29,11 +29,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app, { experimentalAutoDetectLongPolling: true, });
 
+async function checkAdmin(username) {
+  const usersCollection = collection(db, "users");
+  const querySnapshot = await getDocs(usersCollection);
+
+  const user = querySnapshot.docs.find((doc) => {
+    const userData = doc.data();
+    return userData.username === username;
+  });
+
+  if (user) {
+    const userData = user.data();
+    console.log(userData.username);
+    console.log(userData.isAdmin);
+    return userData.isAdmin;
+  }
+}
 
 // Function to navigate to product backlog page
-function navigateToProductBacklog() {
-    window.location.href = "product-backlog.html";
-    window.history.pushState({test: "test"}, "", routeTo)
+async function navigateToProductBacklog() {
+    const usernameInput = document.getElementById("userUsername").value;
+    console.log(usernameInput)
+    const admin = await checkAdmin(usernameInput);
+    console.log(admin);
+    const adminString = admin.toString();
+    const routeTo = "product-backlog.html"
+    window.history.pushState({username: usernameInput, isAdmin: adminString }, "", routeTo)
     window.location.href = routeTo
   }
 

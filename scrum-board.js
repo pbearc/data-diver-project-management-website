@@ -27,6 +27,27 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app);
+const productBacklogButton = document.getElementById("product_backlog_button")
+const scumboardButton = document.getElementById("scrum_board_button")
+
+console.log('scrumboard', window.history.state.username);
+
+scumboardButton.addEventListener("click", () => {
+  const routeTo = "scrum-board.html";
+  const username = window.history.state.username;
+  const admin = window.history.state.isAdmin;
+  window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+  window.location.href = routeTo; // Redirect to the desired page
+})
+
+productBacklogButton.addEventListener("click", () => {
+  const routeTo = "product-backlog.html";
+  const username = window.history.state.username;
+  const admin = window.history.state.isAdmin;
+  window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+  window.location.href = routeTo; // Redirect to the desired page
+})
+
 
 document.getElementById("createSprintButton").addEventListener("click", async () => {
   try {
@@ -126,7 +147,11 @@ function displaySprintBacklogs() {
         // Attach a click event listener to the card
         sprintCard.addEventListener("click", () => {
           // Construct the URL with the sprintId parameter and navigate to the Sprint Backlog page
-          window.location.href = `sprint-backlog.html?id=${sprintId}`;
+          const routeTo = `sprint-backlog.html?id=${sprintId}`;
+          const username = window.history.state.username;
+          const admin = window.history.state.isAdmin;
+          window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+          window.location.href = routeTo; // Redirect to the desired page
         });
       });
     })
