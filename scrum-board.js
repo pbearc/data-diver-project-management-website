@@ -169,17 +169,12 @@ async function createAndDisplayModal(sprintId) {
 
     // Iterate through each row in the table
     rows.forEach(async (row) => {
-        // Extract data from the current row's input fields and table cells
-        console.log(row)
-        const date = row.querySelector("input[type='date']").value; //replace with actual functiom to get the dates
-        const idealRemainingTasks = row.querySelector('td:nth-child(2)').textContent; //replace with actual function to get the ideal remaining tasks
-        const actualRemainingTasks = row.querySelector('td:nth-child(3)').textContent; //replace with actual function to get the actual remaining tasks
 
         // Prepare data object for the current row
         const rowData = {
-            date: date,
-            idealRemainingTasks: idealRemainingTasks,
-            actualRemainingTasks: actualRemainingTasks
+            date: [1,2,3,4,5],
+            idealRemainingTasks: [6,7,8,9,10],
+            actualRemainingTasks: [11,12,13,14,15]
         };
 
         // Add the row data as a new document in the "rows" subcollection
@@ -187,30 +182,34 @@ async function createAndDisplayModal(sprintId) {
 
     });
   
-  tableBody.innerHTML = ''
-  const sortedData = await sortedChartData(sprintId)    
+    tableBody.innerHTML = ''
+    const sortedData = await sortedChartData(sprintId)    
 
-  const newCanvas = document.createElement('canvas');
-  newCanvas.id = `burndownChart-${sprintId}`;
-  newCanvas.width = 400;
-  newCanvas.height = 200;
+    const newCanvas = document.createElement('canvas');
+    newCanvas.id = `burndownChart-${sprintId}`;
+    newCanvas.width = 400;
+    newCanvas.height = 200;
 
-  modal.appendChild(newCanvas);
+    modal.appendChild(newCanvas);
 
-  const canvas = modal.querySelector(`#burndownChart-${sprintId}`);
-  const ctx = canvas.getContext("2d");
+    const canvas = modal.querySelector(`#burndownChart-${sprintId}`);
 
-  const dates = sortedData.map((data) => data.date);
-  const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
-  const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
+    const dates = sortedData.map((data) => data.date);
+    const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
+    const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
 
-  const existingChart = Chart.getChart(ctx);
+    const existingChart = Chart.getChart(ctx);
 
-  if (existingChart) {
-    existingChart.destroy();
-  }
+    if (existingChart) {
+      existingChart.destroy();
+    }
 
-  renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks)
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      renderBurndownChart(ctx, [1,2,3,4,5], [3,4,5,6], [7,5,2,3,5]);
+    } else {
+        console.error(`Canvas with id burndownChart-${sprintId} not found.`);
+    }
 
   } catch (error) {
     console.error("Error adding row data:", error);
@@ -227,26 +226,8 @@ async function createAndDisplayModal(sprintId) {
   } catch (error) {
     console.error("Error displaying modal: ", error);
   }
-
-  const sortedData = await sortedChartData(sprintId)
-  sortedData.forEach(data => {
-    const newRow = document.createElement("tr");
-    newRow.innerHTML = `
-      <td><input type="date" value="${data.date}"></td>
-      <td contenteditable="true">${data.idealRemainingTasks}</td>
-      <td contenteditable="true">${data.actualRemainingTasks}</td>
-    `;
-    tableBody.appendChild(newRow);
-  });
     
-  // // // Generate burndown chart using Chart.js
-  // const ctx = modal.querySelector(`#burndownChart-${sprintId}`).getContext("2d");
-  // const dates = sortedData.map((data) => data.date);
-  // const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
-  // const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
-
-  // const chart = renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks);
-return modal;
+  return modal;
 }
 
 function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks) {
