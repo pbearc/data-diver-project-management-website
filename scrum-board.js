@@ -194,7 +194,7 @@ async function createAndDisplayModal(sprintId) {
     const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
     const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
 
-    renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks);
+    renderBurndownChart(ctx, [2,3,4,5], [1,1,5,2], [6,2,4,3]);
 
   } catch (error) {
     console.error("Error fetching and displaying data: ", error);
