@@ -817,7 +817,7 @@ async function displayEffortChart(taskName) {
           y: {
             title: {
               display: true,
-              text: "Time Spent (hours)",
+              text: "Accumulated Time Spent (hours)",
               font: { weight: "bold", size: 18 },
             },
             ticks: {
@@ -886,7 +886,7 @@ async function displayEffortChart(taskName) {
 async function fetchEffortChartData(taskName) {
   const dates = []; // Array of dates
   const members = []; // Array of member names
-  const timeSpent = []; // Array of time spent data
+  const timeSpent = []; // Array of accumulated time spent data
 
   try {
     const taskLogsCollection = collection(db, "task_logs");
@@ -921,7 +921,7 @@ async function fetchEffortChartData(taskName) {
         .toString()
         .padStart(2, "0")}-${logDate.getDate().toString().padStart(2, "0")}`;
 
-      // Update the member's data map with the time spent on this date
+      // Update the member's data map with the accumulated time spent on this date
       if (!memberData.data.has(formattedDate)) {
         memberData.data.set(formattedDate, 0);
       }
@@ -936,12 +936,15 @@ async function fetchEffortChartData(taskName) {
     memberDataMap.forEach((memberData) => {
       members.push(memberData.member);
 
+      let accumulatedTimeSpent = 0;
+
       // Sort dates
       const sortedDates = Array.from(memberData.data.keys()).sort();
 
       const memberTimeSpentData = sortedDates.map((date) => {
+        accumulatedTimeSpent += memberData.data.get(date);
         dates.push(date);
-        return memberData.data.get(date);
+        return accumulatedTimeSpent;
       });
 
       timeSpent.push(memberTimeSpentData);
