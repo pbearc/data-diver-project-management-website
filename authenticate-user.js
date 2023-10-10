@@ -33,6 +33,8 @@ const db = getFirestore(app, { experimentalAutoDetectLongPolling: true, });
 // Function to navigate to product backlog page
 function navigateToProductBacklog() {
     window.location.href = "product-backlog.html";
+    window.history.pushState({test: "test"}, "", routeTo)
+    window.location.href = routeTo
   }
 
 // Function to authenticate the user
@@ -68,7 +70,7 @@ async function authenticateUser(username, password) {
   
       if (isAuthenticated) {
         //navigateToProductBacklog();
-        window.location.href = "product-backlog.html"
+        navigateToProductBacklog()
       } else {
         alert("Invalid username or password");
       }
