@@ -136,7 +136,6 @@ function displaySprintBacklogs() {
 }
 
 async function createAndDisplayModal(sprintId) {
-
   // Create modal
   const modal = document.createElement("div");
   modal.className = "modal";
@@ -146,74 +145,22 @@ async function createAndDisplayModal(sprintId) {
       <canvas id="burndownChart-${sprintId}" width="400" height="200"></canvas>
       <table class="table" style="background-color: white; margin-top: 20px;">
         <thead>
+          <tr>
+            <th style="text-align: center;">Date</th>
+            <th style="text-align: center;">Ideal Remaining Tasks</th>
+            <th style="text-align: center;">Actual Remaining Tasks</th>
+          </tr>
         </thead>
         <tbody id="tableBody-${sprintId}" style="text-align: center;"></tbody>
       </table>
-
     </div>
   `;
 
-  // // Modal close button functionality
+  // Modal close button functionality
   const closeButton = modal.querySelector(".close");
   closeButton.addEventListener("click", () => {
     modal.style.display = "none";
   });
-
-  // Get all rows in the table
-  const rows = modal.querySelectorAll('tr');
-
-  try {
-    // Get a reference to the "rows" subcollection within the modal document
-    const modalID = await findModalIdBySprintId(sprintId);
-    const rowsCollection = collection(db, "modals", modalID, "rows");
-
-    // Iterate through each row in the table
-    rows.forEach(async (row) => {
-
-        // Prepare data object for the current row
-        const rowData = {
-            date: [1,2,3,4,5],
-            idealRemainingTasks: [6,7,8,9,10],
-            actualRemainingTasks: [11,12,13,14,15]
-        };
-
-        // Add the row data as a new document in the "rows" subcollection
-        await addDoc(rowsCollection, rowData);
-
-    });
-  
-    tableBody.innerHTML = ''
-    const sortedData = await sortedChartData(sprintId)    
-
-    const newCanvas = document.createElement('canvas');
-    newCanvas.id = `burndownChart-${sprintId}`;
-    newCanvas.width = 400;
-    newCanvas.height = 200;
-
-    modal.appendChild(newCanvas);
-
-    const canvas = modal.querySelector(`#burndownChart-${sprintId}`);
-
-    const dates = sortedData.map((data) => data.date);
-    const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
-    const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
-
-    const existingChart = Chart.getChart(ctx);
-
-    if (existingChart) {
-      existingChart.destroy();
-    }
-
-    if (canvas) {
-      const ctx = canvas.getContext("2d");
-      renderBurndownChart(ctx, [1,2,3,4,5], [3,4,5,6], [7,5,2,3,5]);
-    } else {
-        console.error(`Canvas with id burndownChart-${sprintId} not found.`);
-    }
-
-  } catch (error) {
-    console.error("Error adding row data:", error);
-  }
 
   // Append the modal to the body or another container
   document.body.appendChild(modal);
@@ -226,8 +173,59 @@ async function createAndDisplayModal(sprintId) {
   } catch (error) {
     console.error("Error displaying modal: ", error);
   }
-    
+
+  // Fetch and display data
+  try {
+    const sortedData = await sortedChartData(sprintId);
+    const tableBody = modal.querySelector(`#tableBody-${sprintId}`);
+    sortedData.forEach(data => {
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `
+        <td>${data.date}</td>
+        <td>${data.idealRemainingTasks}</td>
+        <td>${data.actualRemainingTasks}</td>
+      `;
+      tableBody.appendChild(newRow);
+    });
+
+    // Generate burndown chart using Chart.js
+    const ctx = modal.querySelector(`#burndownChart-${sprintId}`).getContext("2d");
+    const dates = sortedData.map((data) => data.date);
+    const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
+    const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
+
+    renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks);
+
+  } catch (error) {
+    console.error("Error fetching and displaying data: ", error);
+  }
+
   return modal;
+}
+
+function createBurndownChartLabels(sprintData) {
+  // Parse the start and end dates
+  const startDate = new Date(sprintData.startDate);
+  const endDate = new Date(sprintData.endDate);
+  
+  // Validate the dates
+  if (isNaN(startDate) || isNaN(endDate)) {
+      throw new Error("Invalid start or end date");
+  }
+
+  // Initialize an array to store the dates
+  const dateArray = [];
+  
+  // Loop through each date between startDate and endDate
+  for (let currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
+      // Push a copy of currentDate to dateArray
+      dateArray.push(new Date(currentDate));
+  }
+  
+  // Convert the date objects into a string format (optional, depending on your use-case)
+  const formattedDates = dateArray.map(date => date.toISOString().split('T')[0]);
+  
+  return formattedDates;
 }
 
 function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks) {
