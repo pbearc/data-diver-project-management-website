@@ -146,16 +146,10 @@ async function createAndDisplayModal(sprintId) {
       <canvas id="burndownChart-${sprintId}" width="400" height="200"></canvas>
       <table class="table" style="background-color: white; margin-top: 20px;">
         <thead>
-          <tr>
-            <th style="text-align: center;">Date</th>
-            <th style="text-align: center;">Ideal Remaining Tasks</th>
-            <th style="text-align: center;">Actual Remaining Tasks</th>
-          </tr>
         </thead>
         <tbody id="tableBody-${sprintId}" style="text-align: center;"></tbody>
       </table>
-      <button class="addRowBtn" id="addRowBtn-${sprintId}">Add Row</button>
-      <button class="saveRowBtn" id="saveRowBtn-${sprintId}">Save</button>
+
     </div>
   `;
 
@@ -165,108 +159,62 @@ async function createAndDisplayModal(sprintId) {
     modal.style.display = "none";
   });
 
-  // Add event listener for the Add Row button (assuming you have logic for adding rows)
-  const addRowBtn = modal.querySelector(`#addRowBtn-${sprintId}`);
-  const tableBody = modal.querySelector(`#tableBody-${sprintId}`);
-  addRowBtn.addEventListener("click", () => {
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-        <td><input type="date"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td><button class="deleteRowBtn">Delete</button></td>
-    `;
-    newRow.querySelector(".deleteRowBtn").addEventListener("click", () => deleteRow(newRow, null, sprintId));
-    tableBody.appendChild(newRow);
-  });
-  
+  // Get all rows in the table
+  const rows = modal.querySelectorAll('tr');
 
-  const saveRowBtn = modal.querySelector(`#saveRowBtn-${sprintId}`);
-  saveRowBtn.addEventListener("click", async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    // Get all rows in the table
-    const rows = modal.querySelectorAll('tr');
-
+  try {
+    // Get a reference to the "rows" subcollection within the modal document
     const modalID = await findModalIdBySprintId(sprintId);
-
     const rowsCollection = collection(db, "modals", modalID, "rows");
 
-    const querySnapshot = await getDocs(rowsCollection);
-    querySnapshot.forEach((doc) => {
-      deleteDoc(doc.ref);
-});
+    // Iterate through each row in the table
+    rows.forEach(async (row) => {
+        // Extract data from the current row's input fields and table cells
+        console.log(row)
+        const date = row.querySelector("input[type='date']").value; //replace with actual functiom to get the dates
+        const idealRemainingTasks = row.querySelector('td:nth-child(2)').textContent; //replace with actual function to get the ideal remaining tasks
+        const actualRemainingTasks = row.querySelector('td:nth-child(3)').textContent; //replace with actual function to get the actual remaining tasks
 
-    try {
-        // Get a reference to the "rows" subcollection within the modal document
-        const modalID = await findModalIdBySprintId(sprintId);
-        const rowsCollection = collection(db, "modals", modalID, "rows");
+        // Prepare data object for the current row
+        const rowData = {
+            date: date,
+            idealRemainingTasks: idealRemainingTasks,
+            actualRemainingTasks: actualRemainingTasks
+        };
 
-        // Iterate through each row in the table
-        console.log(rows)
-        rows.forEach(async (row) => {
-            // Extract data from the current row's input fields and table cells
-            console.log(row)
-            const date = row.querySelector("input[type='date']").value;
-            const idealRemainingTasks = row.querySelector('td:nth-child(2)').textContent;
-            const actualRemainingTasks = row.querySelector('td:nth-child(3)').textContent;
+        // Add the row data as a new document in the "rows" subcollection
+        await addDoc(rowsCollection, rowData);
 
-            // Prepare data object for the current row
-            const rowData = {
-                date: date,
-                idealRemainingTasks: idealRemainingTasks,
-                actualRemainingTasks: actualRemainingTasks
-            };
+    });
+  
+  tableBody.innerHTML = ''
+  const sortedData = await sortedChartData(sprintId)    
 
-            // Add the row data as a new document in the "rows" subcollection
-            await addDoc(rowsCollection, rowData);
+  const newCanvas = document.createElement('canvas');
+  newCanvas.id = `burndownChart-${sprintId}`;
+  newCanvas.width = 400;
+  newCanvas.height = 200;
 
-        });
-      
-      tableBody.innerHTML = ''
-      const sortedData = await sortedChartData(sprintId)
-      sortedData.forEach(data => {
-        const newRow = document.createElement("tr");
-        newRow.innerHTML = `
-          <td><input type="date" value="${data.date}"></td>
-          <td contenteditable="true">${data.idealRemainingTasks}</td>
-          <td contenteditable="true">${data.actualRemainingTasks}</td>
-          <td><button class="deleteRowBtn">Delete</button></td>
-        `;
-        newRow.querySelector(".deleteRowBtn").addEventListener("click", () => deleteRow(newRow, data.id, sprintId));
-        tableBody.appendChild(newRow);
-      });      
+  modal.appendChild(newCanvas);
 
-      const newCanvas = document.createElement('canvas');
-      newCanvas.id = `burndownChart-${sprintId}`;
-      newCanvas.width = 400;
-      newCanvas.height = 200;
+  const canvas = modal.querySelector(`#burndownChart-${sprintId}`);
+  const ctx = canvas.getContext("2d");
 
-      modal.appendChild(newCanvas);
+  const dates = sortedData.map((data) => data.date);
+  const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
+  const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
 
-      const canvas = modal.querySelector(`#burndownChart-${sprintId}`);
-      const ctx = canvas.getContext("2d");
+  const existingChart = Chart.getChart(ctx);
 
-      const dates = sortedData.map((data) => data.date);
-      const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
-      const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
+  if (existingChart) {
+    existingChart.destroy();
+  }
 
-      const existingChart = Chart.getChart(ctx);
+  renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks)
 
-      if (existingChart) {
-        existingChart.destroy();
-      }
-
-      renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks)
-
-    } catch (error) {
-        console.error("Error adding row data:", error);
-    }
-  });
-
-  // Append the "Add Row" button to the modal content
-  modal.querySelector(".modal-content").appendChild(saveRowBtn);
+  } catch (error) {
+    console.error("Error adding row data:", error);
+  }
 
   // Append the modal to the body or another container
   document.body.appendChild(modal);
@@ -299,22 +247,6 @@ async function createAndDisplayModal(sprintId) {
 
   // const chart = renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks);
 return modal;
-}
-
-async function deleteRow(row, rowId, sprintId) {
-  // Remove row from frontend
-  row.remove();
-
-  // If the row has an id, it exists in the backend and should be removed
-  if (rowId !== null) {
-    try {
-      const modalID = await findModalIdBySprintId(sprintId);
-      const rowRef = doc(db, "modals", modalID, "rows", rowId); // Adjust path if needed
-      await deleteDoc(rowRef);
-    } catch (error) {
-      console.error("Error deleting row data:", error);
-    }
-  }
 }
 
 function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks) {
