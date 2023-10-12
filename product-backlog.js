@@ -248,6 +248,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const saveTaskButton = document.getElementById("saveTaskButton");
   const productBacklogButton = document.getElementById("product_backlog_button")
   const scumboardButton = document.getElementById("scrum_board_button")
+  const createAccountButton = document.getElementById("create_account_button");
+  const checkAdmin = window.history.state.isAdmin
+
 
   addTaskButton.addEventListener("click", () => {
     floatingWindow.style.display = "block";
@@ -298,4 +301,17 @@ document.addEventListener("DOMContentLoaded", function () {
     window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
     window.location.href = routeTo; // Redirect to the desired page
   })
+
+  if (checkAdmin === "true") {
+    createAccountButton.style.display = "block"; // Show the button
+    createAccountButton.addEventListener("click", () => {
+    const routeTo = "account-creation.html"
+    const username = window.history.state.username;
+    const admin = window.history.state.isAdmin;
+    window.history.pushState({username: username, isAdmin: admin, previousPage: 'product-backlog.html'}, "", routeTo)
+    window.location.href = routeTo;
+    })
+  } else {
+    createAccountButton.style.display = "hide"; // Hide the button
+  }
 });

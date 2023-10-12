@@ -30,8 +30,6 @@ const db = getFirestore(app);
 const productBacklogButton = document.getElementById("product_backlog_button")
 const scumboardButton = document.getElementById("scrum_board_button")
 
-console.log('scrumboard', window.history.state.username);
-
 scumboardButton.addEventListener("click", () => {
   const routeTo = "scrum-board.html";
   const username = window.history.state.username;
@@ -89,7 +87,7 @@ function displaySprintBacklogs() {
   // Get all documents in the "sprints" collection
   getDocs(sprintsCollection)
     .then((querySnapshot) => {
-      querySnapshot.forEach((docs) => {
+      querySnapshot.forEach(async(docs) => {
         const sprintData = docs.data();
         const sprintId = docs.id; // Extract the sprintId here
 
@@ -122,9 +120,6 @@ function displaySprintBacklogs() {
           if(sprintData.modal === false) {
             const modal = createAndDisplayModal(sprintId);
             // modal.style.display = "block";
-          }
-          else {
-            
           }
         });
 
@@ -215,7 +210,8 @@ async function createAndDisplayModal(sprintId) {
 
     // Generate burndown chart using Chart.js
     const ctx = modal.querySelector(`#burndownChart-${sprintId}`).getContext("2d");
-    const dates = getDatesForSprint(sprintId);
+    const dates = await getDatesForSprint(sprintId);
+    console.log(dates)
     const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
     const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
 
@@ -378,18 +374,25 @@ function findModalIdBySprintId(sprintId) {
     });
 }
 
-async function getSprintDataBySprintID(sprintId){
+async function getSprintDataBySprintID(sprintId) {
   const sprintsCollection = collection(db, "sprints");
   const sprintDocRef = doc(sprintsCollection, sprintId);
-  const sprintData = (await getDoc(sprintDocRef)).data();
-  return sprintData
+  
+  try {
+    const sprintSnapshot = await getDoc(sprintDocRef);
+    const sprintData = sprintSnapshot.data();
+    return sprintData;
+  } catch (error) {
+    // Handle errors here
+    console.error("Error getting sprint data:", error);
+    throw error; // Re-throw the error to propagate it to the caller
+  }
 }
 
 async function getDatesForSprint(sprintId) {
   try {
       // Assuming you have a function getSprintDataBySprintID(sprintId) that retrieves sprint data.
       const sprintData = await getSprintDataBySprintID(sprintId);
-      console.log(sprintData)
       
       const startDate = new Date(sprintData.startDate);
       const endDate = new Date(sprintData.endDate);
@@ -412,6 +415,21 @@ async function getDatesForSprint(sprintId) {
       console.error('Error getting dates for sprint:', error);
       throw error;  // Re-throw error to allow calling code to handle it.
   }
+}
+
+const createAccountButton = document.getElementById("create_account_button");
+const checkAdmin = window.history.state.isAdmin
+if (checkAdmin === "true") {
+  createAccountButton.style.display = "block"; // Show the button
+  createAccountButton.addEventListener("click", () => {
+    const routeTo = "account-creation.html"
+    const username = window.history.state.username;
+    const admin = window.history.state.isAdmin;
+    window.history.pushState({username: username, isAdmin: admin, previousPage: 'scrum-board.html'}, "", routeTo)
+    window.location.href = routeTo;
+  })
+} else {
+  createAccountButton.style.display = "hide"; // Hide the button
 }
 
 // Call the function to display Sprint Backlogs when the page loads

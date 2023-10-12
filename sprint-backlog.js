@@ -41,8 +41,9 @@ const startDateInput = document.getElementById("startDateInput");
 const endDateInput = document.getElementById("endDateInput");
 const productBacklogButton = document.getElementById("product_backlog_button")
 const scumboardButton = document.getElementById("scrum_board_button")
+const createAccountButton = document.getElementById("create_account_button");
+const checkAdmin = window.history.state.isAdmin
 
-console.log('sprint', window.history.state)
 scumboardButton.addEventListener("click", () => {
   const routeTo = "scrum-board.html";
   const username = window.history.state.username;
@@ -58,6 +59,19 @@ productBacklogButton.addEventListener("click", () => {
   window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
   window.location.href = routeTo; // Redirect to the desired page
 })
+
+if (checkAdmin === "true") {
+  createAccountButton.style.display = "block"; // Show the button
+  createAccountButton.addEventListener("click", () => {
+    const routeTo = "account-creation.html"
+    const username = window.history.state.username;
+    const admin = window.history.state.isAdmin;
+    window.history.pushState({username: username, isAdmin: admin, previousPage:`sprint-backlog.html?id=${sprintId}`}, "", routeTo)
+    window.location.href = routeTo;
+  })
+} else {
+  createAccountButton.style.display = "hide"; // Hide the button
+}
 
 
 function disableAddTaskButton() {

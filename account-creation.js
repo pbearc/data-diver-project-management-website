@@ -39,7 +39,12 @@ function createAccount(username, password) {
 }
 
 function redirectToLoginPage() {
-    window.location.href = "login-mainpage.html"; // Redirect to the desired page
+    const prev = window.history.state.previousPage;
+    const username = window.history.state.username;
+    const admin = window.history.state.isAdmin;
+    window.history.pushState({username: username, isAdmin: admin}, "", prev)
+    window.location.href = prev; // Redirect to the desired page
+    // window.location.href = "login-mainpage.html"
 }
 
 // Function to check if a username is already taken
