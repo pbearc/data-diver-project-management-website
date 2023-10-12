@@ -215,11 +215,11 @@ async function createAndDisplayModal(sprintId) {
 
     // Generate burndown chart using Chart.js
     const ctx = modal.querySelector(`#burndownChart-${sprintId}`).getContext("2d");
-    const dates = createBurndownChartLabels(sprintId);
+    const dates = sortedData.map((data) => data.date);
     const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
     const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
 
-    renderBurndownChart(ctx, [2,4,3,7], [1,1,5,2], [6,2,4,3]);
+    renderBurndownChart(ctx, [2,3,4,5], [1,1,5,2], [6,2,4,3]);
 
   } catch (error) {
     console.error("Error fetching and displaying data: ", error);
