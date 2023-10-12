@@ -904,9 +904,9 @@ async function displayEffortChart(taskName) {
 
 // Function to fetch data for the accumulation of effort chart
 async function fetchEffortChartData(taskName) {
-  const dates = []; // Array of dates
-  const members = []; // Array of member names
-  const timeSpent = []; // Array of accumulated time spent data
+  const datesSet = new Set(); // Use a set to store unique dates
+  const members = [];
+  const timeSpent = [];
 
   try {
     const taskLogsCollection = collection(db, "task_logs");
@@ -916,18 +916,20 @@ async function fetchEffortChartData(taskName) {
     );
     const querySnapshot = await getDocs(q);
 
-    // Create a map to organize data by members
     const memberDataMap = new Map();
 
     querySnapshot.forEach((doc) => {
       const logData = doc.data();
-
-      // Parse the date string into a Date object
       const logDate = new Date(logData.logDate);
 
-      // Check if this member's data already exists in the map
+      // Format the date as YYYY-MM-DD
+      const formattedDate = `${logDate.getFullYear()}-${(logDate.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}-${logDate.getDate().toString().padStart(2, "0")}`;
+
+      datesSet.add(formattedDate); // Add each date to the set
+
       if (!memberDataMap.has(logData.assignee)) {
-        // If not, initialize their data
         memberDataMap.set(logData.assignee, {
           member: logData.assignee,
           data: new Map(),
@@ -936,12 +938,6 @@ async function fetchEffortChartData(taskName) {
 
       const memberData = memberDataMap.get(logData.assignee);
 
-      // Format the date as YYYY-MM-DD
-      const formattedDate = `${logDate.getFullYear()}-${(logDate.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}-${logDate.getDate().toString().padStart(2, "0")}`;
-
-      // Update the member's data map with the accumulated time spent on this date
       if (!memberData.data.has(formattedDate)) {
         memberData.data.set(formattedDate, 0);
       }
@@ -952,25 +948,21 @@ async function fetchEffortChartData(taskName) {
       );
     });
 
-    // Convert the map data to arrays for the chart
+    const sortedDates = Array.from(datesSet).sort(); // Sort unique dates
+
     memberDataMap.forEach((memberData) => {
       members.push(memberData.member);
 
       let accumulatedTimeSpent = 0;
-
-      // Sort dates
-      const sortedDates = Array.from(memberData.data.keys()).sort();
-
       const memberTimeSpentData = sortedDates.map((date) => {
-        accumulatedTimeSpent += memberData.data.get(date);
-        dates.push(date);
+        accumulatedTimeSpent += memberData.data.get(date) || 0;
         return accumulatedTimeSpent;
       });
 
       timeSpent.push(memberTimeSpentData);
     });
 
-    return { dates, members, timeSpent };
+    return { dates: sortedDates, members, timeSpent };
   } catch (error) {
     console.error("Error fetching effort chart data: ", error);
     return { dates: [], members: [], timeSpent: [] };
