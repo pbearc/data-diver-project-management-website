@@ -215,44 +215,17 @@ async function createAndDisplayModal(sprintId) {
 
     // Generate burndown chart using Chart.js
     const ctx = modal.querySelector(`#burndownChart-${sprintId}`).getContext("2d");
-    const dates = sortedData.map((data) => data.date);
+    const dates = getDatesForSprint(sprintId);
     const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
     const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
 
-    renderBurndownChart(ctx, [2,3,4,5], [1,1,5,2], [6,2,4,3]);
+    renderBurndownChart(ctx, dates, [1,1,5,2], [6,2,4,3]);
 
   } catch (error) {
     console.error("Error fetching and displaying data: ", error);
   }
 
   return modal;
-}
-
-function createBurndownChartLabels(sprintId) {
-  // Parse the start and end dates
-  const sprintData=getSprintDataBySprintID(sprintId)
-  const startDate = new Date(sprintData.startDate);
-  const endDate = new Date(sprintData.endDate);
-  
-  // Validate the dates
-  if (isNaN(startDate) || isNaN(endDate)) {
-      throw new Error("Invalid start or end date");
-  }
-
-  // Initialize an array to store the dates
-  const dateArray = [];
-  
-  // Loop through each date between startDate and endDate
-  for (let currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
-      // Push a copy of currentDate to dateArray
-      dateArray.push(new Date(currentDate));
-  }
-  
-  // Convert the date objects into a string format (optional, depending on your use-case)
-  const formattedDates = dateArray.map(date => date.toISOString().split('T')[0]);
-  
-  return formattedDates;
-
 }
 
 function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks) {
@@ -410,6 +383,35 @@ async function getSprintDataBySprintID(sprintId){
   const sprintDocRef = doc(sprintsCollection, sprintId);
   const sprintData = (await getDoc(sprintDocRef)).data();
   return sprintData
+}
+
+async function getDatesForSprint(sprintId) {
+  try {
+      // Assuming you have a function getSprintDataBySprintID(sprintId) that retrieves sprint data.
+      const sprintData = await getSprintDataBySprintID(sprintId);
+      console.log(sprintData)
+      
+      const startDate = new Date(sprintData.startDate);
+      const endDate = new Date(sprintData.endDate);
+
+      // Validate dates
+      if (isNaN(startDate) || isNaN(endDate)) {
+          throw new Error('Invalid startDate or endDate.');
+      }
+
+      const dates = [];
+      let currentDate = new Date(startDate);
+
+      while (currentDate <= endDate) {
+        dates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      return dates;
+  } catch (error) {
+      console.error('Error getting dates for sprint:', error);
+      throw error;  // Re-throw error to allow calling code to handle it.
+  }
 }
 
 // Call the function to display Sprint Backlogs when the page loads
