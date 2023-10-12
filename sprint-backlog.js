@@ -504,8 +504,8 @@ async function showTaskDetails(taskData) {
 async function displayTimeSpentEntries(taskName) {
   const timeSpentDiv = document.getElementById("timeSpentDetails");
 
-  // Initialize the content with "Time Spent:"
-  let content = "<p>Time Spent:</p>";
+  // Initialize the content with "Total Time Spent:"
+  let content = "";
 
   let totalHours = 0;
   let totalMinutes = 0;
@@ -532,22 +532,10 @@ async function displayTimeSpentEntries(taskName) {
         hours: Math.floor(logData.timeSpent),
         minutes: (logData.timeSpent - Math.floor(logData.timeSpent)) * 60,
       });
-    });
-
-    // Sort time entries based on log date
-    timeSpentEntries.sort((a, b) => new Date(a.logDate) - new Date(b.logDate));
-
-    timeSpentEntries.forEach((entry) => {
-      const timeSpentDetails = formatTimeSpentDetails(
-        entry.logDate,
-        entry.hours,
-        entry.minutes
-      );
-      content += `<p>${timeSpentDetails}</p>`;
 
       // Update total time spent
-      totalHours += entry.hours;
-      totalMinutes += entry.minutes;
+      totalHours += Math.floor(logData.timeSpent);
+      totalMinutes += (logData.timeSpent - Math.floor(logData.timeSpent)) * 60;
     });
 
     // Calculate total hours and minutes
