@@ -529,10 +529,11 @@ async function displayTimeSpentEntries(taskName) {
       const logData = doc.data();
       timeSpentEntries.push({
         logDate: logData.logDate,
+        assignee: logData.assignee,
         hours: Math.floor(logData.timeSpent),
         minutes: (logData.timeSpent - Math.floor(logData.timeSpent)) * 60,
       });
-
+    
       // Update total time spent
       totalHours += Math.floor(logData.timeSpent);
       totalMinutes += (logData.timeSpent - Math.floor(logData.timeSpent)) * 60;
@@ -699,14 +700,15 @@ async function saveTaskLog(taskData) {
     // Check if the user wants to delete the time spent
     if (timeSpent === 0) {
       // If timeSpent is 0, delete the existing log entry
-      await deleteTaskLogEntry(taskName, logDate);
+      await deleteTaskLogEntry(taskName, logDate, teamMember);
       console.log("Task log entry deleted successfully.");
     } else {
       // Query the "task_logs" collection for a document with the same task name and logDate
       const q = firestoreQuery(
         taskLogsCollection,
         where("taskName", "==", log.taskName),
-        where("logDate", "==", log.logDate)
+        where("logDate", "==", log.logDate),
+        where("assignee", "==", log.assignee)
       );
 
       const querySnapshot = await getDocs(q);
@@ -749,13 +751,14 @@ async function saveTaskLog(taskData) {
 }
 
 // Function to delete a task log entry
-async function deleteTaskLogEntry(taskName, logDate) {
+async function deleteTaskLogEntry(taskName, logDate, assignee) {
   try {
     const taskLogsCollection = collection(db, "task_logs");
     const q = firestoreQuery(
       taskLogsCollection,
       where("taskName", "==", taskName),
-      where("logDate", "==", logDate)
+      where("logDate", "==", logDate),
+      where("assignee", "==", assignee)
     );
 
     const querySnapshot = await getDocs(q);
