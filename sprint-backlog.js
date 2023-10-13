@@ -367,7 +367,7 @@ function handleDragAndDrop(column) {
           sprintData.inProgress.splice(indexToRemove, 1);
         }
       } else if (sourceColumnId === "column3") {
-        // Remove the task from sprintData.inProgress
+        // Remove the task from sprintData.completed
         const indexToRemove = sprintData.completed.indexOf(taskId);
         if (indexToRemove !== -1) {
           sprintData.completed.splice(indexToRemove, 1);
@@ -377,20 +377,51 @@ function handleDragAndDrop(column) {
       if (targetColumnId === "column1") {
         // Add the task to sprintData.notStarted
         sprintData.notStarted.push(taskId);
+        // Update task status to "Not Started"
+        await updateTaskStatus(taskId, "Not Started");
       } else if (targetColumnId === "column2") {
         // Add the task to sprintData.inProgress
         sprintData.inProgress.push(taskId);
+        // Update task status to "In Progress"
+        await updateTaskStatus(taskId, "In Progress");
       } else if (targetColumnId === "column3") {
-        // Add the task to sprintData.inProgress
+        // Add the task to sprintData.completed
         sprintData.completed.push(taskId);
+        // Update task status to "Completed"
+        await updateTaskStatus(taskId, "Completed");
       }
 
       // Update the Firestore document
       await updateDoc(sprintDocRef, sprintData);
+
+      // Refresh local data 
+      populateColumnsFromSprintData();
     }
   });
 }
 columns.forEach(handleDragAndDrop);
+
+async function updateTaskStatus(taskId, newStatus) {
+  try {
+    const taskDocRef = doc(db, "tasks", taskId);
+    const taskData = (await getDoc(taskDocRef)).data();
+
+    if (taskData) {
+      taskData.taskStatus = newStatus;
+      await updateDoc(taskDocRef, taskData);
+    
+      // Update the task's appearance in the corresponding column
+      const taskElement = document.getElementById(taskId);
+      if (taskElement) {
+        taskElement.dataset.status = newStatus;
+      }
+    } else {
+      console.error("Task not found.");
+    }
+  } catch (error) {
+    console.error("Error updating task status:", error);
+  }
+}
 
 const deleteArea = document.getElementById("deleteArea");
 deleteArea.addEventListener("dragover", (e) => {
