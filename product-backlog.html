@@ -17,6 +17,9 @@
       function preventBack() { window.history.forward(); }  
       setTimeout("preventBack()", 0);
       window.onunload = function () { null };  
+      window.addEventListener('popstate', function(event) {
+        location.reload();
+      });
     </script> 
   </head>
   <body style="background-color: #e9c6d8">
