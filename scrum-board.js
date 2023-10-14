@@ -27,58 +27,68 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app);
-const productBacklogButton = document.getElementById("product_backlog_button")
-const scumboardButton = document.getElementById("scrum_board_button")
+const productBacklogButton = document.getElementById("product_backlog_button");
+const scumboardButton = document.getElementById("scrum_board_button");
+const teamMemberButton = document.getElementById("team_member_button");
 
 scumboardButton.addEventListener("click", () => {
   const routeTo = "scrum-board.html";
   const username = window.history.state.username;
   const admin = window.history.state.isAdmin;
-  window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+  window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
   window.location.href = routeTo; // Redirect to the desired page
-})
+});
 
 productBacklogButton.addEventListener("click", () => {
   const routeTo = "product-backlog.html";
   const username = window.history.state.username;
   const admin = window.history.state.isAdmin;
-  window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+  window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
   window.location.href = routeTo; // Redirect to the desired page
-})
+});
 
+teamMemberButton.addEventListener("click", () => {
+  const routeTo = "team-member.html";
+  const username = window.history.state.username;
+  const admin = window.history.state.isAdmin;
+  window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
+  window.location.href = routeTo; // Redirect to the desired page
+});
 
-document.getElementById("createSprintButton").addEventListener("click", async () => {
-  try {
+document
+  .getElementById("createSprintButton")
+  .addEventListener("click", async () => {
+    try {
       // Get a reference to the "sprints" and "modals" collections in Firestore
       const sprintsCollection = collection(db, "sprints");
       const modalsCollection = collection(db, "modals");
 
       // Add a new document with a unique ID to the "sprints" collection
       const sprintDocRef = await addDoc(sprintsCollection, {
-          name: '',
-          startDate: '', 
-          endDate: '',
-          notStarted: [],
-          inProgress: [],
-          completed: [],
-          addedTaskID:[],
-          removedTaskID: [],
-          storyPoint: 0,
-          modal: false,
+        name: "",
+        startDate: "",
+        endDate: "",
+        notStarted: [],
+        inProgress: [],
+        completed: [],
+        addedTaskID: [],
+        removedTaskID: [],
+        storyPoint: 0,
+        modal: false,
       });
 
       // Add a new document with a unique ID to the "modals" collection
       const modalDocRef = await addDoc(modalsCollection, {
-          sprint: sprintDocRef.id, // Store the sprint ID in the modal document
-          sprintChartData: [],
+        sprint: sprintDocRef.id, // Store the sprint ID in the modal document
+        sprintChartData: [],
       });
 
       // Redirect to the sprint backlog page with the sprint ID
       window.location.href = `sprint-backlog.html?id=${sprintDocRef.id}`;
-  } catch (error) {
+    } catch (error) {
       console.error("Error adding sprint and modal: ", error);
-  }
-});
+    }
+  });
 
 function displaySprintBacklogs() {
   const sprintsContainer = document.getElementById("sprintsContainer");
@@ -87,7 +97,7 @@ function displaySprintBacklogs() {
   // Get all documents in the "sprints" collection
   getDocs(sprintsCollection)
     .then((querySnapshot) => {
-      querySnapshot.forEach(async(docs) => {
+      querySnapshot.forEach(async (docs) => {
         const sprintData = docs.data();
         const sprintId = docs.id; // Extract the sprintId here
 
@@ -100,7 +110,7 @@ function displaySprintBacklogs() {
         const closeButton = document.createElement("div");
         closeButton.className = "close-button";
         closeButton.innerText = "x";
-        closeButton.addEventListener("click", async(event) => {
+        closeButton.addEventListener("click", async (event) => {
           // Prevent the click event from propagating to the card click event
           event.stopPropagation();
           const confirmDelete = confirm("Do you want to delete this sprint?");
@@ -114,10 +124,10 @@ function displaySprintBacklogs() {
         const chartButton = document.createElement("div");
         chartButton.className = "chart-button";
         chartButton.innerText = "Burndown Chart";
-        chartButton.addEventListener("click", async(event) => {
+        chartButton.addEventListener("click", async (event) => {
           // Prevent the click event from propagating to the card click event
           event.stopPropagation();
-          if(sprintData.modal === false) {
+          if (sprintData.modal === false) {
             const modal = createAndDisplayModal(sprintId);
             // modal.style.display = "block";
           }
@@ -145,7 +155,11 @@ function displaySprintBacklogs() {
           const routeTo = `sprint-backlog.html?id=${sprintId}`;
           const username = window.history.state.username;
           const admin = window.history.state.isAdmin;
-          window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+          window.history.pushState(
+            { username: username, isAdmin: admin },
+            "",
+            routeTo
+          );
           window.location.href = routeTo; // Redirect to the desired page
         });
       });
@@ -198,7 +212,7 @@ async function createAndDisplayModal(sprintId) {
   try {
     const sortedData = await sortedChartData(sprintId);
     const tableBody = modal.querySelector(`#tableBody-${sprintId}`);
-    sortedData.forEach(data => {
+    sortedData.forEach((data) => {
       const newRow = document.createElement("tr");
       newRow.innerHTML = `
         <td>${data.date}</td>
@@ -209,14 +223,19 @@ async function createAndDisplayModal(sprintId) {
     });
 
     // Generate burndown chart using Chart.js
-    const ctx = modal.querySelector(`#burndownChart-${sprintId}`).getContext("2d");
+    const ctx = modal
+      .querySelector(`#burndownChart-${sprintId}`)
+      .getContext("2d");
     const dates = await getDatesForSprint(sprintId);
-    console.log(dates)
-    const idealRemainingTasks = sortedData.map((data) => data.idealRemainingTasks);
-    const actualRemainingTasks = sortedData.map((data) => data.actualRemainingTasks);
+    console.log(dates);
+    const idealRemainingTasks = sortedData.map(
+      (data) => data.idealRemainingTasks
+    );
+    const actualRemainingTasks = sortedData.map(
+      (data) => data.actualRemainingTasks
+    );
 
-    renderBurndownChart(ctx, dates, [1,1,5,2], [6,2,4,3]);
-
+    renderBurndownChart(ctx, dates, [1, 1, 5, 2], [6, 2, 4, 3]);
   } catch (error) {
     console.error("Error fetching and displaying data: ", error);
   }
@@ -224,7 +243,12 @@ async function createAndDisplayModal(sprintId) {
   return modal;
 }
 
-function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTasks) {
+function renderBurndownChart(
+  ctx,
+  dates,
+  idealRemainingTasks,
+  actualRemainingTasks
+) {
   const chart = new Chart(ctx, {
     type: "line",
     data: {
@@ -235,16 +259,16 @@ function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTas
           data: actualRemainingTasks,
           borderColor: "rgba(75, 192, 192, 1)",
           borderWidth: 2,
-          fill: false
+          fill: false,
         },
         {
           label: "Ideal Remaining Tasks",
           data: idealRemainingTasks,
           borderColor: "rgba(255, 99, 132, 1)",
           borderWidth: 2,
-          fill: false
-        }
-      ]
+          fill: false,
+        },
+      ],
     },
     options: {
       responsive: true,
@@ -285,7 +309,7 @@ function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTas
         },
         title: {
           display: true,
-          text: 'Burndown Chart',
+          text: "Burndown Chart",
           font: {
             size: 23,
           },
@@ -299,7 +323,10 @@ function renderBurndownChart(ctx, dates, idealRemainingTasks, actualRemainingTas
             label: (tooltipItem) => {
               const datasetLabel = tooltipItem.dataset.label || "";
               const dataIndex = tooltipItem.dataIndex;
-              const timeSpent = tooltipItem.chart.data.datasets[tooltipItem.datasetIndex].data[dataIndex];
+              const timeSpent =
+                tooltipItem.chart.data.datasets[tooltipItem.datasetIndex].data[
+                  dataIndex
+                ];
               return `${datasetLabel}: ${timeSpent} hours`;
             },
           },
@@ -334,17 +361,19 @@ async function sortedChartData(sprintId) {
       });
       const entriesToRemove = modalData.sprintChartData.length;
 
-      await updateDoc(modalDocRef, { sprintChartData: modalData.sprintChartData });
+      await updateDoc(modalDocRef, {
+        sprintChartData: modalData.sprintChartData,
+      });
 
       for (let i = 0; i < entriesToRemove; i++) {
         const data = modalData.sprintChartData.pop();
-        temp.push(data)
-      } 
+        temp.push(data);
+      }
       temp.sort((a, b) => {
         // Convert the date strings to Date objects for comparison
         const dateA = new Date(a.date);
         const dateB = new Date(b.date);
-      
+
         // Compare the dates and return the result of the comparison
         return dateA - dateB;
       });
@@ -377,7 +406,7 @@ function findModalIdBySprintId(sprintId) {
 async function getSprintDataBySprintID(sprintId) {
   const sprintsCollection = collection(db, "sprints");
   const sprintDocRef = doc(sprintsCollection, sprintId);
-  
+
   try {
     const sprintSnapshot = await getDoc(sprintDocRef);
     const sprintData = sprintSnapshot.data();
@@ -391,43 +420,47 @@ async function getSprintDataBySprintID(sprintId) {
 
 async function getDatesForSprint(sprintId) {
   try {
-      // Assuming you have a function getSprintDataBySprintID(sprintId) that retrieves sprint data.
-      const sprintData = await getSprintDataBySprintID(sprintId);
-      
-      const startDate = new Date(sprintData.startDate);
-      const endDate = new Date(sprintData.endDate);
+    // Assuming you have a function getSprintDataBySprintID(sprintId) that retrieves sprint data.
+    const sprintData = await getSprintDataBySprintID(sprintId);
 
-      // Validate dates
-      if (isNaN(startDate) || isNaN(endDate)) {
-          throw new Error('Invalid startDate or endDate.');
-      }
+    const startDate = new Date(sprintData.startDate);
+    const endDate = new Date(sprintData.endDate);
 
-      const dates = [];
-      let currentDate = new Date(startDate);
+    // Validate dates
+    if (isNaN(startDate) || isNaN(endDate)) {
+      throw new Error("Invalid startDate or endDate.");
+    }
 
-      while (currentDate <= endDate) {
-        dates.push(currentDate.toISOString().split('T')[0]);
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-      
-      return dates;
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      dates.push(currentDate.toISOString().split("T")[0]);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dates;
   } catch (error) {
-      console.error('Error getting dates for sprint:', error);
-      throw error;  // Re-throw error to allow calling code to handle it.
+    console.error("Error getting dates for sprint:", error);
+    throw error; // Re-throw error to allow calling code to handle it.
   }
 }
 
 const createAccountButton = document.getElementById("create_account_button");
-const checkAdmin = window.history.state.isAdmin
+const checkAdmin = window.history.state.isAdmin;
 if (checkAdmin === "true") {
   createAccountButton.style.display = "block"; // Show the button
   createAccountButton.addEventListener("click", () => {
-    const routeTo = "account-creation.html"
+    const routeTo = "account-creation.html";
     const username = window.history.state.username;
     const admin = window.history.state.isAdmin;
-    window.history.pushState({username: username, isAdmin: admin, previousPage: 'scrum-board.html'}, "", routeTo)
+    window.history.pushState(
+      { username: username, isAdmin: admin, previousPage: "scrum-board.html" },
+      "",
+      routeTo
+    );
     window.location.href = routeTo;
-  })
+  });
 } else {
   createAccountButton.style.display = "hide"; // Hide the button
 }

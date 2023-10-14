@@ -39,40 +39,56 @@ const startSprintButton = document.getElementById("startSprintButton");
 const sprintNameInput = document.getElementById("sprintNameInput");
 const startDateInput = document.getElementById("startDateInput");
 const endDateInput = document.getElementById("endDateInput");
-const productBacklogButton = document.getElementById("product_backlog_button")
-const scumboardButton = document.getElementById("scrum_board_button")
+const productBacklogButton = document.getElementById("product_backlog_button");
+const scumboardButton = document.getElementById("scrum_board_button");
 const createAccountButton = document.getElementById("create_account_button");
-const checkAdmin = window.history.state.isAdmin
+const teamMemberButton = document.getElementById("team_member_button");
+const checkAdmin = window.history.state.isAdmin;
 
 scumboardButton.addEventListener("click", () => {
   const routeTo = "scrum-board.html";
   const username = window.history.state.username;
   const admin = window.history.state.isAdmin;
-  window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+  window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
   window.location.href = routeTo; // Redirect to the desired page
-})
+});
 
 productBacklogButton.addEventListener("click", () => {
   const routeTo = "product-backlog.html";
   const username = window.history.state.username;
   const admin = window.history.state.isAdmin;
-  window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+  window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
   window.location.href = routeTo; // Redirect to the desired page
-})
+});
+
+teamMemberButton.addEventListener("click", () => {
+  const routeTo = "team-member.html";
+  const username = window.history.state.username;
+  const admin = window.history.state.isAdmin;
+  window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
+  window.location.href = routeTo; // Redirect to the desired page
+});
 
 if (checkAdmin === "true") {
   createAccountButton.style.display = "block"; // Show the button
   createAccountButton.addEventListener("click", () => {
-    const routeTo = "account-creation.html"
+    const routeTo = "account-creation.html";
     const username = window.history.state.username;
     const admin = window.history.state.isAdmin;
-    window.history.pushState({username: username, isAdmin: admin, previousPage:`sprint-backlog.html?id=${sprintId}`}, "", routeTo)
+    window.history.pushState(
+      {
+        username: username,
+        isAdmin: admin,
+        previousPage: `sprint-backlog.html?id=${sprintId}`,
+      },
+      "",
+      routeTo
+    );
     window.location.href = routeTo;
-  })
+  });
 } else {
   createAccountButton.style.display = "hide"; // Hide the button
 }
-
 
 function disableAddTaskButton() {
   addButton.disabled = true;
@@ -394,7 +410,7 @@ function handleDragAndDrop(column) {
       // Update the Firestore document
       await updateDoc(sprintDocRef, sprintData);
 
-      // Refresh local data 
+      // Refresh local data
       populateColumnsFromSprintData();
     }
   });
@@ -409,7 +425,7 @@ async function updateTaskStatus(taskId, newStatus) {
     if (taskData) {
       taskData.taskStatus = newStatus;
       await updateDoc(taskDocRef, taskData);
-    
+
       // Update the task's appearance in the corresponding column
       const taskElement = document.getElementById(taskId);
       if (taskElement) {
@@ -578,7 +594,7 @@ async function displayTimeSpentEntries(taskName) {
         hours: Math.floor(logData.timeSpent),
         minutes: (logData.timeSpent - Math.floor(logData.timeSpent)) * 60,
       });
-    
+
       // Update total time spent
       totalHours += Math.floor(logData.timeSpent);
       totalMinutes += (logData.timeSpent - Math.floor(logData.timeSpent)) * 60;

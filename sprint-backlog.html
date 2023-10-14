@@ -16,14 +16,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script type="module" src="sprint-backlog.js"></script>
     <script src="sidebar.js"></script>
-    <script type = "text/javascript" >  
-      function preventBack() { window.history.forward(); }  
+    <script type="text/javascript">
+      function preventBack() {
+        window.history.forward();
+      }
       setTimeout("preventBack()", 0);
-      window.onunload = function () { null };  
-      window.addEventListener('popstate', function(event) {
+      window.onunload = function () {
+        null;
+      };
+      window.addEventListener("popstate", function (event) {
         location.reload();
       });
-    </script> 
+    </script>
   </head>
   <body style="background-color: #e9c6d8">
     <!-- the following implementation of sidebar is from w3schools: https://www.w3schools.com/w3css/tryit.asp?filename=tryw3css_sidebar_shift -->
@@ -31,9 +35,22 @@
       <button class="w3-bar-item w3-button w3-large" onclick="w3_close()">
         Close &times;
       </button>
-      <button id="product_backlog_button"class="w3-bar-item w3-button">Product Backlog</button>
-      <button id="scrum_board_button" class="w3-bar-item w3-button">Scrum Board </button>
-      <button id="create_account_button" class="w3-bar-item w3-button" style="display: none;">Create Account</button>
+      <button id="product_backlog_button" class="w3-bar-item w3-button">
+        Product Backlog
+      </button>
+      <button id="scrum_board_button" class="w3-bar-item w3-button">
+        Scrum Board
+      </button>
+      <button
+        id="create_account_button"
+        class="w3-bar-item w3-button"
+        style="display: none"
+      >
+        Create Account
+      </button>
+      <button id="team_member_button" class="w3-bar-item w3-button">
+        Team Member
+      </button>
     </div>
 
     <div id="main">

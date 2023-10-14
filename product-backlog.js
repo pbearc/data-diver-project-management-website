@@ -1,12 +1,20 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot, deleteDoc } 
-from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  getDocs,
+  onSnapshot,
+  deleteDoc,
+} from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBbyuRShsNdaTzIcuKKzlvTDl8bCDr8pJY",
   authDomain: "fit2101-project-database.firebaseapp.com",
   databaseURL:
-  "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "https://fit2101-project-database-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "fit2101-project-database",
   storageBucket: "fit2101-project-database.appspot.com",
   messagingSenderId: "841276992676",
@@ -38,11 +46,16 @@ const createButton = (text, position, eventHandler) => {
 const getPriorityClass = (priority) => {
   let priorityClass = "priority-text-";
   switch (priority.toLowerCase()) {
-    case "low": return priorityClass += "low";
-    case "medium": return priorityClass += "medium";
-    case "important": return priorityClass += "important";
-    case "urgent": return priorityClass += "urgent";
-    default: return priorityClass += "default";
+    case "low":
+      return (priorityClass += "low");
+    case "medium":
+      return (priorityClass += "medium");
+    case "important":
+      return (priorityClass += "important");
+    case "urgent":
+      return (priorityClass += "urgent");
+    default:
+      return (priorityClass += "default");
   }
 };
 
@@ -73,28 +86,41 @@ const sortTasks = (querySnapshot, sortOrder) => {
 
   switch (sortOrder) {
     case "RecentToOldest":
-      sortedDocs = querySnapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+      sortedDocs = querySnapshot.docs.sort(
+        (a, b) => b.data().timestamp - a.data().timestamp
+      );
       break;
     case "LowestToUrgent":
     case "UrgentToLowest":
-      const priorityOrder = sortOrder === "LowestToUrgent" ? ["Low", "Medium", "Important", "Urgent"] : ["Urgent", "Important", "Medium", "Low"];
-      sortedDocs = querySnapshot.docs.sort((a, b) => priorityOrder.indexOf(a.data().priority) - priorityOrder.indexOf(b.data().priority));
+      const priorityOrder =
+        sortOrder === "LowestToUrgent"
+          ? ["Low", "Medium", "Important", "Urgent"]
+          : ["Urgent", "Important", "Medium", "Low"];
+      sortedDocs = querySnapshot.docs.sort(
+        (a, b) =>
+          priorityOrder.indexOf(a.data().priority) -
+          priorityOrder.indexOf(b.data().priority)
+      );
       break;
     default:
-      sortedDocs = querySnapshot.docs.sort((a, b) => a.data().timestamp - b.data().timestamp);
+      sortedDocs = querySnapshot.docs.sort(
+        (a, b) => a.data().timestamp - b.data().timestamp
+      );
   }
 
   return sortedDocs;
-}
+};
 
 const getColoredTags = (tagString) => {
   const tagsArray = tagString.split(", ");
-  const coloredTags = tagsArray.map(tag => {
-    const tagClass = `tag-${tag.toLowerCase()}`;
-    return `<span class="${tagClass}">${tag}</span>`;
-  }).join(", ");
+  const coloredTags = tagsArray
+    .map((tag) => {
+      const tagClass = `tag-${tag.toLowerCase()}`;
+      return `<span class="${tagClass}">${tag}</span>`;
+    })
+    .join(", ");
   return coloredTags;
-}
+};
 // Main code
 document.addEventListener("DOMContentLoaded", function () {
   let editingTaskId = null;
@@ -179,10 +205,10 @@ document.addEventListener("DOMContentLoaded", function () {
         floatingWindow.style.display = "block";
       }
     );
-    
+
     const priorityClass = getPriorityClass(taskData.priority);
     const coloredTags = getColoredTags(taskData.tag);
-  
+
     taskItem.innerHTML = `
       <p class="task-name">Name: ${taskData.taskName}</p>
       <p class="task-name">Tag: ${coloredTags}</p>
@@ -190,7 +216,9 @@ document.addEventListener("DOMContentLoaded", function () {
       <p>Priority: <span class="${priorityClass}">${taskData.priority}</span></p>
     `;
 
-    [deleteButton, editButton].forEach((button) => taskItem.appendChild(button));
+    [deleteButton, editButton].forEach((button) =>
+      taskItem.appendChild(button)
+    );
     taskList.appendChild(taskItem);
   }
 
@@ -198,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const taskDetailsContent = document.getElementById("taskDetailsContent");
     const priorityClass = getPriorityClass(taskData.priority);
     const coloredTags = getColoredTags(taskData.tag);
-    
+
     // Populate the task details in the pop-up window
     taskDetailsContent.innerHTML = `
       <p>Name: ${taskData.taskName}</p>
@@ -224,33 +252,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function displayTasksRealtime(sortOrder = "OldestToRecent") {
     const tasksCollection = collection(db, "tasks");
-    const filterValue = document.getElementById("filter").value.replace("-filter", "");
-  
+    const filterValue = document
+      .getElementById("filter")
+      .value.replace("-filter", "");
+
     onSnapshot(tasksCollection, (querySnapshot) => {
       const taskList = document.getElementById("taskList");
       taskList.innerHTML = "";
-  
+
       const sortedDocs = sortTasks(querySnapshot, sortOrder);
-  
+
       sortedDocs.forEach((doc) => {
         const taskData = doc.data();
-        if (filterValue === "All" || filterValue === "" || taskData.tag.includes(filterValue)) {
-          displayTask(taskData, doc.id);  // Assuming displayTask is defined elsewhere
+        if (
+          filterValue === "All" ||
+          filterValue === "" ||
+          taskData.tag.includes(filterValue)
+        ) {
+          displayTask(taskData, doc.id); // Assuming displayTask is defined elsewhere
         }
       });
     });
   }
-  
+
   // Event listeners for buttons and windows
   const addTaskButton = document.getElementById("addTaskButton");
   const floatingWindow = document.getElementById("floatingWindow");
   const closeFloatingWindow = document.getElementById("closeFloatingWindow");
   const saveTaskButton = document.getElementById("saveTaskButton");
-  const productBacklogButton = document.getElementById("product_backlog_button")
-  const scumboardButton = document.getElementById("scrum_board_button")
+  const productBacklogButton = document.getElementById(
+    "product_backlog_button"
+  );
+  const scumboardButton = document.getElementById("scrum_board_button");
   const createAccountButton = document.getElementById("create_account_button");
-  const checkAdmin = window.history.state.isAdmin
-
+  const teamMemberButton = document.getElementById("team_member_button");
+  const checkAdmin = window.history.state.isAdmin;
 
   addTaskButton.addEventListener("click", () => {
     floatingWindow.style.display = "block";
@@ -290,27 +326,55 @@ document.addEventListener("DOMContentLoaded", function () {
     const routeTo = "scrum-board.html";
     const username = window.history.state.username;
     const admin = window.history.state.isAdmin;
-    window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+    window.history.pushState(
+      { username: username, isAdmin: admin },
+      "",
+      routeTo
+    );
     window.location.href = routeTo; // Redirect to the desired page
-  })
+  });
 
   productBacklogButton.addEventListener("click", () => {
     const routeTo = "product-backlog.html";
     const username = window.history.state.username;
     const admin = window.history.state.isAdmin;
-    window.history.pushState({username: username, isAdmin: admin}, "", routeTo)
+    window.history.pushState(
+      { username: username, isAdmin: admin },
+      "",
+      routeTo
+    );
     window.location.href = routeTo; // Redirect to the desired page
-  })
+  });
+
+  teamMemberButton.addEventListener("click", () => {
+    const routeTo = "team-member.html";
+    const username = window.history.state.username;
+    const admin = window.history.state.isAdmin;
+    window.history.pushState(
+      { username: username, isAdmin: admin },
+      "",
+      routeTo
+    );
+    window.location.href = routeTo; // Redirect to the desired page
+  });
 
   if (checkAdmin === "true") {
     createAccountButton.style.display = "block"; // Show the button
     createAccountButton.addEventListener("click", () => {
-    const routeTo = "account-creation.html"
-    const username = window.history.state.username;
-    const admin = window.history.state.isAdmin;
-    window.history.pushState({username: username, isAdmin: admin, previousPage: 'product-backlog.html'}, "", routeTo)
-    window.location.href = routeTo;
-    })
+      const routeTo = "account-creation.html";
+      const username = window.history.state.username;
+      const admin = window.history.state.isAdmin;
+      window.history.pushState(
+        {
+          username: username,
+          isAdmin: admin,
+          previousPage: "product-backlog.html",
+        },
+        "",
+        routeTo
+      );
+      window.location.href = routeTo;
+    });
   } else {
     createAccountButton.style.display = "hide"; // Hide the button
   }
