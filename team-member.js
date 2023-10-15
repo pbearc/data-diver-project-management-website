@@ -10,6 +10,8 @@ import {
   deleteDoc,
   getDoc,
   orderBy,
+  query,
+  where,
 } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -58,24 +60,86 @@ teamMemberButton.addEventListener("click", () => {
 const addTeamMemberButton = document.getElementById("addTeamMemberButton");
 
 addTeamMemberButton.addEventListener("click", () => {
-  window.location.href = "account-creation.html"; // Redirect to the account creation page
+  const dropdownMenu = document.getElementById("teamMemberDropdown");
+  const selectedUser = dropdownMenu.value; // Assuming you have a dropdown menu with the id 'dropdownMenu'
+
+  // Fetch the user data from the 'users' collection based on the selectedUser
+  const usersCollection = collection(db, "users");
+  const userQuery = query(
+    usersCollection,
+    where("username", "==", selectedUser)
+  ); // Rename the variable here
+  getDocs(userQuery) // Use the new variable here
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        saveToUsersAdded(userData);
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching user: ", error);
+    });
 });
+
+function saveToUsersAdded(userData) {
+  const usersAddedCollection = collection(db, "users_added");
+  const { username, isAdmin } = userData; // Extract the necessary fields from the userData
+  const data = { username, isAdmin };
+
+  addDoc(usersAddedCollection, data)
+    .then((docRef) => {
+      console.log("Document written with ID: ", docRef.id);
+      displayTeamMembers(); // Call the display function after the new member is added
+    })
+    .catch((error) => {
+      console.error("Error adding document: ", error);
+    });
+}
+
+async function displayTeamMembersInDropdown() {
+  const usersSnapshot = await getDocs(collection(db, "users"));
+  const usersAddedSnapshot = await getDocs(collection(db, "users_added"));
+  const dropdown = document.getElementById("teamMemberDropdown");
+  dropdown.innerHTML = "";
+
+  const usersAddedUsernames = usersAddedSnapshot.docs.map(
+    (doc) => doc.data().username
+  );
+
+  if (usersAddedUsernames.length === usersSnapshot.size) {
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.text = "All team members added";
+    dropdown.appendChild(defaultOption);
+  } else {
+    usersSnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (!usersAddedUsernames.includes(data.username)) {
+        const option = document.createElement("option");
+        option.value = data.username;
+        option.text = data.username;
+        dropdown.appendChild(option);
+      }
+    });
+  }
+}
 
 function displayTeamMembers() {
   const teamMembersContainer = document.getElementById("teamMembersContainer");
-  const teamMembersCollection = collection(db, "users");
+  teamMembersContainer.innerHTML = ""; // Clear the container before adding new members
 
-  // Get all documents in the "sprints" collection
-  getDocs(teamMembersCollection)
+  const usersAddedCollection = collection(db, "users_added");
+
+  getDocs(usersAddedCollection)
     .then((querySnapshot) => {
-      querySnapshot.forEach(async (docs) => {
-        const teamMemberData = docs.data();
-        const teamMemberId = docs.id; // Extract the sprintId here
+      querySnapshot.forEach((doc) => {
+        const teamMemberData = doc.data();
+        const teamMemberId = doc.id; // Extract the team member's ID here
 
-        // Create a card or element to display sprintData.name and sprintData.date
+        // Create a card or element to display the team member's data
         const teamMemberCard = document.createElement("div");
         teamMemberCard.className = "card"; // Add class for styling
-        teamMemberCard.setAttribute("data-sprint-id", teamMemberId);
+        teamMemberCard.setAttribute("data-team-member-id", teamMemberId);
 
         // Card body
         const cardBody = document.createElement("div");
@@ -87,25 +151,11 @@ function displayTeamMembers() {
           }</p>
         `;
 
-        // Append close button and card body to the card
+        // Append card body to the card
         teamMemberCard.appendChild(cardBody);
 
         // Append the card to the container
         teamMembersContainer.appendChild(teamMemberCard);
-
-        // // Attach a click event listener to the card
-        // teamMemberCard.addEventListener("click", () => {
-        //   // Construct the URL with the sprintId parameter and navigate to the Sprint Backlog page
-        //   const routeTo = `team-member-details.html?id=${teamMemberId}`;
-        //   const username = window.history.state.username;
-        //   const admin = window.history.state.isAdmin;
-        //   window.history.pushState(
-        //     { username: username, isAdmin: admin },
-        //     "",
-        //     routeTo
-        //   );
-        //   window.location.href = routeTo; // Redirect to the desired page
-        // });
       });
     })
     .catch((error) => {
@@ -134,5 +184,11 @@ function displayTeamMembers() {
 
 // Call the function to display Sprint Backlogs when the page loads
 window.addEventListener("load", () => {
+  displayTeamMembersInDropdown();
   displayTeamMembers();
+
+  const usersAddedCollection = collection(db, "users_added");
+  onSnapshot(usersAddedCollection, () => {
+    displayTeamMembersInDropdown();
+  });
 });
