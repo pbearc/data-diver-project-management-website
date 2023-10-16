@@ -38,13 +38,17 @@ function createAccount(username, password) {
     });
 }
 
-function redirectToLoginPage() {
-    const prev = window.history.state.previousPage;
-    const username = window.history.state.username;
-    const admin = window.history.state.isAdmin;
-    window.history.pushState({username: username, isAdmin: admin}, "", prev)
-    window.location.href = prev; // Redirect to the desired page
-    // window.location.href = "login-mainpage.html"
+function redirectToPreviousPage() {
+  const routeTo = window.history.state.previousPage
+  const username = window.history.state.username;
+  const admin = window.history.state.isAdmin;
+  window.history.pushState(
+    { username: username, isAdmin: admin },
+    "",
+    routeTo
+  );
+  window.location.href = routeTo; // Redirect to the desired page
+
 }
 
 // Function to check if a username is already taken
@@ -63,6 +67,11 @@ async function isUsernameTaken(username) {
 
     return isTaken;
 }
+
+const backButton = document.getElementById("back-button")
+backButton.addEventListener("click", () => {
+  redirectToPreviousPage();
+})
 
 const createAccountButton = document.getElementById("createAccountButton");
 
@@ -94,7 +103,7 @@ if (createAccountButton) {
     createAccount(username, password)
         .then(() => {
         console.log("Account created successfully!");
-        redirectToLoginPage()
+        redirectToPreviousPage()
         // Redirect or show a success message to the user
         })
         .catch((error) => {
