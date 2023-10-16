@@ -322,11 +322,19 @@ async function populateColumn(taskIds, columnTaskContainer) {
 
   // Populate column with sorted and filtered tasks
   for (const task of filteredTasks) {
+    const coloredTags = getColoredTags(task.data.tag)
+    const priorityClass = getPriorityClass(task.data.priority);
     const taskElement = createTaskElement(
       task.id,
       task.data,
       task.data.taskName
     );
+    taskElement.innerHTML = `
+    <p class="task-name">Name: ${task.data.taskName}</p>
+    <p class="task-name">Tag: ${coloredTags}</p>
+    <p>Story Point: ${task.data.storyPoint}</p>
+    <p>Priority: <span class="${priorityClass}">${task.data.priority}</span></p>
+  `;
     columnTaskContainer.appendChild(taskElement);
   }
 }
