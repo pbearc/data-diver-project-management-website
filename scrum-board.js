@@ -110,7 +110,15 @@ document
       });
 
       // Redirect to the sprint backlog page with the sprint ID
-      window.location.href = `sprint-backlog.html?id=${sprintDocRef.id}`;
+      const routeTo = `sprint-backlog.html?id=${sprintDocRef.id}`
+      const username = window.history.state.username;
+      const admin = window.history.state.isAdmin;
+      window.history.pushState(
+        { username: username, isAdmin: admin },
+        "",
+        routeTo
+      );
+      window.location.href = routeTo;
     } catch (error) {
       console.error("Error adding sprint and modal: ", error);
     }
@@ -203,16 +211,6 @@ async function createAndDisplayModal(sprintId) {
     <div class="modal-content">
       <span class="close">&times;</span>
       <canvas id="burndownChart-${sprintId}" width="400" height="200"></canvas>
-      <table class="table" style="background-color: white; margin-top: 20px;">
-        <thead>
-          <tr>
-            <th style="text-align: center;">Date</th>
-            <th style="text-align: center;">Ideal Remaining Tasks</th>
-            <th style="text-align: center;">Actual Remaining Tasks</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody-${sprintId}" style="text-align: center;"></tbody>
-      </table>
     </div>
   `;
 

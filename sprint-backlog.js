@@ -46,6 +46,7 @@ const teamMemberButton = document.getElementById("team_member_button");
 const changePassButton = document.getElementById("changePasswordLink")
 const checkAdmin = window.history.state.isAdmin;
 
+
 scumboardButton.addEventListener("click", () => {
   const routeTo = "scrum-board.html";
   const username = window.history.state.username;
