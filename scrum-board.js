@@ -30,6 +30,10 @@ const db = getFirestore(app);
 const productBacklogButton = document.getElementById("product_backlog_button");
 const scumboardButton = document.getElementById("scrum_board_button");
 const teamMemberButton = document.getElementById("team_member_button");
+const changePassButton = document.getElementById("changePasswordLink")
+const checkAdmin = window.history.state.isAdmin;
+
+console.log(window.history.state)
 
 scumboardButton.addEventListener("click", () => {
   const routeTo = "scrum-board.html";
@@ -47,13 +51,35 @@ productBacklogButton.addEventListener("click", () => {
   window.location.href = routeTo; // Redirect to the desired page
 });
 
-teamMemberButton.addEventListener("click", () => {
-  const routeTo = "team-member.html";
+if (checkAdmin === "true") {
+  teamMemberButton.style.display = "block"; // Show the button
+  teamMemberButton.addEventListener("click", () => {
+    const routeTo = "team-member.html";
+    const username = window.history.state.username;
+    const admin = window.history.state.isAdmin;
+    window.history.pushState(
+      { username: username, isAdmin: admin },
+      "",
+      routeTo
+    );
+    window.location.href = routeTo; // Redirect to the desired page
+  });
+}
+else{
+  teamMemberButton.style.display = "hide"; // Hide the button
+}
+
+changePassButton.addEventListener("click", () => {
+  const routeTo = "change-password.html"
   const username = window.history.state.username;
   const admin = window.history.state.isAdmin;
-  window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
+  window.history.pushState(
+    { username: username, isAdmin: admin, previousPage: "scrum-board.html" },
+    "",
+    routeTo
+  );
   window.location.href = routeTo; // Redirect to the desired page
-});
+})
 
 document
   .getElementById("createSprintButton")
@@ -447,7 +473,6 @@ async function getDatesForSprint(sprintId) {
 }
 
 const createAccountButton = document.getElementById("create_account_button");
-const checkAdmin = window.history.state.isAdmin;
 if (checkAdmin === "true") {
   createAccountButton.style.display = "block"; // Show the button
   createAccountButton.addEventListener("click", () => {

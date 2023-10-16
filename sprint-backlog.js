@@ -43,6 +43,7 @@ const productBacklogButton = document.getElementById("product_backlog_button");
 const scumboardButton = document.getElementById("scrum_board_button");
 const createAccountButton = document.getElementById("create_account_button");
 const teamMemberButton = document.getElementById("team_member_button");
+const changePassButton = document.getElementById("changePasswordLink")
 const checkAdmin = window.history.state.isAdmin;
 
 scumboardButton.addEventListener("click", () => {
@@ -68,6 +69,18 @@ teamMemberButton.addEventListener("click", () => {
   window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
   window.location.href = routeTo; // Redirect to the desired page
 });
+
+changePassButton.addEventListener("click", () => {
+  const routeTo = "change-password.html"
+  const username = window.history.state.username;
+  const admin = window.history.state.isAdmin;
+  window.history.pushState(
+    { username: username, isAdmin: admin, previousPage: "sprint-backlog.html" },
+    "",
+    routeTo
+  );
+  window.location.href = routeTo; // Redirect to the desired page
+})
 
 if (checkAdmin === "true") {
   createAccountButton.style.display = "block"; // Show the button

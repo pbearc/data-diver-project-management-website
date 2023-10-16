@@ -482,3 +482,15 @@ body {
   text-decoration: none;
   cursor: pointer;
 }
+
+.changePasswordLink {
+    border: 2px solid transparent; /* Set initial border to be transparent */
+    color: black; /* Set initial text color */
+    background-color: white; /* Set initial background color */
+    transition: border-color 0.3s, color 0.3s; /* Add transition effect for border color and text color changes */
+}
+
+.changePasswordLink:hover {
+    border-color: white; /* Change border color to white on hover */
+    color: blue; /* Change text color to blue on hover */
+}

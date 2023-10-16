@@ -25,15 +25,25 @@ const firebaseConfig = {
   measurementId: "G-9936B4VLCD",
 };
 
+console.log(window.history.state)
 // Initialize Firebase
 const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app, { experimentalAutoDetectLongPolling: true, });
 
-function redirectToLoginPage() {
-    window.location.href = "login-mainpage.html"; // Redirect to the desired page
-}
-
 const usersCollection = collection(db, "users");
+
+function redirectToPreviousPage() {
+    const routeTo = window.history.state.previousPage
+    const username = window.history.state.username;
+    const admin = window.history.state.isAdmin;
+    window.history.pushState(
+      { username: username, isAdmin: admin },
+      "",
+      routeTo
+    );
+    window.location.href = routeTo; // Redirect to the desired page
+
+}
 
 // Function to update password and redirect
 async function updatePasswordAndRedirect(username, newPassword) {
@@ -47,24 +57,23 @@ async function updatePasswordAndRedirect(username, newPassword) {
       });
   
       // Redirect to the login page
-      redirectToLoginPage();
+      redirectToPreviousPage();
     });
   
     // If the loop completes without finding a matching username, you can handle it here (e.g., show an error message).
 }
-
 const backButton = document.getElementById("back-button")
 backButton.addEventListener("click", () => {
-  redirectToLoginPage();
+  redirectToPreviousPage();
 })
-
 const changePasswordBtn = document.getElementById("change_new_password");
 changePasswordBtn.addEventListener("click", () => {
-  const username = document.getElementById("username").value;
+  const username = window.history.state.username;
   const newPassword = document.getElementById("new_password").value;
   const confirmPassword = document.getElementById("check_new_password").value;
-  if (username === "" || password === "") {
-    alert("Please fill in both username and password.");
+
+  if (newPassword === "") {
+    alert("Please fill in password.");
     return;
   }
 
@@ -73,6 +82,6 @@ changePasswordBtn.addEventListener("click", () => {
     updatePasswordAndRedirect(username, newPassword);
   } else {
     // Handle password mismatch error (e.g., display an error message to the user)
-    console.log("Passwords do not match. Please try again.");
+    alert("Passwords do not match. Please try again.");
   }
 });

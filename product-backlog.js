@@ -132,6 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   // console.log('pb', window.history.state.username);
   displayTasksRealtime();
+  console.log(window.history.state.username)
 
   async function deleteTask(taskId) {
     const taskRef = doc(db, "tasks", taskId);
@@ -286,6 +287,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const scumboardButton = document.getElementById("scrum_board_button");
   const createAccountButton = document.getElementById("create_account_button");
   const teamMemberButton = document.getElementById("team_member_button");
+  const changePassButton = document.getElementById("changePasswordLink")
   const checkAdmin = window.history.state.isAdmin;
 
   addTaskButton.addEventListener("click", () => {
@@ -345,18 +347,36 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     window.location.href = routeTo; // Redirect to the desired page
   });
+  
+  if (checkAdmin === "true") {
+    teamMemberButton.style.display = "block"; // Show the button
+    teamMemberButton.addEventListener("click", () => {
+      const routeTo = "team-member.html";
+      const username = window.history.state.username;
+      const admin = window.history.state.isAdmin;
+      window.history.pushState(
+        { username: username, isAdmin: admin },
+        "",
+        routeTo
+      );
+      window.location.href = routeTo; // Redirect to the desired page
+    });
+  }
+  else{
+    teamMemberButton.style.display = "hide"; // Hide the button
+  }
 
-  teamMemberButton.addEventListener("click", () => {
-    const routeTo = "team-member.html";
+  changePassButton.addEventListener("click", () => {
+    const routeTo = "change-password.html"
     const username = window.history.state.username;
     const admin = window.history.state.isAdmin;
     window.history.pushState(
-      { username: username, isAdmin: admin },
+      { username: username, isAdmin: admin, previousPage: "product-backlog.html" },
       "",
       routeTo
     );
     window.location.href = routeTo; // Redirect to the desired page
-  });
+  })
 
   if (checkAdmin === "true") {
     createAccountButton.style.display = "block"; // Show the button
