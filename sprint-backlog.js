@@ -239,17 +239,6 @@ async function addTaskToColumn() {
     hide: 1,
   });
 
-  const docSnapshot = await getDoc(taskRef);
-
-// Check if the document exists
-if (docSnapshot.exists()) {
-  // Extract the data from the document snapshot
-  const taskData = docSnapshot.data();
-
-  // Now taskData contains the data stored in the document
-  console.log("Task Data:", taskData);
-}
-
   const indexToRemove = sprintData.removedTaskID.indexOf(selectedTaskId);
   sprintData.removedTaskID.splice(indexToRemove, 1);
 

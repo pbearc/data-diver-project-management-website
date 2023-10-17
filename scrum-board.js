@@ -270,13 +270,22 @@ async function createAndDisplayModal(sprintId) {
 async function calculateTotalStoryPoints(sprintID) {
   const sprintData = await getSprintDataBySprintID(sprintID);
 
+  let totalStoryPoints = 0;
+
   // Combine all task objects into a single list
   const allTasks = [...sprintData.notStarted, ...sprintData.inProgress, ...sprintData.completed];
 
-  // Reduce the combined list to calculate total story points
-  const totalStoryPoints = allTasks.reduce((accumulator, task) => {
-    return accumulator + parseInt(task.storyPoint, 10);
-  }, 0);
+  for (const taskID of allTasks) {
+    const taskRef = doc(db, "tasks", taskID);
+    const docSnapshot = await getDoc(taskRef);
+
+    if (docSnapshot.exists()) {
+      const taskData = docSnapshot.data();
+      const taskStoryPoint = parseInt(taskData.storyPoint);
+      totalStoryPoints += taskStoryPoint;
+    }
+  }
+  console.log(totalStoryPoints)
 
   // Update the sprint document with the total story points
   const sprintDocRef = doc(db, "sprints", sprintID);
@@ -284,12 +293,14 @@ async function calculateTotalStoryPoints(sprintID) {
     storyPoint: totalStoryPoints,
   });
 
+  console.log(totalStoryPoints)
   return totalStoryPoints;
 }
 
 async function createIdealBurndownChartData(sprintID) {
   const sprintData = await getSprintDataBySprintID(sprintID);
   const totalStoryPoints = await calculateTotalStoryPoints(sprintID);
+  console.log(totalStoryPoints)
 
   const startDate = new Date(sprintData.startDate);
   const endDate = new Date(sprintData.endDate);
