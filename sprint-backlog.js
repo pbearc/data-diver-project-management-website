@@ -43,9 +43,8 @@ const productBacklogButton = document.getElementById("product_backlog_button");
 const scumboardButton = document.getElementById("scrum_board_button");
 const createAccountButton = document.getElementById("create_account_button");
 const teamMemberButton = document.getElementById("team_member_button");
-const changePassButton = document.getElementById("changePasswordLink")
+const changePassButton = document.getElementById("changePasswordLink");
 const checkAdmin = window.history.state.isAdmin;
-
 
 scumboardButton.addEventListener("click", () => {
   const routeTo = "scrum-board.html";
@@ -72,7 +71,7 @@ teamMemberButton.addEventListener("click", () => {
 });
 
 changePassButton.addEventListener("click", () => {
-  const routeTo = "change-password.html"
+  const routeTo = "change-password.html";
   const username = window.history.state.username;
   const admin = window.history.state.isAdmin;
   window.history.pushState(
@@ -81,7 +80,7 @@ changePassButton.addEventListener("click", () => {
     routeTo
   );
   window.location.href = routeTo; // Redirect to the desired page
-})
+});
 
 if (checkAdmin === "true") {
   createAccountButton.style.display = "block"; // Show the button
@@ -329,7 +328,7 @@ async function populateColumn(taskIds, columnTaskContainer) {
 
   // Populate column with sorted and filtered tasks
   for (const task of filteredTasks) {
-    const coloredTags = getColoredTags(task.data.tag)
+    const coloredTags = getColoredTags(task.data.tag);
     const priorityClass = getPriorityClass(task.data.priority);
     const taskElement = createTaskElement(
       task.id,
@@ -485,7 +484,7 @@ deleteArea.addEventListener("drop", async (e) => {
 
   const taskRef = doc(db, "tasks", taskId);
 
-  console.log(taskRef)
+  console.log(taskRef);
 
   await updateDoc(taskRef, {
     hide: 0,
@@ -685,6 +684,29 @@ function showEditTaskLogWindow(taskData) {
   const logDateInput = document.getElementById("logDate");
   const hoursInput = document.getElementById("hours");
   const minutesInput = document.getElementById("minutes");
+
+  const assigneeSelect = document.getElementById("teamMember");
+
+  // Function to fetch users from the 'users_added' collection in Firebase
+  async function fetchUsers() {
+    try {
+      const usersCollection = collection(db, "users_added");
+      const querySnapshot = await getDocs(usersCollection);
+
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const option = document.createElement("option");
+        option.value = userData.username; // Assuming username is a property of the user object
+        option.text = userData.username; // Assuming username is a property of the user object
+        assigneeSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  }
+
+  // Call the fetchUsers function to populate the select element
+  fetchUsers();
 
   // Set today's date as the default value for the date input
   const today = new Date();
