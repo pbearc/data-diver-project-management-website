@@ -214,8 +214,11 @@ async function populateDropdown() {
       !sprintData.addedTaskID.includes(id) ||
       sprintData.removedTaskID.includes(id)
     ) {
+      console.log(typeof data.hide)
       const option = createDropdownOption(id, data.taskName);
-      dropdown.appendChild(option);
+      if (data.hide===0) {
+        dropdown.appendChild(option);
+      }
     }
   });
 }
@@ -247,13 +250,21 @@ async function addTaskToColumn() {
     hide: 1,
   });
 
-  const indexToRemove = sprintData.removedTaskID.indexOf(selectedTaskId);
-  sprintData.removedTaskID.splice(indexToRemove, 1);
+  const docSnapshot = await getDoc(taskRef);
+
+// Check if the document exists
+if (docSnapshot.exists()) {
+  // Extract the data from the document snapshot
+  const taskData = docSnapshot.data();
+
+  // Now taskData contains the data stored in the document
+  console.log(taskData.hide)
+}
 
   try {
     await updateDoc(sprintDocRef, sprintData);
     // Repopulate the dropdown to remove the added task
-    populateDropdown();
+    await populateDropdown();
     populateColumnsFromSprintData();
     calculateTotalStoryPoints();
   } catch (error) {
@@ -493,8 +504,6 @@ deleteArea.addEventListener("drop", async (e) => {
 
   const taskRef = doc(db, "tasks", taskId);
 
-  console.log(taskRef);
-
   await updateDoc(taskRef, {
     hide: 0,
   });
@@ -521,7 +530,7 @@ deleteArea.addEventListener("drop", async (e) => {
   }
 
   await updateDoc(sprintDocRef, sprintData);
-  populateDropdown();
+  await populateDropdown();
 });
 
 const getColoredTags = (tagString) => {
