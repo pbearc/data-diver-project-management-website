@@ -173,6 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function displayTask(taskData, taskId) {
     const taskList = document.getElementById("taskList");
     const taskItem = document.createElement("div");
+    taskItem.id = taskId;
     taskItem.addEventListener("click", () => {
       displayTaskDetails(taskData); // Call a function to display task details
     });
@@ -221,6 +222,12 @@ document.addEventListener("DOMContentLoaded", function () {
       taskItem.appendChild(button)
     );
     taskList.appendChild(taskItem);
+
+    console.log(taskData)
+    
+    if (taskData.hide === 1){
+      taskItem.style.display = "none";
+    }
   }
 
   function displayTaskDetails(taskData) {
@@ -304,6 +311,7 @@ document.addEventListener("DOMContentLoaded", function () {
       Array.from(formFields).map((field) => [field.id, field.value])
     );
     taskData.tag = getUniqueTags(tagSelect);
+    taskData.hide = 0;
 
     if (!isValidTaskData(taskData)) {
       alert("Please fill out all fields.");

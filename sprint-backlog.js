@@ -233,6 +233,23 @@ async function addTaskToColumn() {
   sprintData.addedTaskID.push(selectedTaskId);
   sprintData.notStarted.push(selectedTaskId);
 
+  const taskRef = doc(db, "tasks", selectedTaskId);
+
+  await updateDoc(taskRef, {
+    hide: 1,
+  });
+
+  const docSnapshot = await getDoc(taskRef);
+
+// Check if the document exists
+if (docSnapshot.exists()) {
+  // Extract the data from the document snapshot
+  const taskData = docSnapshot.data();
+
+  // Now taskData contains the data stored in the document
+  console.log("Task Data:", taskData);
+}
+
   const indexToRemove = sprintData.removedTaskID.indexOf(selectedTaskId);
   sprintData.removedTaskID.splice(indexToRemove, 1);
 
@@ -476,6 +493,14 @@ deleteArea.addEventListener("drop", async (e) => {
   const indexToRemove = sprintData.addedTaskID.indexOf(taskId);
   sprintData.addedTaskID.splice(indexToRemove, 1);
   sprintData.removedTaskID.push(taskId);
+
+  const taskRef = doc(db, "tasks", taskId);
+
+  console.log(taskRef)
+
+  await updateDoc(taskRef, {
+    hide: 0,
+  });
 
   // Update sprintData based on the source and target columns
   if (sourceColumnId === "column1") {
