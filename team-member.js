@@ -173,6 +173,25 @@ async function displayTeamMembersInDropdown() {
   }
 }
 
+function createDeleteButton(memberId) {
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "delete-button";
+  deleteButton.innerHTML = "X";
+  deleteButton.onclick = () => deleteTeamMember(memberId); // Call the delete function
+  return deleteButton;
+}
+
+async function deleteTeamMember(memberId) {
+  try {
+    await deleteDoc(doc(db, "users_added", memberId));
+    console.log("Document successfully deleted!");
+    displayTeamMembers(); // Refresh the display after deletion
+    displayTeamMembersInDropdown(); // Refresh the dropdown options after deletion
+  } catch (error) {
+    console.error("Error removing document: ", error);
+  }
+}
+
 function displayTeamMembers() {
   const teamMembersContainer = document.getElementById("teamMembersContainer");
   teamMembersContainer.innerHTML = ""; // Clear the container before adding new members
@@ -203,6 +222,9 @@ function displayTeamMembers() {
         // Append card body to the card
         teamMemberCard.appendChild(cardBody);
 
+        const deleteButton = createDeleteButton(teamMemberId);
+        teamMemberCard.appendChild(deleteButton);
+
         // Append the card to the container
         teamMembersContainer.appendChild(teamMemberCard);
       });
@@ -211,25 +233,6 @@ function displayTeamMembers() {
       console.error("Error fetching team member: ", error);
     });
 }
-
-// const createAccountButton = document.getElementById("create_account_button");
-// const checkAdmin = window.history.state.isAdmin;
-// if (checkAdmin === "true") {
-//   createAccountButton.style.display = "block"; // Show the button
-//   createAccountButton.addEventListener("click", () => {
-//     const routeTo = "account-creation.html";
-//     const username = window.history.state.username;
-//     const admin = window.history.state.isAdmin;
-//     window.history.pushState(
-//       { username: username, isAdmin: admin, previousPage: "scrum-board.html" },
-//       "",
-//       routeTo
-//     );
-//     window.location.href = routeTo;
-//   });
-// } else {
-//   createAccountButton.style.display = "hide"; // Hide the button
-// }
 
 // Call the function to display Sprint Backlogs when the page loads
 window.addEventListener("load", () => {
