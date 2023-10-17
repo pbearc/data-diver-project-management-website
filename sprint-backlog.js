@@ -62,13 +62,22 @@ productBacklogButton.addEventListener("click", () => {
   window.location.href = routeTo; // Redirect to the desired page
 });
 
-teamMemberButton.addEventListener("click", () => {
-  const routeTo = "team-member.html";
-  const username = window.history.state.username;
-  const admin = window.history.state.isAdmin;
-  window.history.pushState({ username: username, isAdmin: admin }, "", routeTo);
-  window.location.href = routeTo; // Redirect to the desired page
-});
+if (checkAdmin === "true") {
+  teamMemberButton.style.display = "block"; // Show the button
+  teamMemberButton.addEventListener("click", () => {
+    const routeTo = "team-member.html";
+    const username = window.history.state.username;
+    const admin = window.history.state.isAdmin;
+    window.history.pushState(
+      { username: username, isAdmin: admin },
+      "",
+      routeTo
+    );
+    window.location.href = routeTo; // Redirect to the desired page
+  });
+} else {
+  teamMemberButton.style.display = "hide"; // Hide the button
+}
 
 changePassButton.addEventListener("click", () => {
   const routeTo = "change-password.html";
