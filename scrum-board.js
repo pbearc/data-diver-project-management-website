@@ -251,7 +251,7 @@ async function createAndDisplayModal(sprintId) {
       .querySelector(`#burndownChart-${sprintId}`)
       .getContext("2d");
     const dates = await getDatesForSprint(sprintId);
-    console.log(dates);
+    const idealBurndownData=await createIdealBurndownChartData(sprintId)
     const idealRemainingTasks = sortedData.map(
       (data) => data.idealRemainingTasks
     );
@@ -259,12 +259,50 @@ async function createAndDisplayModal(sprintId) {
       (data) => data.actualRemainingTasks
     );
 
-    renderBurndownChart(ctx, dates, [1, 1, 5, 2], [6, 2, 4, 3]);
+    renderBurndownChart(ctx, dates, idealBurndownData, [6, 2, 4, 3]);
   } catch (error) {
     console.error("Error fetching and displaying data: ", error);
   }
 
   return modal;
+}
+
+async function calculateTotalStoryPoints(sprintID) {
+  const sprintData = await getSprintDataBySprintID(sprintID);
+
+  // Combine all task objects into a single list
+  const allTasks = [...sprintData.notStarted, ...sprintData.inProgress, ...sprintData.completed];
+
+  // Reduce the combined list to calculate total story points
+  const totalStoryPoints = allTasks.reduce((accumulator, task) => {
+    return accumulator + parseInt(task.storyPoint, 10);
+  }, 0);
+
+  // Update the sprint document with the total story points
+  const sprintDocRef = doc(db, "sprints", sprintID);
+  await updateDoc(sprintDocRef, {
+    storyPoint: totalStoryPoints,
+  });
+
+  return totalStoryPoints;
+}
+
+async function createIdealBurndownChartData(sprintID) {
+  const sprintData = await getSprintDataBySprintID(sprintID);
+  const totalStoryPoints = await calculateTotalStoryPoints(sprintID);
+
+  const startDate = new Date(sprintData.startDate);
+  const endDate = new Date(sprintData.endDate);
+  const dayDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+  const idealNumberDecrease = totalStoryPoints / dayDiff;
+
+  const idealChartData = [];
+  for (let i = 0; i < dayDiff; i++) {
+      idealChartData.push(Math.max(totalStoryPoints - i * idealNumberDecrease, 0));
+  }
+
+  return idealChartData;
 }
 
 function renderBurndownChart(
