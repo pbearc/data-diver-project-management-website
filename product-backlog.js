@@ -26,6 +26,29 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig, "Data Diver");
 const db = getFirestore(app);
 
+const assigneeSelect = document.getElementById("assignee");
+
+// Function to fetch users from the 'users_added' collection in Firebase
+async function fetchUsers() {
+  try {
+    const usersCollection = collection(db, "users_added");
+    const querySnapshot = await getDocs(usersCollection);
+
+    querySnapshot.forEach((doc) => {
+      const userData = doc.data();
+      const option = document.createElement("option");
+      option.value = userData.username; // Assuming username is a property of the user object
+      option.text = userData.username; // Assuming username is a property of the user object
+      assigneeSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+  }
+}
+
+// Call the fetchUsers function to populate the select element
+fetchUsers();
+
 // Helper functions
 const resetFormFields = (fields, initialValues) => {
   fields.forEach((field) => {
@@ -132,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   // console.log('pb', window.history.state.username);
   displayTasksRealtime();
-  console.log(window.history.state.username)
+  console.log(window.history.state.username);
 
   async function deleteTask(taskId) {
     const taskRef = doc(db, "tasks", taskId);
@@ -223,9 +246,9 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     taskList.appendChild(taskItem);
 
-    console.log(taskData)
-    
-    if (taskData.hide === 1){
+    console.log(taskData);
+
+    if (taskData.hide === 1) {
       taskItem.style.display = "none";
     }
   }
@@ -294,7 +317,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const scumboardButton = document.getElementById("scrum_board_button");
   const createAccountButton = document.getElementById("create_account_button");
   const teamMemberButton = document.getElementById("team_member_button");
-  const changePassButton = document.getElementById("changePasswordLink")
+  const changePassButton = document.getElementById("changePasswordLink");
   const checkAdmin = window.history.state.isAdmin;
 
   addTaskButton.addEventListener("click", () => {
@@ -355,7 +378,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     window.location.href = routeTo; // Redirect to the desired page
   });
-  
+
   if (checkAdmin === "true") {
     teamMemberButton.style.display = "block"; // Show the button
     teamMemberButton.addEventListener("click", () => {
@@ -369,22 +392,25 @@ document.addEventListener("DOMContentLoaded", function () {
       );
       window.location.href = routeTo; // Redirect to the desired page
     });
-  }
-  else{
+  } else {
     teamMemberButton.style.display = "hide"; // Hide the button
   }
 
   changePassButton.addEventListener("click", () => {
-    const routeTo = "change-password.html"
+    const routeTo = "change-password.html";
     const username = window.history.state.username;
     const admin = window.history.state.isAdmin;
     window.history.pushState(
-      { username: username, isAdmin: admin, previousPage: "product-backlog.html" },
+      {
+        username: username,
+        isAdmin: admin,
+        previousPage: "product-backlog.html",
+      },
       "",
       routeTo
     );
     window.location.href = routeTo; // Redirect to the desired page
-  })
+  });
 
   if (checkAdmin === "true") {
     createAccountButton.style.display = "block"; // Show the button
