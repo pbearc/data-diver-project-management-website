@@ -254,8 +254,7 @@ body {
   background-color: #f0f0f0; /* Background color of the column */
   padding: 15px;
   border: 1px solid #ddd;
-  margin: 10px;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 .column-title {
   font-size: 18px;
@@ -503,3 +502,18 @@ body {
   margin-left: 100px; /* Adjust the value based on how much you want to shift the popup to the right */
   /* You can also use other properties like left or transform: translateX() to achieve the shift */
 }
+
+.row {
+  margin-top: 10px; 
+  margin-left: 0.5px; 
+}
+
+.nav-link.new-button.custom-filter-button {
+  margin-bottom: 10px; 
+}
+
+.form-control.filter-dropdown, 
+.form-control.sort-dropdown {
+  width: 175px; 
+}
+
