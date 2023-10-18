@@ -966,30 +966,6 @@ async function deleteTaskLogEntry(taskName, logDate, assignee) {
   }
 }
 
-
-// Function to delete a task log entry
-async function deleteTaskLogEntry(taskName, logDate, assignee) {
-  try {
-    const taskLogsCollection = collection(db, "task_logs");
-    const q = firestoreQuery(
-      taskLogsCollection,
-      where("taskName", "==", taskName),
-      where("logDate", "==", logDate),
-      where("assignee", "==", assignee)
-    );
-
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      // If matching documents found, delete the first matching document
-      const docRef = querySnapshot.docs[0].ref;
-      await deleteDoc(docRef);
-    }
-  } catch (error) {
-    console.error("Error deleting task log entry: ", error);
-  }
-}
-
 // Function to display the accumulation of effort chart
 async function displayEffortChart(taskName) {
   // Fetch data for the accumulation of effort chart from the database
