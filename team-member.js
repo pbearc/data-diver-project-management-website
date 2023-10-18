@@ -204,9 +204,9 @@ function displayTeamMembers() {
 
   getDocs(usersAddedCollection)
     .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        const teamMemberData = doc.data();
-        const teamMemberId = doc.id; // Extract the team member's ID here
+      querySnapshot.forEach((docs) => {
+        const teamMemberData = docs.data();
+        const teamMemberId = docs.id; // Extract the team member's ID here
 
         // Create a card or element to display the team member's data
         const teamMemberCard = document.createElement("div");
@@ -236,23 +236,53 @@ function displayTeamMembers() {
           openPopup(teamMemberData)
         })
 
-        function openPopup(teamMemberData) {
+        async function openPopup(teamMemberData) {
           const popupWindow = document.getElementById("teamMemberWindow");
+          const closeTeamMemberPopupButton = document.getElementById("closeTeamMemberPopup");
+          popupWindow.classList.add("shifted-popup");
 
           const usernameElement = document.createElement("p");
           usernameElement.textContent = `Username: ${teamMemberData.username}`;
+          usernameElement.style.marginTop = "30px"
 
           const isAdminElement = document.createElement("p");
           isAdminElement.textContent = `Role: ${teamMemberData.isAdmin ? "Admin" : "Member"}`;
+          isAdminElement.style.marginBottom = "50px"; 
 
+          const completedTask = {};
+
+          const taskLogCollection = collection(db, "task_logs");
+
+          const querySnapshot = await getDocs(taskLogCollection);
+
+          // Iterate through all documents using forEach
+          querySnapshot.forEach((docs) => {
+            const data = docs.data()
+
+            if (data.assignee === teamMemberData.username){
+              completedTask[data.taskName] = [data.logDate, data.timeSpent];
+            }
+          });
+
+          const completedTasksArray = Object.entries(completedTask).map(([taskName, [logDate, timeSpent]]) => {
+            const hours = Math.floor(timeSpent);
+            const minutes = Math.round((timeSpent - hours) * 60);
+            return `${taskName} (Date: ${logDate}, Time Spent: ${hours} hours and ${minutes} minutes)`;
+          });
+
+          const taskCompletedElement = document.createElement("div");
+          
+          const taskCompletedTitle = document.createElement("p");
+          taskCompletedTitle.textContent = "Task Completed:";
+          taskCompletedElement.appendChild(taskCompletedTitle);
+          taskCompletedTitle.style.marginBottom = "20px";
+        
           // Add Task completed and Time spent elements
-          const taskCompletedElement = document.createElement("p");
-          taskCompletedElement.textContent = `Task completed: ${teamMemberData.tasksCompleted || 0}`;
-
-          const timeSpentElement = document.createElement("p");
-          timeSpentElement.textContent = `Time spent: ${teamMemberData.timeSpent || "N/A"}`;
-
-         
+          completedTasksArray.forEach(task => {
+            const taskElement = document.createElement("p");
+            taskElement.textContent = task;
+            taskCompletedElement.appendChild(taskElement);
+          });
         
           // Clear existing content
           popupWindow.innerHTML = "";
@@ -260,35 +290,19 @@ function displayTeamMembers() {
           // Append new content
           popupWindow.appendChild(usernameElement);
           popupWindow.appendChild(isAdminElement);
-          popupWindow.appendChild(taskCompletedElement)
-          popupWindow.appendChild(timeSpentElement)
+          popupWindow.appendChild(taskCompletedElement);
+          popupWindow.appendChild(closeTeamMemberPopupButton);
         
           // Display the pop-up window
           popupWindow.style.display = "block";
 
-          getDocs(taskLogCollection)
-          .then((querySnapshot) => {
-            let totalCompleted = 0;
-            let totalTimeSpent = 0;
+          // Add event listener to the close button
+          closeTeamMemberPopupButton.addEventListener("click", () => {
+            // Hide the teamMemberPopup when the close button is clicked
+            document.getElementById("teamMemberWindow").style.display = "none";
+          });
 
-            querySnapshot.forEach((doc) => {
-              const taskLogData = doc.data();
-
-              if (
-                taskLogData.assignee === teamMemberData.username &&
-                taskLogData.task_name
-              ) {
-                totalCompleted += taskLogData.task_completed || 0;
-                totalTimeSpent += taskLogData.time_spent || 0;
-              }
-            });
-
-      taskCompletedElement.textContent = `Task completed: ${totalCompleted}`;
-      timeSpentElement.textContent = `Time spent: ${totalTimeSpent || "N/A"}`;
-    })
-    .catch((error) => {
-      console.error("Error fetching task log: ", error);
-    });
+          
         }
         
         // Function to close the pop-up window
