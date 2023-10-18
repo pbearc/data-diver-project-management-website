@@ -265,6 +265,30 @@ function displayTeamMembers() {
         
           // Display the pop-up window
           popupWindow.style.display = "block";
+
+          getDocs(taskLogCollection)
+          .then((querySnapshot) => {
+            let totalCompleted = 0;
+            let totalTimeSpent = 0;
+
+            querySnapshot.forEach((doc) => {
+              const taskLogData = doc.data();
+
+              if (
+                taskLogData.assignee === teamMemberData.username &&
+                taskLogData.task_name
+              ) {
+                totalCompleted += taskLogData.task_completed || 0;
+                totalTimeSpent += taskLogData.time_spent || 0;
+              }
+            });
+
+      taskCompletedElement.textContent = `Task completed: ${totalCompleted}`;
+      timeSpentElement.textContent = `Time spent: ${totalTimeSpent || "N/A"}`;
+    })
+    .catch((error) => {
+      console.error("Error fetching task log: ", error);
+    });
         }
         
         // Function to close the pop-up window
