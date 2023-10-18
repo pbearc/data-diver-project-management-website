@@ -234,17 +234,6 @@ async function createAndDisplayModal(sprintId) {
 
   // Fetch and display data
   try {
-    const sortedData = await sortedChartData(sprintId);
-    const tableBody = modal.querySelector(`#tableBody-${sprintId}`);
-    sortedData.forEach((data) => {
-      const newRow = document.createElement("tr");
-      newRow.innerHTML = `
-        <td>${data.date}</td>
-        <td>${data.idealRemainingTasks}</td>
-        <td>${data.actualRemainingTasks}</td>
-      `;
-      tableBody.appendChild(newRow);
-    });
 
     // Generate burndown chart using Chart.js
     const ctx = modal
@@ -252,15 +241,46 @@ async function createAndDisplayModal(sprintId) {
       .getContext("2d");
     const dates = await getDatesForSprint(sprintId);
     const idealBurndownData=await createIdealBurndownChartData(sprintId)
-    console.log(idealBurndownData)
-    const idealRemainingTasks = sortedData.map(
-      (data) => data.idealRemainingTasks
-    );
-    const actualRemainingTasks = sortedData.map(
-      (data) => data.actualRemainingTasks
-    );
+    const actualBurndownData = []
+    const totalStoryPoints = await calculateTotalStoryPoints(sprintId);
 
-    renderBurndownChart(ctx, dates, idealBurndownData, [6, 2, 4, 3]);
+    const modalCollection = collection(db, "modals");
+    const querySnapshot = await getDocs(modalCollection);
+    querySnapshot.forEach((docs) => {
+      const data = docs.data();
+      if (data.sprint=== sprintId) {
+        const sprintChartData = data.sprintChartData;
+        const entries = Object.entries(sprintChartData);
+
+        // Sort the array of key-value pairs based on the dates (assuming date format is DD-MM-YYYY)
+        entries.sort((a, b) => {
+            const dateA = new Date(a[0].split('-').reverse().join('-'));
+            const dateB = new Date(b[0].split('-').reverse().join('-'));
+            return dateA - dateB;
+        });
+
+        // Convert the sorted array back to an object
+        const sortedSprintChartData = Object.fromEntries(entries);
+
+        const dates = Object.keys(sortedSprintChartData);
+        const storyPoints = Object.values(sortedSprintChartData);
+
+        console.log(storyPoints)
+
+        let cumulativeSum = totalStoryPoints;
+        const accumulatedValues = [];
+
+        for (const value of storyPoints) {
+            cumulativeSum -= value;
+            accumulatedValues.push(cumulativeSum);
+        }
+
+        actualBurndownData.push(...accumulatedValues);
+      }
+    })
+    console.log(actualBurndownData)
+
+    renderBurndownChart(ctx, dates, idealBurndownData, actualBurndownData);
   } catch (error) {
     console.error("Error fetching and displaying data: ", error);
   }
@@ -327,14 +347,14 @@ function renderBurndownChart(
       labels: dates,
       datasets: [
         {
-          label: "Actual Remaining Tasks",
+          label: "Actual Remaining Story Points",
           data: actualRemainingTasks,
           borderColor: "rgba(75, 192, 192, 1)",
           borderWidth: 2,
           fill: false,
         },
         {
-          label: "Ideal Remaining Tasks",
+          label: "Ideal Remaining Story Points",
           data: idealRemainingTasks,
           borderColor: "rgba(255, 99, 132, 1)",
           borderWidth: 2,
@@ -361,7 +381,7 @@ function renderBurndownChart(
         y: {
           title: {
             display: true,
-            text: "Time Spent (hours)",
+            text: "Remaining Story Points",
             font: { weight: "bold", size: 18 },
           },
           ticks: {
@@ -399,7 +419,7 @@ function renderBurndownChart(
                 tooltipItem.chart.data.datasets[tooltipItem.datasetIndex].data[
                   dataIndex
                 ];
-              return `${datasetLabel}: ${timeSpent} hours`;
+              return `${datasetLabel}: ${timeSpent}`;
             },
           },
         },
@@ -409,50 +429,50 @@ function renderBurndownChart(
   return chart;
 }
 
-async function sortedChartData(sprintId) {
-  const modalId = await findModalIdBySprintId(sprintId);
+// async function sortedChartData(sprintId) {
+//   const modalId = await findModalIdBySprintId(sprintId);
 
-  if (modalId) {
-    const modalDocRef = doc(db, "modals", modalId);
-    const modalDoc = await getDoc(modalDocRef);
+//   if (modalId) {
+//     const modalDocRef = doc(db, "modals", modalId);
+//     const modalDoc = await getDoc(modalDocRef);
 
-    if (modalDoc.exists()) {
-      const modalData = modalDoc.data();
+//     if (modalDoc.exists()) {
+//       const modalData = modalDoc.data();
 
-      // Fetch the subcollection data within the modal document
-      const rowsCollection = collection(db, "modals", modalId, "rows");
-      const rowsSnapshot = await getDocs(rowsCollection);
+//       // Fetch the subcollection data within the modal document
+//       const rowsCollection = collection(db, "modals", modalId, "rows");
+//       const rowsSnapshot = await getDocs(rowsCollection);
 
-      modalData.sprintChartData = [];
-      const rowContainer = [];
-      const temp = [];
+//       modalData.sprintChartData = [];
+//       const rowContainer = [];
+//       const temp = [];
 
-      // Iterate through subcollection documents and add them to modalData.rows
-      rowsSnapshot.forEach((doc) => {
-        modalData.sprintChartData.push(doc.data());
-      });
-      const entriesToRemove = modalData.sprintChartData.length;
+//       // Iterate through subcollection documents and add them to modalData.rows
+//       rowsSnapshot.forEach((doc) => {
+//         modalData.sprintChartData.push(doc.data());
+//       });
+//       const entriesToRemove = modalData.sprintChartData.length;
 
-      await updateDoc(modalDocRef, {
-        sprintChartData: modalData.sprintChartData,
-      });
+//       await updateDoc(modalDocRef, {
+//         sprintChartData: modalData.sprintChartData,
+//       });
 
-      for (let i = 0; i < entriesToRemove; i++) {
-        const data = modalData.sprintChartData.pop();
-        temp.push(data);
-      }
-      temp.sort((a, b) => {
-        // Convert the date strings to Date objects for comparison
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
+//       for (let i = 0; i < entriesToRemove; i++) {
+//         const data = modalData.sprintChartData.pop();
+//         temp.push(data);
+//       }
+//       temp.sort((a, b) => {
+//         // Convert the date strings to Date objects for comparison
+//         const dateA = new Date(a.date);
+//         const dateB = new Date(b.date);
 
-        // Compare the dates and return the result of the comparison
-        return dateA - dateB;
-      });
-      return temp;
-    }
-  }
-}
+//         // Compare the dates and return the result of the comparison
+//         return dateA - dateB;
+//       });
+//       return temp;
+//     }
+//   }
+// }
 
 function findModalIdBySprintId(sprintId) {
   const modalsCollection = collection(db, "modals");

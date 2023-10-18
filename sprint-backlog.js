@@ -461,6 +461,16 @@ function handleDragAndDrop(column) {
         const querySnapshot = await getDocs(modalCollection);
 
         const formattedDate = currentDate.replace(/\//g, "-");
+
+        const startDate = sprintData.startDate;
+
+        const endDate = sprintData.endDate
+
+        const formattedStart = startDate.replace(/\//g, "-");
+
+        const formattedEnd = endDate.replace(/\//g, "-");
+
+        const dateRange = generateDateRange(formattedStart, formattedEnd);
         
         const keyToCheck = formattedDate
 
@@ -470,19 +480,36 @@ function handleDragAndDrop(column) {
 
         const taskData= docSnap.data();
 
-        querySnapshot.forEach((docs) => {
+        querySnapshot.forEach(async(docs) => {
           const data = docs.data();
           if (data.sprint=== sprintId) {
             const modalRef = doc(db, "modals", docs.id);
-            if(!data.sprintChartData.hasOwnProperty(keyToCheck)){
+            for (const dateKey of dateRange) {
+              const dateField = `sprintChartData.${dateKey}`;
+              const initialValue = 0;
               const updateData = {
-                [`sprintChartData.${keyToCheck}`]: taskData.storyPoint // Using keyToCheck as the dynamic key
-            };
-            updateDoc(modalRef, updateData);
+                [dateField]: initialValue
+              };
+              await updateDoc(modalRef, updateData);
+            }
+
+            if(data.sprintChartData.hasOwnProperty(keyToCheck)){
+              const existingValue = data.sprintChartData[keyToCheck] || 0;
+              const addStoryPoint = parseInt(existingValue) + parseInt(taskData.storyPoint);
+
+              const updateData = {
+                [`sprintChartData.${keyToCheck}`]: addStoryPoint
+              };
+              await updateDoc(modalRef, updateData);
             }
             else{
-              const addStoryPoint = parseInt(data.chartData.keyToCheck) + parseInt(storyPoint.storyPoint)
-              chartData[keyToCheck] = addStoryPoint
+              const existingValue = data.sprintChartData[formattedEnd] || 0;
+              const addStoryPoint = parseInt(existingValue) + parseInt(taskData.storyPoint);
+
+              const updateData = {
+                [`sprintChartData.${formattedEnd}`]: addStoryPoint
+              };
+              await updateDoc(modalRef, updateData);
             }
           }
         })
@@ -495,6 +522,23 @@ function handleDragAndDrop(column) {
       populateColumnsFromSprintData();
     }
   });
+}
+
+function generateDateRange(start, end) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const dateRange = [];
+
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+
+  let currentDate = startDate;
+  while (currentDate <= endDate) {
+      const formattedDate = currentDate.toLocaleDateString(undefined, options).replace(/\//g, '-');
+      dateRange.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dateRange;
 }
 columns.forEach(handleDragAndDrop);
 
