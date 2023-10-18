@@ -383,7 +383,7 @@ function createTaskElement(id, data, text) {
   taskElement.draggable = true;
 
   taskElement.addEventListener("click", () => {
-    showTaskDetails(data);
+    showTaskDetails(id, data);
   });
 
   taskElement.addEventListener("dragstart", (e) => {
@@ -561,7 +561,7 @@ const getPriorityClass = (priority) => {
 };
 
 // Function to display task details in the modal
-async function showTaskDetails(taskData) {
+async function showTaskDetails(id, taskData) {
   const taskDetailsWindow = document.getElementById("taskDetailsWindow");
   const taskDetailsContent = document.getElementById("taskDetailsContent");
   const priorityClass = getPriorityClass(taskData.priority);
@@ -596,7 +596,7 @@ async function showTaskDetails(taskData) {
   const editLogButton = document.getElementById("editLogButton");
   editLogButton.addEventListener("click", () => {
     // Open the edit task log window
-    showEditTaskLogWindow(taskData);
+    showEditTaskLogWindow(id, taskData);
   });
 
   // // Add an event listener to the "Show Effort Chart" button
@@ -695,7 +695,7 @@ function formatTotalTimeSpent(hours, minutes) {
 }
 
 // Inside showEditTaskLogWindow function
-function showEditTaskLogWindow(taskData) {
+function showEditTaskLogWindow(id, taskData) {
   const editTaskLogWindow = document.getElementById("editTaskLogWindow");
   const taskSelected = document.getElementById("taskSelected");
   const teamMemberSelect = document.getElementById("teamMember");
@@ -758,7 +758,7 @@ function showEditTaskLogWindow(taskData) {
 
   saveLogButton.removeEventListener("click", saveTaskLog);
   saveLogButton.addEventListener("click", () => {
-    saveTaskLog(taskData); // Save the task log data
+    saveTaskLog(id, taskData); // Save the task log data
   });
 
   const cancelLogButton = document.getElementById("cancelLogButton");
@@ -804,7 +804,7 @@ function updateTimeSpentDisplay(taskName, totalHours, totalMinutes) {
 let isSaving = false;
 
 // Function to save task log to the database
-async function saveTaskLog(taskData) {
+async function saveTaskLog(id, taskData) {
   const taskSelect = document.getElementById("taskSelected");
   const teamMemberSelect = document.getElementById("teamMember");
   const logDateInput = document.getElementById("logDate");
@@ -846,6 +846,14 @@ async function saveTaskLog(taskData) {
 
   const taskLogsCollection = collection(db, "task_logs");
 
+  const taskRef = doc(db, "tasks", id);
+
+  const newData = {assignee: teamMember}
+
+  await updateDoc(taskRef, newData);
+
+
+
   try {
     // Check if the user wants to delete the time spent
     if (timeSpent === 0) {
@@ -876,9 +884,10 @@ async function saveTaskLog(taskData) {
         console.log("Task log entry updated successfully.");
       }
     }
-
+    const updatedTaskData = { ...taskData, assignee: teamMember };
     // Update the display immediately
     await displayTimeSpentEntries(taskName);
+    await showTaskDetails(id, updatedTaskData)
 
     // Update the timeSpentEntriesMap immediately
     const timeSpentEntries = timeSpentEntriesMap.get(taskName) || [];
@@ -899,6 +908,30 @@ async function saveTaskLog(taskData) {
   editTaskLogWindow.style.display = "none";
   saveLogButton.disabled = false;
 }
+
+// Function to delete a task log entry
+async function deleteTaskLogEntry(taskName, logDate, assignee) {
+  try {
+    const taskLogsCollection = collection(db, "task_logs");
+    const q = firestoreQuery(
+      taskLogsCollection,
+      where("taskName", "==", taskName),
+      where("logDate", "==", logDate),
+      where("assignee", "==", assignee)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      // If matching documents found, delete the first matching document
+      const docRef = querySnapshot.docs[0].ref;
+      await deleteDoc(docRef);
+    }
+  } catch (error) {
+    console.error("Error deleting task log entry: ", error);
+  }
+}
+
 
 // Function to delete a task log entry
 async function deleteTaskLogEntry(taskName, logDate, assignee) {
