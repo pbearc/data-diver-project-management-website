@@ -214,9 +214,9 @@ async function populateDropdown() {
       !sprintData.addedTaskID.includes(id) ||
       sprintData.removedTaskID.includes(id)
     ) {
-      console.log(typeof data.hide)
+      console.log(typeof data.hide);
       const option = createDropdownOption(id, data.taskName);
-      if (data.hide===0) {
+      if (data.hide === 0) {
         dropdown.appendChild(option);
       }
     }
@@ -252,14 +252,14 @@ async function addTaskToColumn() {
 
   const docSnapshot = await getDoc(taskRef);
 
-// Check if the document exists
-if (docSnapshot.exists()) {
-  // Extract the data from the document snapshot
-  const taskData = docSnapshot.data();
+  // Check if the document exists
+  if (docSnapshot.exists()) {
+    // Extract the data from the document snapshot
+    const taskData = docSnapshot.data();
 
-  // Now taskData contains the data stored in the document
-  console.log(taskData.hide)
-}
+    // Now taskData contains the data stored in the document
+    console.log(taskData.hide);
+  }
 
   try {
     await updateDoc(sprintDocRef, sprintData);
@@ -708,19 +708,32 @@ function showEditTaskLogWindow(taskData) {
   // Function to fetch users from the 'users_added' collection in Firebase
   async function fetchUsers() {
     try {
+      assigneeSelect.innerHTML = ""; // Clear the select element
       const usersCollection = collection(db, "users_added");
       const querySnapshot = await getDocs(usersCollection);
 
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
-        const option = document.createElement("option");
-        option.value = userData.username; // Assuming username is a property of the user object
-        option.text = userData.username; // Assuming username is a property of the user object
-        assigneeSelect.appendChild(option);
+        if (!optionExists(userData.username, assigneeSelect)) {
+          const option = document.createElement("option");
+          option.value = userData.username; // Assuming username is a property of the user object
+          option.text = userData.username; // Assuming username is a property of the user object
+          assigneeSelect.appendChild(option);
+        }
       });
     } catch (error) {
       console.error("Error fetching users:", error);
     }
+  }
+
+  // Check if the option already exists in the select element
+  function optionExists(username, selectElement) {
+    for (let i = 0; i < selectElement.options.length; i++) {
+      if (selectElement.options[i].value === username) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // Call the fetchUsers function to populate the select element
