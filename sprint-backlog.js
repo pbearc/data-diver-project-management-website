@@ -886,8 +886,6 @@ async function saveTaskLog(id, taskData) {
 
   await updateDoc(taskRef, newData);
 
-
-
   try {
     // Check if the user wants to delete the time spent
     if (timeSpent === 0) {
@@ -916,6 +914,13 @@ async function saveTaskLog(id, taskData) {
           timeSpent: log.timeSpent, // Update the timeSpent field
         });
         console.log("Task log entry updated successfully.");
+      }
+      // Update the task card's assignee
+      const taskCardElement = document.getElementById(id);
+      if (taskCardElement) {
+        taskCardElement.querySelector(".task-name").textContent = `Name: ${
+          taskData.taskName
+        } (Assignee: ${teamMember})`;
       }
     }
     const updatedTaskData = { ...taskData, assignee: teamMember };
