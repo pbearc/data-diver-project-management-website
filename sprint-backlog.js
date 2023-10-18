@@ -915,14 +915,8 @@ async function saveTaskLog(id, taskData) {
         });
         console.log("Task log entry updated successfully.");
       }
-      // Update the task card's assignee
-      const taskCardElement = document.getElementById(id);
-      if (taskCardElement) {
-        taskCardElement.querySelector(".task-name").textContent = `Name: ${
-          taskData.taskName
-        } (Assignee: ${teamMember})`;
-      }
     }
+    
     const updatedTaskData = { ...taskData, assignee: teamMember };
     // Update the display immediately
     await displayTimeSpentEntries(taskName);
