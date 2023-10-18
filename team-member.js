@@ -177,6 +177,10 @@ function createDeleteButton(memberId) {
   const deleteButton = document.createElement("button");
   deleteButton.className = "delete-button";
   deleteButton.innerHTML = "X";
+  deleteButton.onclick = (event) => {
+    event.stopPropagation()
+    deleteTeamMember(memberId)
+  }
   deleteButton.onclick = () => deleteTeamMember(memberId); // Call the delete function
   return deleteButton;
 }
@@ -227,6 +231,54 @@ function displayTeamMembers() {
 
         // Append the card to the container
         teamMembersContainer.appendChild(teamMemberCard);
+
+        teamMemberCard.addEventListener("click", () => {
+          openPopup(teamMemberData)
+        })
+
+        function openPopup(teamMemberData) {
+          const popupWindow = document.getElementById("teamMemberWindow");
+
+          const usernameElement = document.createElement("p");
+          usernameElement.textContent = `Username: ${teamMemberData.username}`;
+
+          const isAdminElement = document.createElement("p");
+          isAdminElement.textContent = `Role: ${teamMemberData.isAdmin ? "Admin" : "Member"}`;
+
+          // Add Task completed and Time spent elements
+          const taskCompletedElement = document.createElement("p");
+          taskCompletedElement.textContent = `Task completed: ${teamMemberData.tasksCompleted || 0}`;
+
+          const timeSpentElement = document.createElement("p");
+          timeSpentElement.textContent = `Time spent: ${teamMemberData.timeSpent || "N/A"}`;
+
+         
+        
+          // Clear existing content
+          popupWindow.innerHTML = "";
+        
+          // Append new content
+          popupWindow.appendChild(usernameElement);
+          popupWindow.appendChild(isAdminElement);
+          popupWindow.appendChild(taskCompletedElement)
+          popupWindow.appendChild(timeSpentElement)
+        
+          // Display the pop-up window
+          popupWindow.style.display = "block";
+        }
+        
+        // Function to close the pop-up window
+        function closePopup() {
+          const popupWindow = document.getElementById("teamMemberWindow");
+          popupWindow.style.display = "none";
+        }
+
+        document.addEventListener("click", (event) => {
+          if (event.target === document.getElementById("teamMemberWindow")) {
+            closePopup()
+          }
+        })
+        
       });
     })
     .catch((error) => {
