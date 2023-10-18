@@ -11,6 +11,7 @@ import {
   query as firestoreQuery,
   where,
   getDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -403,6 +404,8 @@ function handleDragAndDrop(column) {
     const taskElement = document.getElementById(taskId);
 
     if (e.target.classList.contains("task-column")) {
+      const currentDate = new Date().toLocaleDateString();
+
       const sourceColumnId = taskElement.parentElement.parentElement.id;
       const targetColumnId = column.id;
 
@@ -452,6 +455,37 @@ function handleDragAndDrop(column) {
         sprintData.completed.push(taskId);
         // Update task status to "Completed"
         await updateTaskStatus(taskId, "Completed");
+
+        const modalCollection = collection(db, "modals");
+
+        const querySnapshot = await getDocs(modalCollection);
+
+        const formattedDate = currentDate.replace(/\//g, "-");
+        
+        const keyToCheck = formattedDate
+
+        const taskRef = doc(db, "tasks", taskId);
+
+        const docSnap = await getDoc(taskRef);
+
+        const taskData= docSnap.data();
+
+        querySnapshot.forEach((docs) => {
+          const data = docs.data();
+          if (data.sprint=== sprintId) {
+            const modalRef = doc(db, "modals", docs.id);
+            if(!data.sprintChartData.hasOwnProperty(keyToCheck)){
+              const updateData = {
+                [`sprintChartData.${keyToCheck}`]: taskData.storyPoint // Using keyToCheck as the dynamic key
+            };
+            updateDoc(modalRef, updateData);
+            }
+            else{
+              const addStoryPoint = parseInt(data.chartData.keyToCheck) + parseInt(storyPoint.storyPoint)
+              chartData[keyToCheck] = addStoryPoint
+            }
+          }
+        })
       }
 
       // Update the Firestore document

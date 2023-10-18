@@ -106,7 +106,7 @@ document
       // Add a new document with a unique ID to the "modals" collection
       const modalDocRef = await addDoc(modalsCollection, {
         sprint: sprintDocRef.id, // Store the sprint ID in the modal document
-        sprintChartData: [],
+        sprintChartData: {},
       });
 
       // Redirect to the sprint backlog page with the sprint ID
@@ -252,6 +252,7 @@ async function createAndDisplayModal(sprintId) {
       .getContext("2d");
     const dates = await getDatesForSprint(sprintId);
     const idealBurndownData=await createIdealBurndownChartData(sprintId)
+    console.log(idealBurndownData)
     const idealRemainingTasks = sortedData.map(
       (data) => data.idealRemainingTasks
     );
@@ -285,7 +286,6 @@ async function calculateTotalStoryPoints(sprintID) {
       totalStoryPoints += taskStoryPoint;
     }
   }
-  console.log(totalStoryPoints)
 
   // Update the sprint document with the total story points
   const sprintDocRef = doc(db, "sprints", sprintID);
@@ -293,25 +293,24 @@ async function calculateTotalStoryPoints(sprintID) {
     storyPoint: totalStoryPoints,
   });
 
-  console.log(totalStoryPoints)
   return totalStoryPoints;
 }
 
 async function createIdealBurndownChartData(sprintID) {
   const sprintData = await getSprintDataBySprintID(sprintID);
   const totalStoryPoints = await calculateTotalStoryPoints(sprintID);
-  console.log(totalStoryPoints)
 
   const startDate = new Date(sprintData.startDate);
   const endDate = new Date(sprintData.endDate);
   const dayDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
 
-  const idealNumberDecrease = totalStoryPoints / dayDiff;
+  const idealNumberDecrease = totalStoryPoints / (dayDiff - 1);;
 
   const idealChartData = [];
   for (let i = 0; i < dayDiff; i++) {
       idealChartData.push(Math.max(totalStoryPoints - i * idealNumberDecrease, 0));
   }
+  idealChartData.push(0);
 
   return idealChartData;
 }
