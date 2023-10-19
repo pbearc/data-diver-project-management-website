@@ -187,7 +187,7 @@ function createDeleteButton(memberId) {
 
 async function deleteTeamMember(memberId) {
   try {
-    const query = await getDoc(doc(db, "users_added", memberId));
+    const query = await getDoc(doc(db, "users", memberId));
     const username = query.data().username;
 
     const userCollection = collection(db, "users");
