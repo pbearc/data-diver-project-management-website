@@ -178,9 +178,9 @@ function createDeleteButton(memberId) {
   deleteButton.className = "delete-button";
   deleteButton.innerHTML = "X";
   deleteButton.onclick = (event) => {
-    event.stopPropagation()
-    deleteTeamMember(memberId)
-  }
+    event.stopPropagation();
+    deleteTeamMember(memberId);
+  };
   // deleteButton.onclick = () => deleteTeamMember(memberId); // Call the delete function
   return deleteButton;
 }
@@ -190,22 +190,21 @@ async function deleteTeamMember(memberId) {
     const query = await getDoc(doc(db, "users_added", memberId));
     const username = query.data().username;
 
-    const userCollection = collection(db, "users")
+    const userCollection = collection(db, "users");
 
     getDocs(userCollection)
-    .then((querySnapshot) => {
-      querySnapshot.forEach(async(docs) => {
-        const data = docs.data();
-        if (data.username === username){
-          await deleteDoc(docs.ref);
-          co
-        }
+      .then((querySnapshot) => {
+        querySnapshot.forEach(async (docs) => {
+          const data = docs.data();
+          if (data.username === username) {
+            await deleteDoc(docs.ref);
+            co;
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Error getting documents: ", error);
       });
-    })
-    .catch((error) => {
-      console.error("Error getting documents: ", error);
-    });
-
 
     await deleteDoc(doc(db, "users_added", memberId));
     console.log("Document successfully deleted!");
@@ -220,7 +219,7 @@ function displayTeamMembers() {
   const teamMembersContainer = document.getElementById("teamMembersContainer");
   teamMembersContainer.innerHTML = ""; // Clear the container before adding new members
 
-  const usersAddedCollection = collection(db, "users_added");
+  const usersAddedCollection = collection(db, "users");
 
   getDocs(usersAddedCollection)
     .then((querySnapshot) => {
@@ -255,21 +254,25 @@ function displayTeamMembers() {
         teamMemberCard.addEventListener("click", (event) => {
           event.stopPropagation();
           event.preventDefault();
-          openPopup(teamMemberData)
-        })
+          openPopup(teamMemberData);
+        });
 
         async function openPopup(teamMemberData) {
           const popupWindow = document.getElementById("teamMemberWindow");
-          const closeTeamMemberPopupButton = document.getElementById("closeTeamMemberPopup");
+          const closeTeamMemberPopupButton = document.getElementById(
+            "closeTeamMemberPopup"
+          );
           popupWindow.classList.add("shifted-popup");
 
           const usernameElement = document.createElement("p");
           usernameElement.textContent = `Username: ${teamMemberData.username}`;
-          usernameElement.style.marginTop = "30px"
+          usernameElement.style.marginTop = "30px";
 
           const isAdminElement = document.createElement("p");
-          isAdminElement.textContent = `Role: ${teamMemberData.isAdmin ? "Admin" : "Member"}`;
-          isAdminElement.style.marginBottom = "50px"; 
+          isAdminElement.textContent = `Role: ${
+            teamMemberData.isAdmin ? "Admin" : "Member"
+          }`;
+          isAdminElement.style.marginBottom = "50px";
 
           const completedTask = {};
 
@@ -279,42 +282,44 @@ function displayTeamMembers() {
 
           // Iterate through all documents using forEach
           querySnapshot.forEach((docs) => {
-            const data = docs.data()
+            const data = docs.data();
 
-            if (data.assignee === teamMemberData.username){
+            if (data.assignee === teamMemberData.username) {
               completedTask[data.taskName] = [data.logDate, data.timeSpent];
             }
           });
 
-          const completedTasksArray = Object.entries(completedTask).map(([taskName, [logDate, timeSpent]]) => {
-            const hours = Math.floor(timeSpent);
-            const minutes = Math.round((timeSpent - hours) * 60);
-            return `${taskName} (Date: ${logDate}, Time Spent: ${hours} hours and ${minutes} minutes)`;
-          });
+          const completedTasksArray = Object.entries(completedTask).map(
+            ([taskName, [logDate, timeSpent]]) => {
+              const hours = Math.floor(timeSpent);
+              const minutes = Math.round((timeSpent - hours) * 60);
+              return `${taskName} (Date: ${logDate}, Time Spent: ${hours} hours and ${minutes} minutes)`;
+            }
+          );
 
           const taskCompletedElement = document.createElement("div");
-          
+
           const taskCompletedTitle = document.createElement("p");
           taskCompletedTitle.textContent = "Task Completed:";
           taskCompletedElement.appendChild(taskCompletedTitle);
           taskCompletedTitle.style.marginBottom = "20px";
-        
+
           // Add Task completed and Time spent elements
-          completedTasksArray.forEach(task => {
+          completedTasksArray.forEach((task) => {
             const taskElement = document.createElement("p");
             taskElement.textContent = task;
             taskCompletedElement.appendChild(taskElement);
           });
-        
+
           // Clear existing content
           popupWindow.innerHTML = "";
-        
+
           // Append new content
           popupWindow.appendChild(usernameElement);
           popupWindow.appendChild(isAdminElement);
           popupWindow.appendChild(taskCompletedElement);
           popupWindow.appendChild(closeTeamMemberPopupButton);
-        
+
           // Display the pop-up window
           popupWindow.style.display = "block";
 
@@ -323,10 +328,8 @@ function displayTeamMembers() {
             // Hide the teamMemberPopup when the close button is clicked
             document.getElementById("teamMemberWindow").style.display = "none";
           });
-
-          
         }
-        
+
         // Function to close the pop-up window
         function closePopup() {
           const popupWindow = document.getElementById("teamMemberWindow");
@@ -335,10 +338,9 @@ function displayTeamMembers() {
 
         document.addEventListener("click", (event) => {
           if (event.target === document.getElementById("teamMemberWindow")) {
-            closePopup()
+            closePopup();
           }
-        })
-        
+        });
       });
     })
     .catch((error) => {
