@@ -11,7 +11,7 @@ import {
   query as firestoreQuery,
   where,
   getDoc,
-  setDoc
+  setDoc,
 } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -464,55 +464,56 @@ function handleDragAndDrop(column) {
 
         const startDate = sprintData.startDate;
 
-        const endDate = sprintData.endDate
+        const endDate = sprintData.endDate;
 
         const formattedStart = startDate.replace(/\//g, "-");
 
         const formattedEnd = endDate.replace(/\//g, "-");
 
         const dateRange = generateDateRange(formattedStart, formattedEnd);
-        
-        const keyToCheck = formattedDate
+
+        const keyToCheck = formattedDate;
 
         const taskRef = doc(db, "tasks", taskId);
 
         const docSnap = await getDoc(taskRef);
 
-        const taskData= docSnap.data();
+        const taskData = docSnap.data();
 
-        querySnapshot.forEach(async(docs) => {
+        querySnapshot.forEach(async (docs) => {
           const data = docs.data();
-          if (data.sprint=== sprintId) {
+          if (data.sprint === sprintId) {
             const modalRef = doc(db, "modals", docs.id);
             for (const dateKey of dateRange) {
               const dateField = `sprintChartData.${dateKey}`;
               const initialValue = 0;
               const updateData = {
-                [dateField]: initialValue
+                [dateField]: initialValue,
               };
               await updateDoc(modalRef, updateData);
             }
 
-            if(data.sprintChartData.hasOwnProperty(keyToCheck)){
+            if (data.sprintChartData.hasOwnProperty(keyToCheck)) {
               const existingValue = data.sprintChartData[keyToCheck] || 0;
-              const addStoryPoint = parseInt(existingValue) + parseInt(taskData.storyPoint);
+              const addStoryPoint =
+                parseInt(existingValue) + parseInt(taskData.storyPoint);
 
               const updateData = {
-                [`sprintChartData.${keyToCheck}`]: addStoryPoint
+                [`sprintChartData.${keyToCheck}`]: addStoryPoint,
               };
               await updateDoc(modalRef, updateData);
-            }
-            else{
+            } else {
               const existingValue = data.sprintChartData[formattedEnd] || 0;
-              const addStoryPoint = parseInt(existingValue) + parseInt(taskData.storyPoint);
+              const addStoryPoint =
+                parseInt(existingValue) + parseInt(taskData.storyPoint);
 
               const updateData = {
-                [`sprintChartData.${formattedEnd}`]: addStoryPoint
+                [`sprintChartData.${formattedEnd}`]: addStoryPoint,
               };
               await updateDoc(modalRef, updateData);
             }
           }
-        })
+        });
       }
 
       // Update the Firestore document
@@ -529,13 +530,15 @@ function generateDateRange(start, end) {
   const endDate = new Date(end);
   const dateRange = [];
 
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+  const options = { year: "numeric", month: "2-digit", day: "2-digit" };
 
   let currentDate = startDate;
   while (currentDate <= endDate) {
-      const formattedDate = currentDate.toLocaleDateString(undefined, options).replace(/\//g, '-');
-      dateRange.push(formattedDate);
-      currentDate.setDate(currentDate.getDate() + 1);
+    const formattedDate = currentDate
+      .toLocaleDateString(undefined, options)
+      .replace(/\//g, "-");
+    dateRange.push(formattedDate);
+    currentDate.setDate(currentDate.getDate() + 1);
   }
 
   return dateRange;
@@ -787,7 +790,7 @@ function showEditTaskLogWindow(id, taskData) {
   async function fetchUsers() {
     try {
       assigneeSelect.innerHTML = ""; // Clear the select element
-      const usersCollection = collection(db, "users_added");
+      const usersCollection = collection(db, "users");
       const querySnapshot = await getDocs(usersCollection);
 
       querySnapshot.forEach((doc) => {
@@ -926,7 +929,7 @@ async function saveTaskLog(id, taskData) {
 
   const taskRef = doc(db, "tasks", id);
 
-  const newData = {assignee: teamMember}
+  const newData = { assignee: teamMember };
 
   await updateDoc(taskRef, newData);
 
@@ -960,11 +963,11 @@ async function saveTaskLog(id, taskData) {
         console.log("Task log entry updated successfully.");
       }
     }
-    
+
     const updatedTaskData = { ...taskData, assignee: teamMember };
     // Update the display immediately
     await displayTimeSpentEntries(taskName);
-    await showTaskDetails(id, updatedTaskData)
+    await showTaskDetails(id, updatedTaskData);
 
     // Update the timeSpentEntriesMap immediately
     const timeSpentEntries = timeSpentEntriesMap.get(taskName) || [];
