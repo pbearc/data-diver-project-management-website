@@ -106,29 +106,29 @@ changePassButton.addEventListener("click", () => {
   window.location.href = routeTo; // Redirect to the desired page
 });
 
-const addTeamMemberButton = document.getElementById("addTeamMemberButton");
+// const addTeamMemberButton = document.getElementById("addTeamMemberButton");
 
-addTeamMemberButton.addEventListener("click", () => {
-  const dropdownMenu = document.getElementById("teamMemberDropdown");
-  const selectedUser = dropdownMenu.value; // Assuming you have a dropdown menu with the id 'dropdownMenu'
+// addTeamMemberButton.addEventListener("click", () => {
+//   const dropdownMenu = document.getElementById("teamMemberDropdown");
+//   const selectedUser = dropdownMenu.value; // Assuming you have a dropdown menu with the id 'dropdownMenu'
 
-  // Fetch the user data from the 'users' collection based on the selectedUser
-  const usersCollection = collection(db, "users");
-  const userQuery = query(
-    usersCollection,
-    where("username", "==", selectedUser)
-  ); // Rename the variable here
-  getDocs(userQuery) // Use the new variable here
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        saveToUsersAdded(userData);
-      });
-    })
-    .catch((error) => {
-      console.error("Error fetching user: ", error);
-    });
-});
+//   // Fetch the user data from the 'users' collection based on the selectedUser
+//   const usersCollection = collection(db, "users");
+//   const userQuery = query(
+//     usersCollection,
+//     where("username", "==", selectedUser)
+//   ); // Rename the variable here
+//   getDocs(userQuery) // Use the new variable here
+//     .then((querySnapshot) => {
+//       querySnapshot.forEach((doc) => {
+//         const userData = doc.data();
+//         saveToUsersAdded(userData);
+//       });
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching user: ", error);
+//     });
+// });
 
 function saveToUsersAdded(userData) {
   const usersAddedCollection = collection(db, "users_added");
@@ -181,12 +181,32 @@ function createDeleteButton(memberId) {
     event.stopPropagation()
     deleteTeamMember(memberId)
   }
-  deleteButton.onclick = () => deleteTeamMember(memberId); // Call the delete function
+  // deleteButton.onclick = () => deleteTeamMember(memberId); // Call the delete function
   return deleteButton;
 }
 
 async function deleteTeamMember(memberId) {
   try {
+    const query = await getDoc(doc(db, "users_added", memberId));
+    const username = query.data().username;
+
+    const userCollection = collection(db, "users")
+
+    getDocs(userCollection)
+    .then((querySnapshot) => {
+      querySnapshot.forEach(async(docs) => {
+        const data = docs.data();
+        if (data.username === username){
+          await deleteDoc(docs.ref);
+          co
+        }
+      });
+    })
+    .catch((error) => {
+      console.error("Error getting documents: ", error);
+    });
+
+
     await deleteDoc(doc(db, "users_added", memberId));
     console.log("Document successfully deleted!");
     displayTeamMembers(); // Refresh the display after deletion
@@ -232,7 +252,9 @@ function displayTeamMembers() {
         // Append the card to the container
         teamMembersContainer.appendChild(teamMemberCard);
 
-        teamMemberCard.addEventListener("click", () => {
+        teamMemberCard.addEventListener("click", (event) => {
+          event.stopPropagation();
+          event.preventDefault();
           openPopup(teamMemberData)
         })
 
