@@ -31,7 +31,7 @@ const assigneeSelect = document.getElementById("assignee");
 // Function to fetch users from the 'users_added' collection in Firebase
 async function fetchUsers() {
   try {
-    const usersCollection = collection(db, "users_added");
+    const usersCollection = collection(db, "users");
     const querySnapshot = await getDocs(usersCollection);
 
     querySnapshot.forEach((doc) => {
