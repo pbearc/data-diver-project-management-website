@@ -32,6 +32,7 @@ const db = getFirestore(app);
 const columns = document.querySelectorAll(".task-column");
 const addButton = document.getElementById("addButton");
 addButton.addEventListener("click", addTaskToColumn);
+addButton.addEventListener("click", handleAddTask);
 const sprintsCollection = collection(db, "sprints");
 const sprintId = getSprintIdFromURL();
 const sprintDocRef = doc(sprintsCollection, sprintId);
@@ -164,7 +165,8 @@ endDateInput.addEventListener("change", async function () {
     // If end date is earlier than start date, show an error message or handle it accordingly
     alert("End date cannot be earlier than start date");
     endDateInput.value = ""; // Reset the end date input field
-  } else {
+  } 
+  else {
     sprintData.endDate = endDateInput.value;
     await updateDoc(sprintDocRef, sprintData);
   }
@@ -229,6 +231,37 @@ function createDropdownOption(value, text) {
   option.value = value;
   option.textContent = text;
   return option;
+}
+
+async function handleAddTask() {
+  const currentDate = new Date().toLocaleDateString();
+  const modalCollection = collection(db, "modals");
+  const querySnapshot = await getDocs(modalCollection);
+  const formattedDate = currentDate.replace(/\//g, "-");
+  const startDate = sprintData.startDate;
+  const endDate = sprintData.endDate;
+  const formattedStart = startDate.replace(/\//g, "-");
+  const formattedEnd = endDate.replace(/\//g, "-");
+  const dateRange = generateDateRange(formattedStart, formattedEnd);
+  const keyToCheck = formattedDate;
+
+  querySnapshot.forEach(async (docs) => {
+    const data = docs.data();
+    if (data.sprint === sprintId) {
+      const modalRef = doc(db, "modals", docs.id);
+      for (const dateKey of dateRange) {
+        const dateField = `sprintChartData.${dateKey}`;
+        if (!dateField in data.sprintChartData){
+          const initialValue = 0;
+        const updateData = {
+          [dateField]: initialValue,
+        };
+        await updateDoc(modalRef, updateData)
+        }
+      }
+      console.log(1, keyToCheck);
+    }
+  });
 }
 
 async function addTaskToColumn() {
@@ -462,15 +495,9 @@ function handleDragAndDrop(column) {
 
         const formattedDate = currentDate.replace(/\//g, "-");
 
-        const startDate = sprintData.startDate;
-
         const endDate = sprintData.endDate;
 
-        const formattedStart = startDate.replace(/\//g, "-");
-
         const formattedEnd = endDate.replace(/\//g, "-");
-
-        const dateRange = generateDateRange(formattedStart, formattedEnd);
 
         const keyToCheck = formattedDate;
 
@@ -479,41 +506,35 @@ function handleDragAndDrop(column) {
         const docSnap = await getDoc(taskRef);
 
         const taskData = docSnap.data();
-
+        
         querySnapshot.forEach(async (docs) => {
           const data = docs.data();
           if (data.sprint === sprintId) {
             const modalRef = doc(db, "modals", docs.id);
-            for (const dateKey of dateRange) {
-              const dateField = `sprintChartData.${dateKey}`;
-              const initialValue = 0;
-              const updateData = {
-                [dateField]: initialValue,
-              };
-              await updateDoc(modalRef, updateData);
-            }
-
-            if (data.sprintChartData.hasOwnProperty(keyToCheck)) {
+            console.log(data.sprintChartData)
+            if (keyToCheck in data.sprintChartData) {
+              console.log(2, keyToCheck)
               const existingValue = data.sprintChartData[keyToCheck] || 0;
               const addStoryPoint =
                 parseInt(existingValue) + parseInt(taskData.storyPoint);
-
+    
               const updateData = {
                 [`sprintChartData.${keyToCheck}`]: addStoryPoint,
               };
               await updateDoc(modalRef, updateData);
-            } else {
-              const existingValue = data.sprintChartData[formattedEnd] || 0;
-              const addStoryPoint =
-                parseInt(existingValue) + parseInt(taskData.storyPoint);
-
-              const updateData = {
-                [`sprintChartData.${formattedEnd}`]: addStoryPoint,
-              };
-              await updateDoc(modalRef, updateData);
-            }
-          }
-        });
+            } 
+              else {
+                // console.log(3, keyToCheck)
+                const existingValue = data.sprintChartData[formattedEnd] || 0;
+                const addStoryPoint =
+                  parseInt(existingValue) + parseInt(taskData.storyPoint);
+    
+                const updateData = {
+                  [`sprintChartData.${formattedEnd}`]: addStoryPoint,
+                };
+                await updateDoc(modalRef, updateData);
+              }
+          }})
       }
 
       // Update the Firestore document
