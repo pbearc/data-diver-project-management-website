@@ -234,6 +234,7 @@ function createDropdownOption(value, text) {
 }
 
 async function handleAddTask() {
+  console.log(sprintId)
   const currentDate = new Date().toLocaleDateString();
   const modalCollection = collection(db, "modals");
   const querySnapshot = await getDocs(modalCollection);
@@ -243,23 +244,26 @@ async function handleAddTask() {
   const formattedStart = startDate.replace(/\//g, "-");
   const formattedEnd = endDate.replace(/\//g, "-");
   const dateRange = generateDateRange(formattedStart, formattedEnd);
-  const keyToCheck = formattedDate;
 
   querySnapshot.forEach(async (docs) => {
     const data = docs.data();
     if (data.sprint === sprintId) {
+      console.log(data)
       const modalRef = doc(db, "modals", docs.id);
       for (const dateKey of dateRange) {
         const dateField = `sprintChartData.${dateKey}`;
-        if (!dateField in data.sprintChartData){
+        console.log("Hi")
+        if (!data.sprintChartData.hasOwnProperty(dateField)){
           const initialValue = 0;
         const updateData = {
           [dateField]: initialValue,
         };
         await updateDoc(modalRef, updateData)
         }
+        else{
+          console.log("Bye")
+        }
       }
-      console.log(1, keyToCheck);
     }
   });
 }
