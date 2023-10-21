@@ -284,6 +284,9 @@ async function addTaskToColumn() {
 
   const taskRef = doc(db, "tasks", selectedTaskId);
 
+  // Update task status to "Not Started" explicitly
+  await updateTaskStatus(selectedTaskId, "Not Started");
+
   await updateDoc(taskRef, {
     hide: 1,
   });
