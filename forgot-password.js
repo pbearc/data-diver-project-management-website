@@ -27,43 +27,46 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig, "Data Diver");
-const db = getFirestore(app, { experimentalAutoDetectLongPolling: true, });
+const db = getFirestore(app, { experimentalAutoDetectLongPolling: true });
 
 function redirectToLoginPage() {
-    window.location.href = "login-mainpage.html"; // Redirect to the desired page
+  window.location.href = "login-mainpage.html"; // Redirect to the desired page
 }
 
 const usersCollection = collection(db, "users");
 
 // Function to update password and redirect
 async function updatePasswordAndRedirect(username, newPassword) {
-    const query = firestoreQuery(usersCollection, where("username", "==", username));
-    const querySnapshot = await getDocs(query);
-  
-    querySnapshot.forEach(async (doc) => {
-      // Update password in the matching document
-      await updateDoc(doc.ref, {
-        password: newPassword,
-      });
-  
-      // Redirect to the login page
-      redirectToLoginPage();
+  const query = firestoreQuery(
+    usersCollection,
+    where("username", "==", username)
+  );
+  const querySnapshot = await getDocs(query);
+
+  querySnapshot.forEach(async (doc) => {
+    // Update password in the matching document
+    await updateDoc(doc.ref, {
+      password: newPassword,
     });
-  
-    // If the loop completes without finding a matching username, you can handle it here (e.g., show an error message).
+
+    // Redirect to the login page
+    redirectToLoginPage();
+  });
+
+  // If the loop completes without finding a matching username, you can handle it here (e.g., show an error message).
 }
 
-const backButton = document.getElementById("back-button")
+const backButton = document.getElementById("back-button");
 backButton.addEventListener("click", () => {
   redirectToLoginPage();
-})
+});
 
 const changePasswordBtn = document.getElementById("change_new_password");
 changePasswordBtn.addEventListener("click", () => {
   const username = document.getElementById("username").value;
   const newPassword = document.getElementById("new_password").value;
   const confirmPassword = document.getElementById("check_new_password").value;
-  if (username === "" || password === "") {
+  if (username === "" || newPassword === "") {
     alert("Please fill in both username and password.");
     return;
   }
